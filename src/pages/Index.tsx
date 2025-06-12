@@ -12,35 +12,48 @@ import {
   Activity,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useCases } from "@/hooks/useCases";
+import { useDoctors } from "@/hooks/useDoctors";
+import { useExpenses } from "@/hooks/useExpenses";
 
 const Index = () => {
   const navigate = useNavigate();
+  const { data: cases = [] } = useCases();
+  const { data: doctors = [] } = useDoctors();
+  const { data: expenses = [] } = useExpenses();
+
+  // حساب الإحصائيات الحقيقية
+  const totalCases = cases.length;
+  const activeDoctors = doctors.length;
+  const inProgressCases = cases.filter(c => c.status === 'قيد التنفيذ').length;
+  const totalRevenue = cases.reduce((sum, c) => sum + (c.price || 0), 0);
+  const monthlyExpenses = expenses.reduce((sum, e) => sum + e.total_amount, 0);
 
   const stats = [
     {
       title: "إجمالي الحالات",
-      value: "248",
+      value: totalCases.toString(),
       change: "+12%",
       icon: FileText,
       color: "text-blue-600",
     },
     {
       title: "الأطباء النشطون",
-      value: "15",
+      value: activeDoctors.toString(),
       change: "+2",
       icon: UserPlus,
       color: "text-green-600",
     },
     {
-      title: "الإيرادات الشهرية",
-      value: "125,000 ر.س",
+      title: "إجمالي الإيرادات",
+      value: `${totalRevenue.toLocaleString()} ر.س`,
       change: "+8%",
       icon: DollarSign,
       color: "text-purple-600",
     },
     {
       title: "الحالات الجارية",
-      value: "32",
+      value: inProgressCases.toString(),
       change: "+5",
       icon: Activity,
       color: "text-orange-600",
@@ -78,6 +91,9 @@ const Index = () => {
     },
   ];
 
+  // آخر النشاطات الحقيقية
+  const recentCases = cases.slice(0, 3);
+
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Header */}
@@ -86,7 +102,7 @@ const Index = () => {
           مرحباً بك في نظام إدارة مختبر الأسنان
         </h1>
         <p className="text-gray-600">
-          10 يونيو 2025 - لوحة التحكم الرئيسية
+          {new Date().toLocaleDateString('ar-SA')} - لوحة التحكم الرئيسية
         </p>
       </div>
 
@@ -151,27 +167,23 @@ const Index = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <div>
-                  <p className="text-sm font-medium">حالة جديدة - زيركون</p>
-                  <p className="text-xs text-gray-500">د. أحمد محمد - منذ ساعتين</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <div>
-                  <p className="text-sm font-medium">تم تسليم الحالة A23</p>
-                  <p className="text-xs text-gray-500">د. سارة عبدالعزيز - منذ 4 ساعات</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 p-3 bg-purple-50 rounded-lg">
-                <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                <div>
-                  <p className="text-sm font-medium">دفعة جديدة - 5000 ر.س</p>
-                  <p className="text-xs text-gray-500">د. خالد العمري - أمس</p>
-                </div>
-              </div>
+              {recentCases.length > 0 ? (
+                recentCases.map((caseItem, index) => (
+                  <div key={caseItem.id} className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <div>
+                      <p className="text-sm font-medium">
+                        حالة جديدة - {caseItem.work_type} - {caseItem.patient_name}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {caseItem.doctor?.name || 'غير محدد'} - رقم الحالة: {caseItem.case_number}
+                      </p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-500 text-center py-4">لا توجد حالات حديثة</p>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -186,24 +198,23 @@ const Index = () => {
           <CardContent>
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">معدل إنجاز الحالات</span>
-                <span className="text-lg font-bold text-green-600">92%</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div className="bg-green-500 h-2 rounded-full" style={{ width: "92%" }}></div>
+                <span className="text-sm text-gray-600">إجمالي الحالات</span>
+                <span className="text-lg font-bold text-green-600">{totalCases}</span>
               </div>
               
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">رضا العملاء</span>
-                <span className="text-lg font-bold text-blue-600">96%</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div className="bg-blue-500 h-2 rounded-full" style={{ width: "96%" }}></div>
+                <span className="text-sm text-gray-600">الأطباء المسجلون</span>
+                <span className="text-lg font-bold text-blue-600">{activeDoctors}</span>
               </div>
 
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">الوقت المتوسط للإنجاز</span>
-                <span className="text-lg font-bold text-purple-600">3.2 أيام</span>
+                <span className="text-sm text-gray-600">إجمالي المصاريف</span>
+                <span className="text-lg font-bold text-red-600">{monthlyExpenses.toLocaleString()} ر.س</span>
+              </div>
+
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-600">الحالات الجارية</span>
+                <span className="text-lg font-bold text-purple-600">{inProgressCases}</span>
               </div>
             </div>
           </CardContent>

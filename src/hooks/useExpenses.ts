@@ -1,0 +1,55 @@
+
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Tables, TablesInsert } from "@/integrations/supabase/types";
+import { toast } from "@/hooks/use-toast";
+
+export type Expense = Tables<"expenses">;
+export type ExpenseInsert = TablesInsert<"expenses">;
+
+export const useExpenses = () => {
+  return useQuery({
+    queryKey: ["expenses"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("expenses")
+        .select("*")
+        .order("purchase_date", { ascending: false });
+      
+      if (error) throw error;
+      return data;
+    },
+  });
+};
+
+export const useAddExpense = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (expense: Omit<ExpenseInsert, "id" | "created_at" | "updated_at">) => {
+      const { data, error } = await supabase
+        .from("expenses")
+        .insert(expense)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["expenses"] });
+      toast({
+        title: "تم إضافة المصروف بنجاح",
+        description: "تم حفظ بيانات المصروف في النظام",
+      });
+    },
+    onError: (error) => {
+      console.error("Error adding expense:", error);
+      toast({
+        title: "خطأ في إضافة المصروف",
+        description: "حدث خطأ أثناء إضافة المصروف، يرجى المحاولة مرة أخرى",
+        variant: "destructive",
+      });
+    },
+  });
+};

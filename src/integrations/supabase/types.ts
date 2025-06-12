@@ -9,7 +9,230 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      cases: {
+        Row: {
+          case_number: string
+          created_at: string
+          delivery_date: string | null
+          doctor_id: string | null
+          id: string
+          notes: string | null
+          patient_name: string
+          price: number | null
+          status: Database["public"]["Enums"]["case_status"]
+          submission_date: string
+          tooth_number: string | null
+          updated_at: string
+          work_type: Database["public"]["Enums"]["work_type"]
+        }
+        Insert: {
+          case_number: string
+          created_at?: string
+          delivery_date?: string | null
+          doctor_id?: string | null
+          id?: string
+          notes?: string | null
+          patient_name: string
+          price?: number | null
+          status?: Database["public"]["Enums"]["case_status"]
+          submission_date?: string
+          tooth_number?: string | null
+          updated_at?: string
+          work_type: Database["public"]["Enums"]["work_type"]
+        }
+        Update: {
+          case_number?: string
+          created_at?: string
+          delivery_date?: string | null
+          doctor_id?: string | null
+          id?: string
+          notes?: string | null
+          patient_name?: string
+          price?: number | null
+          status?: Database["public"]["Enums"]["case_status"]
+          submission_date?: string
+          tooth_number?: string | null
+          updated_at?: string
+          work_type?: Database["public"]["Enums"]["work_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cases_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      doctor_transactions: {
+        Row: {
+          amount: number
+          case_id: string | null
+          check_number: string | null
+          created_at: string
+          doctor_id: string
+          id: string
+          notes: string | null
+          payment_method: string | null
+          status: string
+          transaction_date: string
+          transaction_type: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          case_id?: string | null
+          check_number?: string | null
+          created_at?: string
+          doctor_id: string
+          id?: string
+          notes?: string | null
+          payment_method?: string | null
+          status?: string
+          transaction_date?: string
+          transaction_type: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          case_id?: string | null
+          check_number?: string | null
+          created_at?: string
+          doctor_id?: string
+          id?: string
+          notes?: string | null
+          payment_method?: string | null
+          status?: string
+          transaction_date?: string
+          transaction_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "doctor_transactions_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "doctor_transactions_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      doctors: {
+        Row: {
+          address: string | null
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          phone: string | null
+          specialty: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          phone?: string | null
+          specialty?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          phone?: string | null
+          specialty?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      expenses: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          item_name: string
+          notes: string | null
+          purchase_date: string
+          quantity: number
+          total_amount: number
+          unit_price: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          item_name: string
+          notes?: string | null
+          purchase_date?: string
+          quantity?: number
+          total_amount: number
+          unit_price: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          item_name?: string
+          notes?: string | null
+          purchase_date?: string
+          quantity?: number
+          total_amount?: number
+          unit_price?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      partners: {
+        Row: {
+          address: string | null
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          partnership_percentage: number
+          phone: string | null
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          partnership_percentage?: number
+          phone?: string | null
+          total_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          partnership_percentage?: number
+          phone?: string | null
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -18,7 +241,22 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      case_status:
+        | "قيد التنفيذ"
+        | "تجهيز العمل"
+        | "اختبار القوي"
+        | "المراجعة النهائية"
+        | "تم التسليم"
+        | "معلق"
+        | "ملغي"
+      work_type:
+        | "زيركون"
+        | "مؤقت"
+        | "تقويم"
+        | "تلبيس"
+        | "حشوات"
+        | "جسور"
+        | "طقم أسنان"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -133,6 +371,25 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      case_status: [
+        "قيد التنفيذ",
+        "تجهيز العمل",
+        "اختبار القوي",
+        "المراجعة النهائية",
+        "تم التسليم",
+        "معلق",
+        "ملغي",
+      ],
+      work_type: [
+        "زيركون",
+        "مؤقت",
+        "تقويم",
+        "تلبيس",
+        "حشوات",
+        "جسور",
+        "طقم أسنان",
+      ],
+    },
   },
 } as const
