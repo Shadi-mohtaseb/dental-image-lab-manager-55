@@ -1,17 +1,30 @@
 
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Receipt, Edit, Trash2, Search } from "lucide-react";
-import { useExpenses } from "@/hooks/useExpenses";
+import { useExpenses, useDeleteExpense } from "@/hooks/useExpenses";
 import { AddExpenseDialog } from "@/components/AddExpenseDialog";
 
 const Expenses = () => {
   const { data: expenses = [], isLoading } = useExpenses();
+  const deleteExpense = useDeleteExpense();
+  const [searchTerm, setSearchTerm] = useState("");
 
   const totalExpenses = expenses.reduce((sum, expense) => sum + Number(expense.total_amount), 0);
+
+  const handleDeleteExpense = async (expenseId: string) => {
+    if (window.confirm("هل أنت متأكد من حذف هذا المصروف؟")) {
+      await deleteExpense.mutateAsync(expenseId);
+    }
+  };
+
+  const filteredExpenses = expenses.filter(expense => 
+    expense.item_name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   if (isLoading) {
     return (
@@ -40,7 +53,7 @@ const Expenses = () => {
       <Card className="bg-gradient-to-r from-purple-500 to-purple-600 text-white">
         <CardContent className="p-6 text-center">
           <h3 className="text-lg font-semibold mb-2">إجمالي المصاريف</h3>
-          <p className="text-3xl font-bold">{totalExpenses.toFixed(2)} ر.س</p>
+          <p className="text-3xl font-bold">{totalExpenses.toFixed(2)} ₪</p>
         </CardContent>
       </Card>
 
@@ -51,6 +64,8 @@ const Expenses = () => {
             <div className="flex-1">
               <Input
                 placeholder="بحث في المصاريف..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full"
               />
             </div>
@@ -65,19 +80,18 @@ const Expenses = () => {
       {/* Expenses List */}
       <Card>
         <CardHeader>
-          <CardTitle>قائمة المصاريف ({expenses.length})</CardTitle>
+          <CardTitle>قائمة المصاريف ({filteredExpenses.length})</CardTitle>
         </CardHeader>
         <CardContent>
-          {expenses.length === 0 ? (
+          {filteredExpenses.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
-              لا توجد مصاريف مسجلة حتى الآن
+              {searchTerm ? "لا توجد نتائج مطابقة للبحث" : "لا توجد مصاريف مسجلة حتى الآن"}
             </div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>اسم المادة</TableHead>
-                  <TableHead>الوصف</TableHead>
                   <TableHead>السعر</TableHead>
                   <TableHead>الكمية</TableHead>
                   <TableHead>الإجمالي</TableHead>
@@ -86,24 +100,28 @@ const Expenses = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {expenses.map((expense) => (
+                {filteredExpenses.map((expense) => (
                   <TableRow key={expense.id}>
                     <TableCell className="font-semibold">{expense.item_name}</TableCell>
-                    <TableCell>{expense.description || "غير محدد"}</TableCell>
-                    <TableCell>{Number(expense.unit_price).toFixed(2)} ر.س</TableCell>
+                    <TableCell>{Number(expense.unit_price).toFixed(2)} ₪</TableCell>
                     <TableCell>
                       <Badge variant="outline">{expense.quantity}</Badge>
                     </TableCell>
                     <TableCell className="font-semibold text-primary">
-                      {Number(expense.total_amount).toFixed(2)} ر.س
+                      {Number(expense.total_amount).toFixed(2)} ₪
                     </TableCell>
-                    <TableCell>{new Date(expense.purchase_date).toLocaleDateString('ar-SA')}</TableCell>
+                    <TableCell>{new Date(expense.purchase_date).toLocaleDateString('en-US')}</TableCell>
                     <TableCell>
                       <div className="flex gap-2">
                         <Button size="sm" variant="outline" className="text-green-600 hover:bg-green-50">
                           <Edit className="w-4 h-4" />
                         </Button>
-                        <Button size="sm" variant="outline" className="text-red-600 hover:bg-red-50">
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="text-red-600 hover:bg-red-50"
+                          onClick={() => handleDeleteExpense(expense.id)}
+                        >
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>

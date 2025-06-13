@@ -1,4 +1,5 @@
 
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,12 +7,16 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Search, Eye, Edit, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useCases } from "@/hooks/useCases";
+import { useCases, useDeleteCase, useUpdateCase } from "@/hooks/useCases";
 import { AddCaseDialog } from "@/components/AddCaseDialog";
 
 const Cases = () => {
   const navigate = useNavigate();
   const { data: cases = [], isLoading } = useCases();
+  const deleteCase = useDeleteCase();
+  const updateCase = useUpdateCase();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -19,7 +24,7 @@ const Cases = () => {
         return "bg-blue-100 text-blue-700";
       case "تجهيز العمل":
         return "bg-yellow-100 text-yellow-700";
-      case "اختبار القوة":
+      case "اختبار القوي":
         return "bg-orange-100 text-orange-700";
       case "تم التسليم":
         return "bg-green-100 text-green-700";
@@ -33,6 +38,20 @@ const Cases = () => {
   const handleViewCase = (caseId: string) => {
     navigate(`/case/${caseId}`);
   };
+
+  const handleDeleteCase = async (caseId: string) => {
+    if (window.confirm("هل أنت متأكد من حذف هذه الحالة؟")) {
+      await deleteCase.mutateAsync(caseId);
+    }
+  };
+
+  const filteredCases = cases.filter(caseItem => {
+    const matchesSearch = caseItem.patient_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         caseItem.doctor?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         caseItem.case_number.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = !statusFilter || caseItem.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
 
   if (isLoading) {
     return (
@@ -60,10 +79,12 @@ const Cases = () => {
       {/* Search and Filters */}
       <Card>
         <CardContent className="p-6">
-          <div className="flex gap-4">
+          <div className="flex gap-4 mb-4">
             <div className="flex-1">
               <Input
-                placeholder="بحث عن مريض أو طبيب..."
+                placeholder="بحث عن مريض أو طبيب أو رقم الحالة..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full"
               />
             </div>
@@ -74,20 +95,40 @@ const Cases = () => {
           </div>
           
           {/* Filter Badges */}
-          <div className="flex gap-2 mt-4">
-            <Badge variant="outline" className="cursor-pointer hover:bg-primary hover:text-white">
+          <div className="flex gap-2 flex-wrap">
+            <Badge 
+              variant={!statusFilter ? "default" : "outline"} 
+              className="cursor-pointer hover:bg-primary hover:text-white"
+              onClick={() => setStatusFilter("")}
+            >
               الكل ({cases.length})
             </Badge>
-            <Badge variant="outline" className="cursor-pointer hover:bg-blue-500 hover:text-white">
+            <Badge 
+              variant={statusFilter === "قيد التنفيذ" ? "default" : "outline"} 
+              className="cursor-pointer hover:bg-blue-500 hover:text-white"
+              onClick={() => setStatusFilter("قيد التنفيذ")}
+            >
               قيد التنفيذ
             </Badge>
-            <Badge variant="outline" className="cursor-pointer hover:bg-green-500 hover:text-white">
+            <Badge 
+              variant={statusFilter === "تم التسليم" ? "default" : "outline"} 
+              className="cursor-pointer hover:bg-green-500 hover:text-white"
+              onClick={() => setStatusFilter("تم التسليم")}
+            >
               تم التسليم
             </Badge>
-            <Badge variant="outline" className="cursor-pointer hover:bg-purple-500 hover:text-white">
+            <Badge 
+              variant={statusFilter === "زيركون" ? "default" : "outline"} 
+              className="cursor-pointer hover:bg-purple-500 hover:text-white"
+              onClick={() => setStatusFilter("زيركون")}
+            >
               زيركون
             </Badge>
-            <Badge variant="outline" className="cursor-pointer hover:bg-orange-500 hover:text-white">
+            <Badge 
+              variant={statusFilter === "مؤقت" ? "default" : "outline"} 
+              className="cursor-pointer hover:bg-orange-500 hover:text-white"
+              onClick={() => setStatusFilter("مؤقت")}
+            >
               مؤقت
             </Badge>
           </div>
@@ -97,12 +138,12 @@ const Cases = () => {
       {/* Cases Table */}
       <Card>
         <CardHeader>
-          <CardTitle>جميع الحالات ({cases.length})</CardTitle>
+          <CardTitle>جميع الحالات ({filteredCases.length})</CardTitle>
         </CardHeader>
         <CardContent>
-          {cases.length === 0 ? (
+          {filteredCases.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
-              لا توجد حالات مسجلة حتى الآن
+              {searchTerm || statusFilter ? "لا توجد نتائج مطابقة للبحث" : "لا توجد حالات مسجلة حتى الآن"}
             </div>
           ) : (
             <Table>
@@ -115,11 +156,12 @@ const Cases = () => {
                   <TableHead>رقم السن</TableHead>
                   <TableHead>تاريخ الاستلام</TableHead>
                   <TableHead>الحالة</TableHead>
+                  <TableHead>اللون</TableHead>
                   <TableHead>إجراءات</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {cases.map((caseItem) => (
+                {filteredCases.map((caseItem) => (
                   <TableRow key={caseItem.id} className="hover:bg-gray-50">
                     <TableCell className="font-semibold text-primary">
                       {caseItem.case_number}
@@ -136,11 +178,17 @@ const Cases = () => {
                         </Badge>
                       )}
                     </TableCell>
-                    <TableCell>{new Date(caseItem.submission_date).toLocaleDateString('ar-SA')}</TableCell>
+                    <TableCell>{new Date(caseItem.submission_date).toLocaleDateString('en-US')}</TableCell>
                     <TableCell>
                       <Badge className={getStatusColor(caseItem.status)}>
                         {caseItem.status}
                       </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div 
+                        className="w-6 h-6 rounded-full border-2 border-gray-300"
+                        style={{ backgroundColor: caseItem.color || "#3b82f6" }}
+                      />
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-2">
@@ -155,7 +203,12 @@ const Cases = () => {
                         <Button size="sm" variant="outline" className="text-green-600 hover:bg-green-50">
                           <Edit className="w-4 h-4" />
                         </Button>
-                        <Button size="sm" variant="outline" className="text-red-600 hover:bg-red-50">
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="text-red-600 hover:bg-red-50"
+                          onClick={() => handleDeleteCase(caseItem.id)}
+                        >
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
