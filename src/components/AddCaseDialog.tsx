@@ -45,17 +45,6 @@ const caseStatuses = [
   "ملغي"
 ] as const;
 
-const colors = [
-  { name: "أحمر", value: "#ef4444" },
-  { name: "أزرق", value: "#3b82f6" },
-  { name: "أخضر", value: "#10b981" },
-  { name: "أصفر", value: "#f59e0b" },
-  { name: "بنفسجي", value: "#8b5cf6" },
-  { name: "وردي", value: "#ec4899" },
-  { name: "برتقالي", value: "#f97316" },
-  { name: "رمادي", value: "#6b7280" }
-];
-
 const formSchema = z.object({
   patient_name: z.string().min(2, "اسم المريض مطلوب"),
   doctor_id: z.string().min(1, "اختيار الطبيب مطلوب"),
@@ -64,7 +53,6 @@ const formSchema = z.object({
   submission_date: z.string(),
   delivery_date: z.string().optional(),
   status: z.enum(caseStatuses).default("قيد التنفيذ"),
-  color: z.string().default("#3b82f6"),
   notes: z.string().optional(),
 });
 
@@ -85,7 +73,6 @@ export function AddCaseDialog() {
       submission_date: new Date().toISOString().split('T')[0],
       delivery_date: "",
       status: "قيد التنفيذ",
-      color: "#3b82f6",
       notes: "",
     },
   });
@@ -104,7 +91,6 @@ export function AddCaseDialog() {
         submission_date: data.submission_date,
         delivery_date: data.delivery_date || null,
         status: data.status,
-        color: data.color,
         notes: data.notes || null,
       });
       form.reset();
@@ -239,62 +225,30 @@ export function AddCaseDialog() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="status"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>الحالة</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="اختر الحالة" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {caseStatuses.map((status) => (
-                          <SelectItem key={status} value={status}>
-                            {status}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="color"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>لون الحالة</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="اختر اللون" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {colors.map((color) => (
-                          <SelectItem key={color.value} value={color.value}>
-                            <div className="flex items-center gap-2">
-                              <div 
-                                className="w-4 h-4 rounded-full border"
-                                style={{ backgroundColor: color.value }}
-                              />
-                              {color.name}
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+            <FormField
+              control={form.control}
+              name="status"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>الحالة</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="اختر الحالة" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {caseStatuses.map((status) => (
+                        <SelectItem key={status} value={status}>
+                          {status}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <FormField
               control={form.control}

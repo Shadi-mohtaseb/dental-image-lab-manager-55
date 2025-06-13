@@ -58,3 +58,66 @@ export const useAddCase = () => {
     },
   });
 };
+
+export const useUpdateCase = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async ({ id, ...updates }: Partial<Case> & { id: string }) => {
+      const { data, error } = await supabase
+        .from("cases")
+        .update(updates)
+        .eq("id", id)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["cases"] });
+      toast({
+        title: "تم تحديث الحالة بنجاح",
+        description: "تم حفظ التغييرات في النظام",
+      });
+    },
+    onError: (error) => {
+      console.error("Error updating case:", error);
+      toast({
+        title: "خطأ في تحديث الحالة",
+        description: "حدث خطأ أثناء تحديث الحالة، يرجى المحاولة مرة أخرى",
+        variant: "destructive",
+      });
+    },
+  });
+};
+
+export const useDeleteCase = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (caseId: string) => {
+      const { error } = await supabase
+        .from("cases")
+        .delete()
+        .eq("id", caseId);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["cases"] });
+      toast({
+        title: "تم حذف الحالة بنجاح",
+        description: "تم حذف الحالة من النظام",
+      });
+    },
+    onError: (error) => {
+      console.error("Error deleting case:", error);
+      toast({
+        title: "خطأ في حذف الحالة",
+        description: "حدث خطأ أثناء حذف الحالة، يرجى المحاولة مرة أخرى",
+        variant: "destructive",
+      });
+    },
+  });
+};

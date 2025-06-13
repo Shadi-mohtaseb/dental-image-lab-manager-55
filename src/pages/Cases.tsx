@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -156,7 +155,6 @@ const Cases = () => {
                   <TableHead>رقم السن</TableHead>
                   <TableHead>تاريخ الاستلام</TableHead>
                   <TableHead>الحالة</TableHead>
-                  <TableHead>اللون</TableHead>
                   <TableHead>إجراءات</TableHead>
                 </TableRow>
               </TableHeader>
@@ -183,12 +181,6 @@ const Cases = () => {
                       <Badge className={getStatusColor(caseItem.status)}>
                         {caseItem.status}
                       </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div 
-                        className="w-6 h-6 rounded-full border-2 border-gray-300"
-                        style={{ backgroundColor: caseItem.color || "#3b82f6" }}
-                      />
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-2">

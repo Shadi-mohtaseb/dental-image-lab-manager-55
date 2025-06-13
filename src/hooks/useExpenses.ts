@@ -53,3 +53,33 @@ export const useAddExpense = () => {
     },
   });
 };
+
+export const useDeleteExpense = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (expenseId: string) => {
+      const { error } = await supabase
+        .from("expenses")
+        .delete()
+        .eq("id", expenseId);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["expenses"] });
+      toast({
+        title: "تم حذف المصروف بنجاح",
+        description: "تم حذف المصروف من النظام",
+      });
+    },
+    onError: (error) => {
+      console.error("Error deleting expense:", error);
+      toast({
+        title: "خطأ في حذف المصروف",
+        description: "حدث خطأ أثناء حذف المصروف، يرجى المحاولة مرة أخرى",
+        variant: "destructive",
+      });
+    },
+  });
+};
