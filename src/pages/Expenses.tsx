@@ -2,55 +2,26 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Receipt, Plus, Edit, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { Receipt, Edit, Trash2, Search } from "lucide-react";
+import { useExpenses } from "@/hooks/useExpenses";
+import { AddExpenseDialog } from "@/components/AddExpenseDialog";
 
 const Expenses = () => {
-  const [showAddExpense, setShowAddExpense] = useState(false);
+  const { data: expenses = [], isLoading } = useExpenses();
 
-  const totalExpenses = "2550 ر.س";
+  const totalExpenses = expenses.reduce((sum, expense) => sum + Number(expense.total_amount), 0);
 
-  const expenses = [
-    {
-      id: 1,
-      date: "2025-05-15",
-      item: "زيركون",
-      description: "مواد خام",
-      quantity: "5",
-      unitPrice: "200 ر.س",
-      total: "1000 ر.س",
-    },
-    {
-      id: 2,
-      date: "2025-05-20",
-      item: "مادة طبع",
-      description: "مواد استهلاكية",
-      quantity: "3",
-      unitPrice: "150 ر.س",
-      total: "450 ر.س",
-    },
-    {
-      id: 3,
-      date: "2025-06-01",
-      item: "أدوات حفر",
-      description: "أدوات العمل",
-      quantity: "10",
-      unitPrice: "50 ر.س",
-      total: "500 ر.س",
-    },
-    {
-      id: 4,
-      date: "2025-06-05",
-      item: "مواد تنظيف",
-      description: "مواد نظافة وتعقيم",
-      quantity: "2",
-      unitPrice: "300 ر.س",
-      total: "600 ر.س",
-    },
-  ];
+  if (isLoading) {
+    return (
+      <div className="space-y-6 animate-fade-in">
+        <div className="flex items-center justify-center p-8">
+          <div className="text-lg">جاري تحميل المصاريف...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -62,112 +33,86 @@ const Expenses = () => {
             <p className="text-gray-600">تتبع وإدارة جميع مصاريف المختبر</p>
           </div>
         </div>
-        <Button
-          onClick={() => setShowAddExpense(!showAddExpense)}
-          className="bg-primary hover:bg-primary/90"
-        >
-          <Plus className="w-4 h-4 ml-2" />
-          إضافة مصروف جديد
-        </Button>
+        <AddExpenseDialog />
       </div>
 
       {/* Total Expenses */}
       <Card className="bg-gradient-to-r from-purple-500 to-purple-600 text-white">
         <CardContent className="p-6 text-center">
           <h3 className="text-lg font-semibold mb-2">إجمالي المصاريف</h3>
-          <p className="text-3xl font-bold">{totalExpenses}</p>
+          <p className="text-3xl font-bold">{totalExpenses.toFixed(2)} ر.س</p>
         </CardContent>
       </Card>
 
-      {/* Add Expense Form */}
-      {showAddExpense && (
-        <Card className="animate-slide-up">
-          <CardHeader>
-            <CardTitle>إضافة مصروف جديد</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="item">اسم المادة</Label>
-                <Input placeholder="أدخل اسم المادة" />
-              </div>
-              <div>
-                <Label htmlFor="price">السعر</Label>
-                <Input placeholder="السعر" />
-              </div>
-              <div>
-                <Label htmlFor="quantity">الكمية</Label>
-                <Input placeholder="الكمية" />
-              </div>
-              <div>
-                <Label htmlFor="date">تاريخ الشراء</Label>
-                <Input type="date" defaultValue="2025-06-10" />
-              </div>
-              <div className="md:col-span-2">
-                <Label htmlFor="notes">ملاحظات</Label>
-                <Input placeholder="أدخل أي ملاحظات إضافية" />
-              </div>
+      {/* Search */}
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <Input
+                placeholder="بحث في المصاريف..."
+                className="w-full"
+              />
             </div>
-            <div className="flex gap-3 mt-6">
-              <Button className="bg-primary hover:bg-primary/90">
-                إضافة المصروف
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setShowAddExpense(false)}
-              >
-                إلغاء
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+            <Button variant="outline" className="gap-2">
+              <Search className="w-4 h-4" />
+              بحث
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Expenses List */}
       <Card>
         <CardHeader>
-          <CardTitle>قائمة المصاريف</CardTitle>
+          <CardTitle>قائمة المصاريف ({expenses.length})</CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>اسم المادة</TableHead>
-                <TableHead>الوصف</TableHead>
-                <TableHead>السعر</TableHead>
-                <TableHead>الكمية</TableHead>
-                <TableHead>الإجمالي</TableHead>
-                <TableHead>تاريخ الشراء</TableHead>
-                <TableHead>إجراءات</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {expenses.map((expense) => (
-                <TableRow key={expense.id}>
-                  <TableCell className="font-semibold">{expense.item}</TableCell>
-                  <TableCell>{expense.description}</TableCell>
-                  <TableCell>{expense.unitPrice}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{expense.quantity}</Badge>
-                  </TableCell>
-                  <TableCell className="font-semibold text-primary">
-                    {expense.total}
-                  </TableCell>
-                  <TableCell>{expense.date}</TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      <Button size="sm" variant="outline">
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button size="sm" variant="outline" className="text-red-600">
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
+          {expenses.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              لا توجد مصاريف مسجلة حتى الآن
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>اسم المادة</TableHead>
+                  <TableHead>الوصف</TableHead>
+                  <TableHead>السعر</TableHead>
+                  <TableHead>الكمية</TableHead>
+                  <TableHead>الإجمالي</TableHead>
+                  <TableHead>تاريخ الشراء</TableHead>
+                  <TableHead>إجراءات</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {expenses.map((expense) => (
+                  <TableRow key={expense.id}>
+                    <TableCell className="font-semibold">{expense.item_name}</TableCell>
+                    <TableCell>{expense.description || "غير محدد"}</TableCell>
+                    <TableCell>{Number(expense.unit_price).toFixed(2)} ر.س</TableCell>
+                    <TableCell>
+                      <Badge variant="outline">{expense.quantity}</Badge>
+                    </TableCell>
+                    <TableCell className="font-semibold text-primary">
+                      {Number(expense.total_amount).toFixed(2)} ر.س
+                    </TableCell>
+                    <TableCell>{new Date(expense.purchase_date).toLocaleDateString('ar-SA')}</TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        <Button size="sm" variant="outline" className="text-green-600 hover:bg-green-50">
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button size="sm" variant="outline" className="text-red-600 hover:bg-red-50">
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
     </div>
