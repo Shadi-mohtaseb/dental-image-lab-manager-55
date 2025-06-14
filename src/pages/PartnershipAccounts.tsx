@@ -17,6 +17,7 @@ import WithdrawFromPersonalBalanceDialog from "@/components/WithdrawFromPersonal
 import FinancialSummary from "@/components/FinancialSummary";
 import PartnerCard from "@/components/PartnerCard";
 import AddPartnerTransactionDialog from "@/components/AddPartnerTransactionDialog";
+import { useFinancialSummary } from "@/hooks/useFinancialSummary";
 
 const PartnershipAccounts = () => {
   const [showAddTransaction, setShowAddTransaction] = useState(false);
@@ -27,7 +28,6 @@ const PartnershipAccounts = () => {
 
   const { data: partners = [], isLoading: loadingPartners } = usePartners();
   const { data: transactions = [], isLoading: loadingTx } = usePartnerTransactions();
-  const { data: companyCapital } = useCompanyCapital();
   const addTx = useAddPartnerTransaction();
   const deleteTx = useDeletePartnerTransaction();
   const calculateCapital = useCalculateCompanyCapital();
@@ -97,10 +97,12 @@ const PartnershipAccounts = () => {
     setWithdrawOpen(true);
   };
 
+  const { data: summary, isLoading: loadingSummary } = useFinancialSummary();
+
   // استخدم 0 إذا لم تكن القيم متوفرة
-  const totalRevenue = (companyCapital && (companyCapital as any).total_revenue) ?? 0;
-  const totalExpenses = (companyCapital && (companyCapital as any).total_expenses) ?? 0;
-  const netProfit = companyCapital?.total_capital ?? 0;
+  const totalRevenue = summary?.totalRevenue ?? 0;
+  const totalExpenses = summary?.totalExpenses ?? 0;
+  const netProfit = summary?.netProfit ?? 0;
 
   // حساب معاملات السحب لكل شريك
   function getPartnerStats(partner) {

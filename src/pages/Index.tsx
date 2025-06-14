@@ -15,7 +15,7 @@ import { useCases } from "@/hooks/useCases";
 import { useDoctors } from "@/hooks/useDoctors";
 import { useExpenses } from "@/hooks/useExpenses";
 import { usePartners } from "@/hooks/usePartners";
-import { useCompanyCapital } from "@/hooks/useCompanyCapital";
+import { useFinancialSummary } from "@/hooks/useFinancialSummary";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -23,16 +23,16 @@ const Index = () => {
   const { data: doctors = [] } = useDoctors();
   const { data: expenses = [] } = useExpenses();
   const { data: partners = [] } = usePartners();
-  const { data: companyCapital } = useCompanyCapital();
+  const { data: summary, isLoading: summaryLoading } = useFinancialSummary();
 
-  // حساب الإحصائيات الجديدة
+  // Use the new summary everywhere
   const totalCases = cases.length;
   const activeDoctors = doctors.length;
   const activePartners = partners.length;
   const inProgressCases = cases.filter(c => c.status === 'قيد التنفيذ').length;
-  const totalRevenue = cases.reduce((sum, c) => sum + (c.price || 0), 0);
-  const monthlyExpenses = expenses.reduce((sum, e) => sum + e.total_amount, 0);
-  const netProfit = companyCapital?.total_capital || 0; // صافي الربح الحقيقي من قاعدة البيانات
+  const totalRevenue = summary?.totalRevenue || 0;
+  const monthlyExpenses = summary?.totalExpenses || 0;
+  const netProfit = summary?.netProfit || 0;
 
   const stats = [
     {
