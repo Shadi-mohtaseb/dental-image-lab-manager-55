@@ -1,4 +1,3 @@
-
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -35,7 +34,7 @@ export function CasesFilterBar({
       <div className="flex gap-4 items-center flex-wrap">
         <div>
           <Input
-            placeholder="بحث نصي عن اسم الطبيب..."
+            placeholder="بحث نصي عن اسم المريض..."
             value={searchTerm}
             onChange={e => onSearchTermChange(e.target.value)}
             className="min-w-[200px] max-w-[270px]"
@@ -79,4 +78,3 @@ export function CasesFilterBar({
     </div>
   );
 }
-
