@@ -154,7 +154,9 @@ const CaseDetails = () => {
                   <Stethoscope className="w-5 h-5 text-primary" />
                   <div>
                     <p className="text-sm text-gray-600">اسم الطبيب</p>
-                    <p className="font-semibold">{caseData.doctor_id /* لاحقاً يمكن جلب اسم الدكتور */}</p>
+                    <p className="font-semibold">
+                      {caseData.doctor?.name ?? "-"}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
