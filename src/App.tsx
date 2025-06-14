@@ -4,7 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import Index from "./pages/Index";
 import PartnershipAccounts from "./pages/PartnershipAccounts";
@@ -24,6 +24,10 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <SidebarProvider>
+          {/* زر إظهار/إخفاء السايدبار أعلى يمين الشاشة ويبقى دائمًا في الأعلى */}
+          <div className="fixed top-4 right-4 z-[100]">
+            <SidebarTrigger />
+          </div>
           <div className="min-h-screen flex flex-row-reverse w-full">
             {/* السايدبار بعرض ثابت دائم الظهور */}
             <div className="w-[260px] min-w-[220px] bg-sidebar-primary border-l border-sidebar-border flex-shrink-0">
@@ -52,3 +56,4 @@ const App = () => (
 );
 
 export default App;
+
