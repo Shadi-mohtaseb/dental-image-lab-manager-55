@@ -118,7 +118,10 @@ export function AddCaseDialog() {
 
   const onSubmit = async (data: FormData) => {
     try {
+      // توليد رقم الحالة بشكل تلقائي عند كل إضافة
+      const caseNumber = `C${Date.now().toString().slice(-6)}`;
       await addCase.mutateAsync({
+        case_number: caseNumber,
         patient_name: data.patient_name,
         doctor_id: data.doctor_id,
         work_type: data.work_type,
