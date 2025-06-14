@@ -35,8 +35,14 @@ export default function DoctorPaymentDialog({ open, onOpenChange, doctor }: Doct
     }
     setLoading(true);
     const { amount, payment_method, transaction_date, notes } = values;
+    // تحويل doctor_id إلى uuid صريح إذا كان موجوداً
+    const doctor_id =
+      typeof doctor.id === "string" && doctor.id.length === 36
+        ? doctor.id
+        : String(doctor.id);
+
     const { error } = await supabase.from("doctor_transactions").insert({
-      doctor_id: doctor.id,
+      doctor_id,
       amount: Number(amount),
       payment_method,
       transaction_type: "دفعة",
