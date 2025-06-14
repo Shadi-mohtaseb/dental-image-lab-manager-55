@@ -6,9 +6,10 @@ import { Search } from "lucide-react";
 import { useDoctors, useDeleteDoctor } from "@/hooks/useDoctors";
 import { AddDoctorDialog } from "@/components/AddDoctorDialog";
 import { EditDoctorDialog } from "@/components/EditDoctorDialog";
+import type { Doctor } from "@/hooks/useDoctors";
 
 const DoctorsAccounts = () => {
-  const { data: doctors = [], isLoading } = useDoctors();
+  const { data: doctors = [], isLoading, error } = useDoctors();
   const deleteDoctor = useDeleteDoctor();
 
   const handleDelete = (id: string) => {
@@ -27,6 +28,24 @@ const DoctorsAccounts = () => {
     );
   }
 
+  if (error) {
+    return (
+      <div className="space-y-6 animate-fade-in">
+        <div className="flex items-center justify-center p-8">
+          <div className="text-lg text-red-600">
+            حدث خطأ أثناء تحميل بيانات الأطباء: {error.message}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // التأكد من أن البيانات تُطابق نوع Doctor قبل التصيير (لتجنب أخطاء runtime)
+  const validDoctors = Array.isArray(doctors) ? doctors.filter(
+    (d: any): d is Doctor =>
+      d && typeof d.id === "string" && typeof d.name === "string" && "zircon_price" in d && "temp_price" in d
+  ) : [];
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
@@ -43,10 +62,10 @@ const DoctorsAccounts = () => {
       {/* قائمة الأطباء */}
       <Card>
         <CardHeader>
-          <CardTitle>قائمة الأطباء ({doctors.length})</CardTitle>
+          <CardTitle>قائمة الأطباء ({validDoctors.length})</CardTitle>
         </CardHeader>
         <CardContent>
-          {doctors.length === 0 ? (
+          {validDoctors.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
               لا يوجد أطباء مسجلين حتى الآن
             </div>
@@ -61,7 +80,7 @@ const DoctorsAccounts = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {doctors.map((doctor) => (
+                {validDoctors.map((doctor) => (
                   <TableRow key={doctor.id} className="hover:bg-gray-50">
                     <TableCell className="font-semibold text-primary">
                       {doctor.name}

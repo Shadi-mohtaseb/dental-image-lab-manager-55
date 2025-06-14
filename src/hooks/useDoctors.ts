@@ -1,10 +1,18 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Tables, TablesInsert } from "@/integrations/supabase/types";
 import { toast } from "@/hooks/use-toast";
 
-export type Doctor = Pick<Tables<"doctors">, "id" | "name" | "zircon_price" | "temp_price" | "created_at" | "updated_at">;
+// تعريف واجهة الطبيب مع الحقول الجديدة
+export type Doctor = {
+  id: string;
+  name: string;
+  zircon_price: number;
+  temp_price: number;
+  created_at?: string;
+  updated_at?: string;
+};
+
 export type DoctorInsert = {
   name: string;
   zircon_price: number;
@@ -15,14 +23,21 @@ export type DoctorInsert = {
 export const useDoctors = () => {
   return useQuery({
     queryKey: ["doctors"],
-    queryFn: async () => {
+    queryFn: async (): Promise<Doctor[]> => {
       const { data, error } = await supabase
         .from("doctors")
         .select("id, name, zircon_price, temp_price, created_at, updated_at")
         .order("created_at", { ascending: false });
-
       if (error) throw error;
-      return data;
+      // التأكد من إرجاع بيانات صحيحة بذات الحقول المطلوبة
+      return (data as any[] ?? []).map((row) => ({
+        id: row.id,
+        name: row.name,
+        zircon_price: Number(row.zircon_price) || 0,
+        temp_price: Number(row.temp_price) || 0,
+        created_at: row.created_at,
+        updated_at: row.updated_at,
+      }));
     },
   });
 };
@@ -39,7 +54,7 @@ export const useAddDoctor = () => {
         .select("id, name, zircon_price, temp_price, created_at, updated_at")
         .single();
       if (error) throw error;
-      return data;
+      return data as Doctor;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["doctors"] });
@@ -59,13 +74,17 @@ export const useAddDoctor = () => {
   });
 };
 
-
 // تحديث طبيب
 export const useUpdateDoctor = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, name, zircon_price, temp_price }: { id: string; name: string; zircon_price: number; temp_price: number }) => {
+    mutationFn: async ({
+      id,
+      name,
+      zircon_price,
+      temp_price,
+    }: { id: string; name: string; zircon_price: number; temp_price: number }) => {
       const { data, error } = await supabase
         .from("doctors")
         .update({ name, zircon_price, temp_price })
@@ -73,7 +92,7 @@ export const useUpdateDoctor = () => {
         .select("id, name, zircon_price, temp_price, created_at, updated_at")
         .single();
       if (error) throw error;
-      return data;
+      return data as Doctor;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["doctors"] });
