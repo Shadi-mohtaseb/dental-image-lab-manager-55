@@ -1,4 +1,3 @@
-
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -47,7 +46,7 @@ export function CasesFilterBar({
             <SelectValue placeholder="كل الأطباء" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">الكل ({totalCount})</SelectItem>
+            <SelectItem value="all">الكل ({totalCount})</SelectItem>
             {doctors.map((doctor: any) => (
               <SelectItem key={doctor.id} value={doctor.id}>
                 {doctor.name}
