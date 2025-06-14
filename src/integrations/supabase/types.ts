@@ -134,7 +134,9 @@ export type Database = {
           name: string
           phone: string | null
           specialty: string | null
+          temp_price: number
           updated_at: string
+          zircon_price: number
         }
         Insert: {
           address?: string | null
@@ -144,7 +146,9 @@ export type Database = {
           name: string
           phone?: string | null
           specialty?: string | null
+          temp_price?: number
           updated_at?: string
+          zircon_price?: number
         }
         Update: {
           address?: string | null
@@ -154,7 +158,9 @@ export type Database = {
           name?: string
           phone?: string | null
           specialty?: string | null
+          temp_price?: number
           updated_at?: string
+          zircon_price?: number
         }
         Relationships: []
       }
