@@ -7,22 +7,10 @@ import { Search } from "lucide-react";
 type CasesFilterBarProps = {
   searchTerm: string;
   onSearchTermChange: (v: string) => void;
-  statusFilter: string;
-  onStatusFilterChange: (v: string) => void;
   workTypeFilter: string;
   onWorkTypeFilterChange: (v: string) => void;
   totalCount: number;
 };
-
-const statuses = [
-  { label: "قيد التنفيذ", color: "blue-500" },
-  { label: "تم التسليم", color: "green-500" },
-  { label: "تجهيز العمل", color: "yellow-500" },
-  { label: "اختبار القوي", color: "orange-500" },
-  { label: "المراجعة النهائية", color: "purple-500" },
-  { label: "معلق", color: "gray-500" },
-  { label: "ملغي", color: "red-500" },
-];
 
 const workTypes = [
   { label: "زيركون", color: "purple-500" },
@@ -32,8 +20,6 @@ const workTypes = [
 export function CasesFilterBar({
   searchTerm,
   onSearchTermChange,
-  statusFilter,
-  onStatusFilterChange,
   workTypeFilter,
   onWorkTypeFilterChange,
   totalCount,
@@ -43,7 +29,7 @@ export function CasesFilterBar({
       <div className="flex gap-4 mb-4">
         <div className="flex-1">
           <Input
-            placeholder="بحث عن مريض أو طبيب أو رقم الحالة..."
+            placeholder="بحث عن اسم الطبيب..."
             value={searchTerm}
             onChange={(e) => onSearchTermChange(e.target.value)}
             className="w-full"
@@ -53,26 +39,6 @@ export function CasesFilterBar({
           <Search className="w-4 h-4" />
           بحث
         </Button>
-      </div>
-      <div className="flex gap-2 flex-wrap mb-2">
-        <span className="font-bold text-sm text-gray-600 mt-1">الحالة:</span>
-        <Badge
-          variant={!statusFilter ? "default" : "outline"}
-          className="cursor-pointer hover:bg-primary hover:text-white"
-          onClick={() => onStatusFilterChange("")}
-        >
-          الكل
-        </Badge>
-        {statuses.map(({ label, color }) => (
-          <Badge
-            key={label}
-            variant={statusFilter === label ? "default" : "outline"}
-            className={`cursor-pointer hover:bg-${color} hover:text-white`}
-            onClick={() => onStatusFilterChange(label)}
-          >
-            {label}
-          </Badge>
-        ))}
       </div>
       <div className="flex gap-2 flex-wrap">
         <span className="font-bold text-sm text-gray-600 mt-1">نوع العمل:</span>

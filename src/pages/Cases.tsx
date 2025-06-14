@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
@@ -14,27 +15,9 @@ const Cases = () => {
   const deleteCase = useDeleteCase();
   const updateCase = useUpdateCase();
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
   const [workTypeFilter, setWorkTypeFilter] = useState("");
   const [editOpen, setEditOpen] = useState(false);
   const [selectedCase, setSelectedCase] = useState<Tables<"cases"> | null>(null);
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "قيد التنفيذ":
-        return "bg-blue-100 text-blue-700";
-      case "تجهيز العمل":
-        return "bg-yellow-100 text-yellow-700";
-      case "اختبار القوي":
-        return "bg-orange-100 text-orange-700";
-      case "تم التسليم":
-        return "bg-green-100 text-green-700";
-      case "المراجعة النهائية":
-        return "bg-purple-100 text-purple-700";
-      default:
-        return "bg-gray-100 text-gray-700";
-    }
-  };
 
   const handleViewCase = (caseId: string) => {
     navigate(`/case/${caseId}`);
@@ -51,13 +34,13 @@ const Cases = () => {
     setSelectedCase(null);
   };
 
+  // البحث فقط حسب اسم الطبيب ونوع العمل
   const filteredCases = cases.filter((caseItem) => {
-    const matchesSearch =
-      caseItem.patient_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      caseItem.doctor?.name?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = !statusFilter || caseItem.status === statusFilter;
+    const matchesDoctor =
+      caseItem.doctor?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (caseItem.doctor_name && caseItem.doctor_name.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesWorkType = !workTypeFilter || caseItem.work_type === workTypeFilter;
-    return matchesSearch && matchesStatus && matchesWorkType;
+    return matchesDoctor && matchesWorkType;
   });
 
   if (isLoading) {
@@ -90,8 +73,6 @@ const Cases = () => {
           <CasesFilterBar
             searchTerm={searchTerm}
             onSearchTermChange={setSearchTerm}
-            statusFilter={statusFilter}
-            onStatusFilterChange={setStatusFilter}
             workTypeFilter={workTypeFilter}
             onWorkTypeFilterChange={setWorkTypeFilter}
             totalCount={cases.length}
@@ -107,7 +88,7 @@ const Cases = () => {
         <CardContent>
           {filteredCases.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
-              {searchTerm || statusFilter || workTypeFilter
+              {searchTerm || workTypeFilter
                 ? "لا توجد نتائج مطابقة للبحث"
                 : "لا توجد حالات مسجلة حتى الآن"}
             </div>
@@ -120,7 +101,6 @@ const Cases = () => {
                 setEditOpen(true);
               }}
               onDelete={handleDeleteCase}
-              getStatusColor={getStatusColor}
             />
           )}
         </CardContent>
@@ -141,3 +121,4 @@ const Cases = () => {
 };
 
 export default Cases;
+
