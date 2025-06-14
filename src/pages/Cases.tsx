@@ -14,7 +14,7 @@ const Cases = () => {
   const { data: cases = [], isLoading } = useCases();
   const deleteCase = useDeleteCase();
   const updateCase = useUpdateCase();
-  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedDoctorId, setSelectedDoctorId] = useState("");
   const [workTypeFilter, setWorkTypeFilter] = useState("");
   const [editOpen, setEditOpen] = useState(false);
   const [selectedCase, setSelectedCase] = useState<Tables<"cases"> | null>(null);
@@ -34,11 +34,9 @@ const Cases = () => {
     setSelectedCase(null);
   };
 
-  // البحث فقط حسب اسم الطبيب ونوع العمل
+  // تصفية الحالات حسب الطبيب ونوع العمل فقط
   const filteredCases = cases.filter((caseItem) => {
-    const matchesDoctor =
-      caseItem.doctor?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (caseItem.doctor_name && caseItem.doctor_name.toLowerCase().includes(searchTerm.toLowerCase()));
+    const matchesDoctor = !selectedDoctorId || caseItem.doctor_id === selectedDoctorId;
     const matchesWorkType = !workTypeFilter || caseItem.work_type === workTypeFilter;
     return matchesDoctor && matchesWorkType;
   });
@@ -71,8 +69,8 @@ const Cases = () => {
       <Card>
         <CardContent className="p-0">
           <CasesFilterBar
-            searchTerm={searchTerm}
-            onSearchTermChange={setSearchTerm}
+            selectedDoctorId={selectedDoctorId}
+            onDoctorChange={setSelectedDoctorId}
             workTypeFilter={workTypeFilter}
             onWorkTypeFilterChange={setWorkTypeFilter}
             totalCount={cases.length}
@@ -88,9 +86,7 @@ const Cases = () => {
         <CardContent>
           {filteredCases.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
-              {searchTerm || workTypeFilter
-                ? "لا توجد نتائج مطابقة للبحث"
-                : "لا توجد حالات مسجلة حتى الآن"}
+              {"لا توجد نتائج مطابقة للبحث"}
             </div>
           ) : (
             <CasesTable
@@ -121,4 +117,3 @@ const Cases = () => {
 };
 
 export default Cases;
-

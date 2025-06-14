@@ -1,12 +1,11 @@
 
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Search } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useDoctors } from "@/hooks/useDoctors";
 
 type CasesFilterBarProps = {
-  searchTerm: string;
-  onSearchTermChange: (v: string) => void;
+  selectedDoctorId: string;
+  onDoctorChange: (v: string) => void;
   workTypeFilter: string;
   onWorkTypeFilterChange: (v: string) => void;
   totalCount: number;
@@ -18,36 +17,40 @@ const workTypes = [
 ];
 
 export function CasesFilterBar({
-  searchTerm,
-  onSearchTermChange,
+  selectedDoctorId,
+  onDoctorChange,
   workTypeFilter,
   onWorkTypeFilterChange,
   totalCount,
 }: CasesFilterBarProps) {
+  const { data: doctors = [], isLoading } = useDoctors();
+
   return (
-    <div className="p-6">
-      <div className="flex gap-4 mb-4">
-        <div className="flex-1">
-          <Input
-            placeholder="بحث عن اسم الطبيب..."
-            value={searchTerm}
-            onChange={(e) => onSearchTermChange(e.target.value)}
-            className="w-full"
-          />
-        </div>
-        <Button variant="outline" className="gap-2" tabIndex={-1} disabled>
-          <Search className="w-4 h-4" />
-          بحث
-        </Button>
+    <div className="p-6 flex flex-col gap-4">
+      <div className="flex gap-4 items-center flex-wrap">
+        <span className="font-bold text-sm text-gray-600">الطبيب:</span>
+        <Select value={selectedDoctorId} onValueChange={onDoctorChange}>
+          <SelectTrigger className="w-48 min-w-[150px]">
+            <SelectValue placeholder="اختر الطبيب" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">الكل ({totalCount})</SelectItem>
+            {doctors.map((doctor: any) => (
+              <SelectItem key={doctor.id} value={doctor.id}>
+                {doctor.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
-      <div className="flex gap-2 flex-wrap">
+      <div className="flex gap-2 flex-wrap items-center">
         <span className="font-bold text-sm text-gray-600 mt-1">نوع العمل:</span>
         <Badge
           variant={!workTypeFilter ? "default" : "outline"}
           className="cursor-pointer hover:bg-primary hover:text-white"
           onClick={() => onWorkTypeFilterChange("")}
         >
-          الكل ({totalCount})
+          الكل
         </Badge>
         {workTypes.map(({ label, color }) => (
           <Badge
