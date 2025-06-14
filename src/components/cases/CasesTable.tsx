@@ -9,7 +9,7 @@ interface CasesTableProps {
   onEdit?: (caseItem: any) => void;
   onDelete?: (caseId: string) => void;
   getStatusColor?: (status: string) => string;
-  onStatusChange?: (caseItem: any) => Promise<void>; // NEW: لتفعيل تغيير الحالة
+  onStatusChange?: (caseItem: any, targetStatus: string) => Promise<void>;
 }
 
 export function CasesTable({
@@ -33,14 +33,15 @@ export function CasesTable({
     return caseItem.price ? `${caseItem.price} ₪` : "-";
   };
 
-  // لتتبع التحميل أثناء تغيير الحالة
   const [loadingId, setLoadingId] = useState<string | null>(null);
 
-  // دالة معالجة تغيير الحالة
+  // دالة معالجة تغيير الحالة: تنقلب بين قيد التنفيذ وتم التسليم
   const handleStatusClick = async (caseItem: any) => {
-    if (!onStatusChange || caseItem.status !== "قيد التنفيذ" || loadingId) return;
+    if (!onStatusChange || loadingId) return;
+    // حدد الحالة الجديدة
+    const newStatus = caseItem.status === "قيد التنفيذ" ? "تم التسليم" : "قيد التنفيذ";
     setLoadingId(caseItem.id);
-    await onStatusChange(caseItem);
+    await onStatusChange(caseItem, newStatus);
     setLoadingId(null);
   };
 
@@ -80,39 +81,56 @@ export function CasesTable({
               <td className="px-4 py-2">{caseItem.work_type || "-"}</td>
               <td className="px-4 py-2">{caseItem.shade || "-"}</td>
               <td className="px-4 py-2">{caseItem.zircon_block_type || "-"}</td>
-              <td className="px-4 py-2">
-                <span
+              {/* زر الحالة أيقونة وقابل للتحويل */}
+              <td className="px-4 py-2 text-center">
+                <button
+                  type="button"
                   className={`
-                    inline-flex items-center justify-center rounded-full font-bold select-none transition-all
-                    ${caseItem.status === "تم التسليم"
-                      ? "bg-green-100 text-green-700 px-3 py-1 cursor-not-allowed"
-                      : "bg-yellow-50 text-yellow-800 px-3 py-1 hover:bg-yellow-200 cursor-pointer"
+                    inline-flex items-center gap-1 justify-center rounded-full font-bold select-none transition-all text-sm
+                    px-3 py-1
+                    ${
+                      caseItem.status === "تم التسليم"
+                        ? "bg-green-100 text-green-700"
+                        : "bg-yellow-50 text-yellow-800 hover:bg-yellow-200"
                     }
+                    ${loadingId === caseItem.id ? "opacity-50 cursor-wait" : "cursor-pointer"}
                   `}
                   onClick={() => handleStatusClick(caseItem)}
-                  title={caseItem.status === "قيد التنفيذ" ? "اضغط لتغيير الحالة إلى تم التسليم" : undefined}
+                  title="اضغط لتبديل حالة التنفيذ"
                   style={{ minWidth: 110 }}
+                  disabled={!!loadingId}
                   >
-                  {loadingId === caseItem.id
-                    ? "جارٍ الحفظ..."
-                    : caseItem.status
-                  }
-                  {/* رمز صح للحالة المسلمة */}
-                  {caseItem.status === "تم التسليم" && (
-                    <Check className="ml-1 inline-block" size={16} />
+                  {/* حالة التحميل */}
+                  {loadingId === caseItem.id ? (
+                    <span>...جارٍ الحفظ</span>
+                  ) : (
+                    <>
+                      {/* نص الحالة مع الرمز */}
+                      {caseItem.status === "تم التسليم" ? (
+                        <>
+                          <span>تم التسليم</span>
+                          <Check className="inline" size={17} />
+                        </>
+                      ) : (
+                        <>
+                          <span>قيد التنفيذ</span>
+                        </>
+                      )}
+                    </>
                   )}
-                </span>
+                </button>
               </td>
-              <td className="px-4 py-2 flex gap-2 flex-wrap items-center min-w-[120px]">
-                {onView && (
+              <td className="px-4 py-2 flex gap-2 flex-wrap items-center min-w-[120px] justify-center">
+                {/* الإجراءات: فقط رموز بدون نص */}
+                {onDelete && (
                   <Button
                     size="icon"
                     variant="outline"
-                    className="text-blue-600 border-blue-200 hover:bg-blue-50"
-                    title="عرض"
-                    onClick={() => onView(caseItem.id)}
+                    className="text-red-600 hover:bg-red-50"
+                    title="حذف"
+                    onClick={() => onDelete(caseItem.id)}
                   >
-                    <Eye />
+                    <Trash2 />
                   </Button>
                 )}
                 {onEdit && (
@@ -126,15 +144,15 @@ export function CasesTable({
                     <Edit />
                   </Button>
                 )}
-                {onDelete && (
+                {onView && (
                   <Button
                     size="icon"
                     variant="outline"
-                    className="text-red-600 hover:bg-red-50"
-                    title="حذف"
-                    onClick={() => onDelete(caseItem.id)}
+                    className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                    title="عرض"
+                    onClick={() => onView(caseItem.id)}
                   >
-                    <Trash2 />
+                    <Eye />
                   </Button>
                 )}
               </td>
