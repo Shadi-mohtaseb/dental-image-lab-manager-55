@@ -1,4 +1,5 @@
 
+import React, { Suspense, lazy } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -14,7 +15,6 @@ import Cases from "./pages/Cases";
 import CaseDetails from "./pages/CaseDetails";
 import NotFound from "./pages/NotFound";
 import Settings from "./pages/Settings";
-import React, { Suspense, lazy } from "react";
 
 // Lazy load DoctorDetails
 const DoctorDetails = lazy(() => import("./pages/DoctorDetails"));
@@ -79,4 +79,3 @@ const App = () => (
 );
 
 export default App;
-
