@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import Index from "./pages/Index";
@@ -52,9 +52,9 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/partnership-accounts" element={<PartnershipAccounts />} />
               <Route path="/doctors-dashboard" element={<DoctorsDashboard />} />
-              {/* صفحات الأطباء القديمة أصبحت جزءًا من داشبورد واحد */}
-              {/* <Route path="/doctors-accounts" element={<DoctorsAccounts />} /> */}
-              {/* <Route path="/doctors-log" element={<DoctorsLog />} /> */}
+              {/* Redirect legacy routes to the combined doctors dashboard */}
+              <Route path="/doctors-accounts" element={<Navigate to="/doctors-dashboard" replace />} />
+              <Route path="/doctors-log" element={<Navigate to="/doctors-dashboard" replace />} />
               <Route path="/expenses" element={<Expenses />} />
               <Route path="/cases" element={<Cases />} />
               <Route path="/case/:id" element={<CaseDetails />} />
