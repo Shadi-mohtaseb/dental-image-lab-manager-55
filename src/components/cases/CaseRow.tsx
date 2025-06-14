@@ -28,16 +28,16 @@ export function CaseRow({ caseItem, onView, onEdit, onDelete, getStatusColor }: 
         <Badge variant="outline">{caseItem.work_type}</Badge>
       </td>
       <td className="text-center">
-        {caseItem.tooth_number && (
-          <div className="flex flex-col items-center space-y-1">
-            <Badge className="bg-gray-100 text-gray-700">
-              {caseItem.tooth_number}
-            </Badge>
-            <span className="text-xs text-gray-500 mt-1">
-              ({teethCount} سن)
-            </span>
-          </div>
+        {caseItem.tooth_number ? (
+          <Badge className="bg-gray-100 text-gray-700">
+            {caseItem.tooth_number}
+          </Badge>
+        ) : (
+          <span className="text-xs text-gray-400">غير محدد</span>
         )}
+      </td>
+      <td className="text-center">
+        <span className="text-sm text-gray-600 font-bold">{teethCount}</span>
       </td>
       <td>
         {new Date(caseItem.submission_date).toLocaleDateString('en-US')}
@@ -78,3 +78,4 @@ export function CaseRow({ caseItem, onView, onEdit, onDelete, getStatusColor }: 
     </tr>
   );
 }
+

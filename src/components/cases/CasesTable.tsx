@@ -20,7 +20,8 @@ export function CasesTable({ cases, onView, onEdit, onDelete, getStatusColor }: 
           <TableHead>اسم المريض</TableHead>
           <TableHead>اسم الطبيب</TableHead>
           <TableHead>نوع العمل</TableHead>
-          <TableHead>رقم السن<br/><span className="text-xs text-gray-400">(وعدد الأسنان بعده)</span></TableHead>
+          <TableHead>رقم السن</TableHead>
+          <TableHead>عدد الأسنان</TableHead>
           <TableHead>تاريخ الاستلام</TableHead>
           <TableHead>الحالة</TableHead>
           <TableHead>إجراءات</TableHead>
