@@ -55,7 +55,8 @@ const DoctorsAccounts = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>اسم الطبيب</TableHead>
-                  <TableHead>سعر الطبيب (شيكل)</TableHead>
+                  <TableHead>سعر الزيركون (شيكل)</TableHead>
+                  <TableHead>سعر المؤقت (شيكل)</TableHead>
                   <TableHead>إجراءات</TableHead>
                 </TableRow>
               </TableHeader>
@@ -66,7 +67,10 @@ const DoctorsAccounts = () => {
                       {doctor.name}
                     </TableCell>
                     <TableCell>
-                      <span className="text-sm">{doctor.price} شيكل</span>
+                      <span className="text-sm">{doctor.zircon_price} شيكل</span>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-sm">{doctor.temp_price} شيكل</span>
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-2">

@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -55,6 +54,10 @@ const formSchema = z.object({
   delivery_date: z.string().optional(),
   status: z.enum(caseStatuses).default("قيد التنفيذ"),
   notes: z.string().optional(),
+  number_of_teeth: z.preprocess(
+    (val) => (val === "" ? undefined : Number(val)),
+    z.number({ invalid_type_error: "يرجى إدخال عدد أسنان صالح" }).min(1, "يرجى إدخال عدد الأسنان")
+  ),
   price: z.preprocess(
     (val) => (val === "" ? undefined : Number(val)),
     z.number({ invalid_type_error: "يرجى إدخال سعر صالح" }).min(0, "يرجى إدخال السعر")
@@ -68,6 +71,14 @@ export function AddCaseDialog() {
   const addCase = useAddCase();
   const { data: doctors = [] } = useDoctors();
 
+  // لإيجاد السعر المناسب لنوع العمل للطبيب المختار
+  const getDoctorWorkTypePrice = (doctor: any, workType: string) => {
+    if (!doctor) return 0;
+    if (workType === "زيركون") return Number(doctor.zircon_price) || 0;
+    if (workType === "مؤقت") return Number(doctor.temp_price) || 0;
+    return 0;
+  };
+
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -75,6 +86,7 @@ export function AddCaseDialog() {
       doctor_id: "",
       work_type: "زيركون",
       tooth_number: "",
+      number_of_teeth: 1,
       submission_date: new Date().toISOString().split('T')[0],
       delivery_date: "",
       status: "قيد التنفيذ",
@@ -83,16 +95,26 @@ export function AddCaseDialog() {
     },
   });
 
-  // تحديث السعر عند تغيير الطبيب أوتوماتيكياً
-  const handleDoctorChange = (doctorId: string) => {
-    form.setValue("doctor_id", doctorId);
-    const doctor = doctors.find((d: any) => d.id === doctorId);
-    if (doctor && typeof doctor.price === "number") {
-      form.setValue("price", doctor.price);
-    } else {
-      form.setValue("price", 0);
+  // تحديث السعر عند تغيير الطبيب أو نوع العمل أو عدد الأسنان
+  useEffect(() => {
+    const doctorId = form.watch("doctor_id");
+    const workType = form.watch("work_type");
+    const numberOfTeeth = form.watch("number_of_teeth") || 1;
+
+    const doctor: any = doctors.find((d: any) => d.id === doctorId);
+    const pricePerTooth = getDoctorWorkTypePrice(doctor, workType);
+    const autoPrice = pricePerTooth * numberOfTeeth;
+    // فقط عدّل السعر إذا لم يغير المستخدم حقله يدويًا بنفس القيمة (منع حلقة لا نهائية)
+    if (form.getValues("price") !== autoPrice) {
+      form.setValue("price", autoPrice);
     }
-  };
+    // eslint-disable-next-line
+  }, [
+    form.watch("doctor_id"),
+    form.watch("work_type"),
+    form.watch("number_of_teeth"),
+    doctors,
+  ]);
 
   const onSubmit = async (data: FormData) => {
     try {
@@ -108,7 +130,7 @@ export function AddCaseDialog() {
         delivery_date: data.delivery_date || null,
         status: data.status,
         notes: data.notes || null,
-        price: data.price, // أضف السعر هنا
+        price: data.price,
       });
       form.reset();
       setOpen(false);
@@ -155,7 +177,7 @@ export function AddCaseDialog() {
                 <FormItem>
                   <FormLabel>الطبيب *</FormLabel>
                   <Select
-                    onValueChange={handleDoctorChange}
+                    onValueChange={field.onChange}
                     value={field.value}
                   >
                     <FormControl>
@@ -176,26 +198,6 @@ export function AddCaseDialog() {
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="price"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>السعر (شيكل) *</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      min={0}
-                      step={0.01}
-                      placeholder="0"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -203,7 +205,7 @@ export function AddCaseDialog() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>نوع العمل *</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="اختر نوع العمل" />
@@ -223,18 +225,32 @@ export function AddCaseDialog() {
               />
               <FormField
                 control={form.control}
-                name="tooth_number"
+                name="number_of_teeth"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>رقم السن</FormLabel>
+                    <FormLabel>عدد الأسنان *</FormLabel>
                     <FormControl>
-                      <Input placeholder="12" {...field} />
+                      <Input type="number" min={1} placeholder="1" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
+
+            <FormField
+              control={form.control}
+              name="tooth_number"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>رقم السن</FormLabel>
+                  <FormControl>
+                    <Input placeholder="12" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <div className="grid grid-cols-2 gap-4">
               <FormField
@@ -271,7 +287,7 @@ export function AddCaseDialog() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>الحالة</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="اختر الحالة" />
@@ -298,6 +314,26 @@ export function AddCaseDialog() {
                   <FormLabel>ملاحظات</FormLabel>
                   <FormControl>
                     <Textarea placeholder="ملاحظات إضافية" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="price"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>السعر (شيكل) *</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min={0}
+                      step={0.01}
+                      placeholder="0"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

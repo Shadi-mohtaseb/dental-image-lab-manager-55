@@ -26,9 +26,13 @@ import { UserPlus } from "lucide-react";
 
 const formSchema = z.object({
   name: z.string().min(2, "اسم الطبيب مطلوب"),
-  price: z.preprocess(
+  zircon_price: z.preprocess(
     (val) => (val === "" ? undefined : Number(val)),
-    z.number({ invalid_type_error: "يرجى إدخال رقم صالح" }).min(0, "يرجى إدخال السعر")
+    z.number({ invalid_type_error: "يرجى إدخال سعر الزيركون" }).min(0, "يرجى إدخال السعر")
+  ),
+  temp_price: z.preprocess(
+    (val) => (val === "" ? undefined : Number(val)),
+    z.number({ invalid_type_error: "يرجى إدخال سعر المؤقت" }).min(0, "يرجى إدخال السعر")
   ),
 });
 
@@ -42,7 +46,8 @@ export function AddDoctorDialog() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      price: 0,
+      zircon_price: 0,
+      temp_price: 0,
     },
   });
 
@@ -50,7 +55,8 @@ export function AddDoctorDialog() {
     try {
       await addDoctor.mutateAsync({
         name: data.name,
-        price: data.price,
+        zircon_price: data.zircon_price,
+        temp_price: data.temp_price,
       });
       form.reset();
       setOpen(false);
@@ -71,7 +77,7 @@ export function AddDoctorDialog() {
         <DialogHeader>
           <DialogTitle>إضافة طبيب جديد</DialogTitle>
           <DialogDescription>
-            أدخل اسم الطبيب و سعر العمل بالشيكل
+            أدخل اسم الطبيب و أسعار العمل بالشيكل لكل نوع
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -91,10 +97,23 @@ export function AddDoctorDialog() {
             />
             <FormField
               control={form.control}
-              name="price"
+              name="zircon_price"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>السعر (شيكل) *</FormLabel>
+                  <FormLabel>سعر الزيركون (شيكل) *</FormLabel>
+                  <FormControl>
+                    <Input type="number" min={0} step={0.01} placeholder="0" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="temp_price"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>سعر المؤقت (شيكل) *</FormLabel>
                   <FormControl>
                     <Input type="number" min={0} step={0.01} placeholder="0" {...field} />
                   </FormControl>

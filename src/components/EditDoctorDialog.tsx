@@ -26,15 +26,19 @@ import { Edit } from "lucide-react";
 
 const formSchema = z.object({
   name: z.string().min(2, "اسم الطبيب مطلوب"),
-  price: z.preprocess(
+  zircon_price: z.preprocess(
     (val) => (val === "" ? undefined : Number(val)),
-    z.number({ invalid_type_error: "يرجى إدخال رقم صالح" }).min(0, "يرجى إدخال السعر")
+    z.number({ invalid_type_error: "يرجى إدخال سعر الزيركون" }).min(0, "يرجى إدخال السعر")
+  ),
+  temp_price: z.preprocess(
+    (val) => (val === "" ? undefined : Number(val)),
+    z.number({ invalid_type_error: "يرجى إدخال سعر المؤقت" }).min(0, "يرجى إدخال السعر")
   ),
 });
 
 type FormData = z.infer<typeof formSchema>;
 
-export function EditDoctorDialog({ doctor }: { doctor: { id: string; name: string; price: number } }) {
+export function EditDoctorDialog({ doctor }: { doctor: { id: string; name: string; zircon_price: number; temp_price: number } }) {
   const [open, setOpen] = useState(false);
   const updateDoctor = useUpdateDoctor();
 
@@ -42,7 +46,8 @@ export function EditDoctorDialog({ doctor }: { doctor: { id: string; name: strin
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: doctor.name,
-      price: doctor.price,
+      zircon_price: doctor.zircon_price,
+      temp_price: doctor.temp_price,
     },
   });
 
@@ -51,7 +56,8 @@ export function EditDoctorDialog({ doctor }: { doctor: { id: string; name: strin
       await updateDoctor.mutateAsync({
         id: doctor.id,
         name: data.name,
-        price: data.price,
+        zircon_price: data.zircon_price,
+        temp_price: data.temp_price,
       });
       setOpen(false);
     } catch (error) {
@@ -70,7 +76,7 @@ export function EditDoctorDialog({ doctor }: { doctor: { id: string; name: strin
         <DialogHeader>
           <DialogTitle>تعديل بيانات الطبيب</DialogTitle>
           <DialogDescription>
-            تعديل اسم الطبيب أو سعر الطبيب (شيكل)
+            تعديل اسم الطبيب وأسعار الأنواع
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -90,10 +96,23 @@ export function EditDoctorDialog({ doctor }: { doctor: { id: string; name: strin
             />
             <FormField
               control={form.control}
-              name="price"
+              name="zircon_price"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>السعر (شيكل) *</FormLabel>
+                  <FormLabel>سعر الزيركون (شيكل) *</FormLabel>
+                  <FormControl>
+                    <Input type="number" min={0} step={0.01} placeholder="0" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="temp_price"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>سعر المؤقت (شيكل) *</FormLabel>
                   <FormControl>
                     <Input type="number" min={0} step={0.01} placeholder="0" {...field} />
                   </FormControl>

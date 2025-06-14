@@ -4,8 +4,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { Tables, TablesInsert } from "@/integrations/supabase/types";
 import { toast } from "@/hooks/use-toast";
 
-export type Doctor = Pick<Tables<"doctors">, "id" | "name" | "price" | "created_at" | "updated_at">;
-export type DoctorInsert = Pick<TablesInsert<"doctors">, "name" | "price">;
+export type Doctor = Pick<Tables<"doctors">, "id" | "name" | "zircon_price" | "temp_price" | "created_at" | "updated_at">;
+export type DoctorInsert = {
+  name: string;
+  zircon_price: number;
+  temp_price: number;
+};
 
 // جلب الأطباء
 export const useDoctors = () => {
@@ -14,9 +18,9 @@ export const useDoctors = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("doctors")
-        .select("id, name, price, created_at, updated_at")
+        .select("id, name, zircon_price, temp_price, created_at, updated_at")
         .order("created_at", { ascending: false });
-      
+
       if (error) throw error;
       return data;
     },
@@ -26,13 +30,13 @@ export const useDoctors = () => {
 // إضافة طبيب
 export const useAddDoctor = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (doctor: DoctorInsert) => {
       const { data, error } = await supabase
         .from("doctors")
         .insert(doctor)
-        .select("id, name, price, created_at, updated_at")
+        .select("id, name, zircon_price, temp_price, created_at, updated_at")
         .single();
       if (error) throw error;
       return data;
@@ -55,17 +59,18 @@ export const useAddDoctor = () => {
   });
 };
 
+
 // تحديث طبيب
 export const useUpdateDoctor = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, name, price }: { id: string; name: string; price: number }) => {
+    mutationFn: async ({ id, name, zircon_price, temp_price }: { id: string; name: string; zircon_price: number; temp_price: number }) => {
       const { data, error } = await supabase
         .from("doctors")
-        .update({ name, price })
+        .update({ name, zircon_price, temp_price })
         .eq("id", id)
-        .select("id, name, price, created_at, updated_at")
+        .select("id, name, zircon_price, temp_price, created_at, updated_at")
         .single();
       if (error) throw error;
       return data;
