@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,6 +9,8 @@ import { Search, Eye, Edit, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useCases, useDeleteCase, useUpdateCase } from "@/hooks/useCases";
 import { AddCaseDialog } from "@/components/AddCaseDialog";
+import { EditCaseDialog } from "@/components/EditCaseDialog";
+import { Tables } from "@/integrations/supabase/types";
 
 const Cases = () => {
   const navigate = useNavigate();
@@ -16,6 +19,10 @@ const Cases = () => {
   const updateCase = useUpdateCase();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+
+  // جديد: للحوار والتعديل
+  const [editOpen, setEditOpen] = useState(false);
+  const [selectedCase, setSelectedCase] = useState<Tables<"cases"> | null>(null);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -42,6 +49,15 @@ const Cases = () => {
     if (window.confirm("هل أنت متأكد من حذف هذه الحالة؟")) {
       await deleteCase.mutateAsync(caseId);
     }
+  };
+
+  // في حال تم التحديث من التعديل، نعدل العنصر مباشرة بدون تحميل
+  const handleUpdateCase = (updated: Tables<"cases">) => {
+    setEditOpen(false);
+    setSelectedCase(null);
+    // optionally you could re-fetch, but for a light UX:
+    // تحديث العنصر في القائمة يدوياً لو أردت
+    // (حاليًا الريأكت-كويري يقوم بالتحديث بناء على invalidate)
   };
 
   const filteredCases = cases.filter(caseItem => {
@@ -192,7 +208,15 @@ const Cases = () => {
                         >
                           <Eye className="w-4 h-4" />
                         </Button>
-                        <Button size="sm" variant="outline" className="text-green-600 hover:bg-green-50">
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="text-green-600 hover:bg-green-50"
+                          onClick={() => {
+                            setSelectedCase(caseItem);
+                            setEditOpen(true);
+                          }}
+                        >
                           <Edit className="w-4 h-4" />
                         </Button>
                         <Button 
@@ -212,8 +236,20 @@ const Cases = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* نافذة التعديل */}
+      <EditCaseDialog
+        caseData={selectedCase}
+        open={editOpen}
+        onOpenChange={(open) => {
+          setEditOpen(open);
+          if (!open) setSelectedCase(null);
+        }}
+        onUpdate={handleUpdateCase}
+      />
     </div>
   );
 };
 
 export default Cases;
+
