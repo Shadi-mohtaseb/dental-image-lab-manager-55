@@ -6,18 +6,21 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useAddCase } from "@/hooks/useCases";
-import { DoctorSelect } from "./form/DoctorSelect";
-import { WorkTypeSelect } from "./form/WorkTypeSelect";
 import { StatusSelect } from "./form/StatusSelect";
 import { Button } from "@/components/ui/button";
 import { useDoctors } from "@/hooks/useDoctors";
 import { useEffect } from "react";
+// مكونات الحقول الجديدة
+import { PatientInfoFields } from "@/components/form/add-case/PatientInfoFields";
+import { TeethDetailsFields } from "@/components/form/add-case/TeethDetailsFields";
+import { ToothNumberField } from "@/components/form/add-case/ToothNumberField";
+import { DatesFields } from "@/components/form/add-case/DatesFields";
+import { NotesField } from "@/components/form/add-case/NotesField";
+import { PriceField } from "@/components/form/add-case/PriceField";
 
 const workTypes = ["زيركون", "مؤقت"] as const;
 const caseStatuses = [
@@ -30,7 +33,6 @@ const caseStatuses = [
   "ملغي",
 ] as const;
 
-// تم اضافة price للحالة
 const formSchema = z.object({
   patient_name: z.string().min(2, "اسم المريض مطلوب"),
   doctor_id: z.string().min(1, "اختيار الطبيب مطلوب"),
@@ -67,7 +69,6 @@ export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
       doctor_id: "",
       work_type: "زيركون",
       tooth_number: "",
-      number_of_teeth: 1,
       submission_date: new Date().toISOString().split('T')[0],
       delivery_date: "",
       status: "قيد التنفيذ",
@@ -76,24 +77,20 @@ export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
     },
   });
 
-  // تحديث السعر عند تغيير الطبيب أو نوع العمل أو عدد الأسنان
+  // تحديث السعر عند تغيير الطبيب أو نوع العمل (تم حذف number_of_teeth)
   useEffect(() => {
     const doctorId = form.watch("doctor_id");
     const workType = form.watch("work_type");
-    const numberOfTeeth = form.watch("number_of_teeth") || 1;
-
     const doctor: any = doctors.find((d: any) => d.id === doctorId);
     const pricePerTooth = getDoctorWorkTypePrice(doctor, workType);
-    const autoPrice = pricePerTooth * numberOfTeeth;
 
-    if (form.getValues("price") !== autoPrice) {
-      form.setValue("price", autoPrice);
+    if (form.getValues("price") !== pricePerTooth) {
+      form.setValue("price", pricePerTooth);
     }
     // eslint-disable-next-line
   }, [
     form.watch("doctor_id"),
     form.watch("work_type"),
-    form.watch("number_of_teeth"),
     doctors,
   ]);
 
@@ -120,118 +117,13 @@ export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="patient_name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>اسم المريض *</FormLabel>
-              <FormControl>
-                <Input placeholder="محمد أحمد" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <DoctorSelect form={form} name="doctor_id" />
-
-        <div className="grid grid-cols-2 gap-4">
-          <WorkTypeSelect form={form} name="work_type" />
-          <FormField
-            control={form.control}
-            name="number_of_teeth"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>عدد الأسنان *</FormLabel>
-                <FormControl>
-                  <Input type="number" min={1} placeholder="1" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <FormField
-          control={form.control}
-          name="tooth_number"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>رقم السن</FormLabel>
-              <FormControl>
-                <Input placeholder="12" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="submission_date"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>تاريخ التسليم *</FormLabel>
-                <FormControl>
-                  <Input type="date" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="delivery_date"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>تاريخ الاستلام</FormLabel>
-                <FormControl>
-                  <Input type="date" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
+        <PatientInfoFields form={form} />
+        <TeethDetailsFields form={form} />
+        <ToothNumberField form={form} />
+        <DatesFields form={form} />
         <StatusSelect form={form} name="status" />
-
-        <FormField
-          control={form.control}
-          name="notes"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>ملاحظات</FormLabel>
-              <FormControl>
-                <Textarea placeholder="ملاحظات إضافية" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="price"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>السعر (شيكل) *</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  min={0}
-                  step={0.01}
-                  placeholder="0"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
+        <NotesField form={form} />
+        <PriceField form={form} />
         <div className="flex justify-end space-x-2">
           <Button
             type="button"
