@@ -18,6 +18,7 @@ import FinancialSummary from "@/components/FinancialSummary";
 import PartnerCard from "@/components/PartnerCard";
 import AddPartnerTransactionDialog from "@/components/AddPartnerTransactionDialog";
 import { useFinancialSummary } from "@/hooks/useFinancialSummary";
+import WithdrawFromShareDialog from "@/components/WithdrawFromShareDialog";
 
 const PartnershipAccounts = () => {
   const [showAddTransaction, setShowAddTransaction] = useState(false);
@@ -25,6 +26,8 @@ const PartnershipAccounts = () => {
   const [selectedTx, setSelectedTx] = useState(null);
   const [withdrawOpen, setWithdrawOpen] = useState(false);
   const [selectedPartner, setSelectedPartner] = useState(null);
+  const [withdrawShareOpen, setWithdrawShareOpen] = useState(false);
+  const [selectedPartnerShare, setSelectedPartnerShare] = useState(null);
 
   const { data: partners = [], isLoading: loadingPartners } = usePartners();
   const { data: transactions = [], isLoading: loadingTx } = usePartnerTransactions();
@@ -97,6 +100,11 @@ const PartnershipAccounts = () => {
     setWithdrawOpen(true);
   };
 
+  const handleWithdrawShare = (partner: any) => {
+    setSelectedPartnerShare(partner);
+    setWithdrawShareOpen(true);
+  };
+
   const { data: summary, isLoading: loadingSummary } = useFinancialSummary();
 
   // استخدم 0 إذا لم تكن القيم متوفرة
@@ -147,6 +155,7 @@ const PartnershipAccounts = () => {
                 }}
                 onWithdraw={handleWithdraw}
                 onDelete={handleDeletePartner}
+                onWithdrawShare={handleWithdrawShare}
               />
             );
           })}
@@ -249,6 +258,14 @@ const PartnershipAccounts = () => {
           if (!open) setSelectedPartner(null);
         }}
         partner={selectedPartner}
+      />
+      <WithdrawFromShareDialog
+        open={withdrawShareOpen}
+        onOpenChange={(open) => {
+          setWithdrawShareOpen(open);
+          if (!open) setSelectedPartnerShare(null);
+        }}
+        partner={selectedPartnerShare}
       />
       {/* يمكنك إضافة المزيد من إحصاءات المعاملات وأقسام ثانوية هنا لاحقاً */}
     </div>
