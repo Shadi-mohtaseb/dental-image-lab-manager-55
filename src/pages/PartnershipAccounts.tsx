@@ -97,11 +97,9 @@ const PartnershipAccounts = () => {
     setWithdrawOpen(true);
   };
 
-  // حساب إجمالي الإيرادات والمصاريف من الشركة وصافي الربح:
-  // نفترض جلبهم من useCompanyCapital وقيمتهم (companyCapital?.total_capital)
-  // سنضع قيم افتراضية لو لم تتوفر.
-  const totalRevenue = companyCapital?.total_revenue ?? 0;
-  const totalExpenses = companyCapital?.total_expenses ?? 0;
+  // استخدم 0 إذا لم تكن القيم متوفرة
+  const totalRevenue = (companyCapital && (companyCapital as any).total_revenue) ?? 0;
+  const totalExpenses = (companyCapital && (companyCapital as any).total_expenses) ?? 0;
   const netProfit = companyCapital?.total_capital ?? 0;
 
   // حساب معاملات السحب لكل شريك
@@ -127,112 +125,111 @@ const PartnershipAccounts = () => {
       />
 
       {/* 2- إدارة الشركاء */}
-      <div className="flex items-center justify-between mt-6">
-        <h1 className="text-2xl font-bold text-gray-900 flex gap-2 items-center">
-          <Users className="w-7 h-7 text-primary" /> الشركاء
-        </h1>
-        <AddPartnerDialog />
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        {partners.map((partner) => {
-          const stats = getPartnerStats(partner);
-          return (
-            <PartnerCard
-              key={partner.id}
-              partner={{
-                ...partner,
-                withdrawals: stats.withdrawals,
-                remaining_share: stats.remaining_share,
-              }}
-              onWithdraw={handleWithdraw}
-              onDelete={handleDeletePartner}
-            />
-          );
-        })}
-      </div>
+      <section>
+        <div className="flex items-center justify-between mt-6 mb-2">
+          <h1 className="text-2xl font-bold text-gray-900 flex gap-2 items-center">
+            <Users className="w-7 h-7 text-primary" /> الشركاء
+          </h1>
+          <AddPartnerDialog />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {partners.map((partner) => {
+            const stats = getPartnerStats(partner);
+            return (
+              <PartnerCard
+                key={partner.id}
+                partner={{
+                  ...partner,
+                  withdrawals: stats.withdrawals,
+                  remaining_share: stats.remaining_share,
+                }}
+                onWithdraw={handleWithdraw}
+                onDelete={handleDeletePartner}
+              />
+            );
+          })}
+        </div>
+      </section>
 
       {/* 3- عمليات السحب و المعاملات */}
-      <div className="flex items-center justify-between mt-10">
-        <h2 className="text-xl font-bold text-gray-700 flex gap-1 items-center">سجل المعاملات</h2>
-        {/* نموذج إضافة المعاملة في مودال منفصل */}
-        <Button
-          onClick={() => setShowAddTransaction(true)}
-          className="bg-primary hover:bg-primary/90"
-        >
-          <Plus className="w-4 h-4 ml-1" />
-          إضافة معاملة
-        </Button>
-      </div>
-      {/* شريط بحث بسيط وفلاتر */}
-      <div className="flex flex-col md:flex-row gap-4 mt-2">
-        <Input
-          placeholder="بحث عن شريك/وصف"
-          className="w-full max-w-xs"
-          // ...حفظ وتطبيق البحث في الحالة
-        />
-        {/* إمكانية إضافة مزيد من الفلاتر في المستقبل */}
-      </div>
-      {/* جدول المعاملات (محسن) */}
-      <Card className="mt-4">
-        <CardHeader>
-          <CardTitle>جدول المعاملات المالية</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>التاريخ</TableHead>
-                <TableHead>الشريك</TableHead>
-                <TableHead>نوع المعاملة</TableHead>
-                <TableHead>المبلغ</TableHead>
-                <TableHead>المصدر</TableHead>
-                <TableHead>الوصف</TableHead>
-                <TableHead>إجراءات</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {(transactions ?? []).map((transaction) => {
-                const partner = partners.find((p) => p.id === transaction.partner_id);
-                return (
-                  <TableRow key={transaction.id}>
-                    <TableCell>{transaction.transaction_date}</TableCell>
-                    <TableCell>{partner?.name || "-"}</TableCell>
-                    <TableCell>
-                      <Badge variant={transaction.transaction_type === "deposit" ? "default" : "destructive"}>
-                        {transaction.transaction_type === "deposit" ? "إيداع" : "سحب"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="font-semibold">
-                      {Number(transaction.amount).toFixed(2)} ₪
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline">
-                        {transaction.transaction_source === "personal_withdrawal" ? "سحب شخصي" : 
-                         transaction.transaction_source === "case_profit" ? "ربح حالة" : "يدوي"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{transaction.description}</TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        <Button size="sm" variant="outline" onClick={() => handleEditTx(transaction)}>
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button size="sm" variant="outline" className="text-red-600"
-                          onClick={() => handleDeleteTransaction(transaction.id)}>
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-      {/* حوار إضافة المعاملة */}
-      <AddPartnerTransactionDialog open={showAddTransaction} onOpenChange={setShowAddTransaction} />
-
+      <section className="mt-10">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-bold text-gray-700 flex gap-1 items-center">سجل المعاملات</h2>
+          {/* نموذج إضافة المعاملة في مودال منفصل */}
+          <Button
+            onClick={() => setShowAddTransaction(true)}
+            className="bg-primary hover:bg-primary/90"
+          >
+            <Plus className="w-4 h-4 ml-1" />
+            إضافة معاملة
+          </Button>
+        </div>
+        {/* شريط بحث بسيط وفلاتر */}
+        <div className="flex flex-col md:flex-row gap-4 mt-2">
+          <Input
+            placeholder="بحث عن شريك/وصف"
+            className="w-full max-w-xs"
+          />
+        </div>
+        <Card className="mt-4">
+          <CardHeader>
+            <CardTitle>جدول المعاملات المالية</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>التاريخ</TableHead>
+                  <TableHead>الشريك</TableHead>
+                  <TableHead>نوع المعاملة</TableHead>
+                  <TableHead>المبلغ</TableHead>
+                  <TableHead>المصدر</TableHead>
+                  <TableHead>الوصف</TableHead>
+                  <TableHead>إجراءات</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {(transactions ?? []).map((transaction) => {
+                  const partner = partners.find((p) => p.id === transaction.partner_id);
+                  return (
+                    <TableRow key={transaction.id}>
+                      <TableCell>{transaction.transaction_date}</TableCell>
+                      <TableCell>{partner?.name || "-"}</TableCell>
+                      <TableCell>
+                        <Badge variant={transaction.transaction_type === "deposit" ? "default" : "destructive"}>
+                          {transaction.transaction_type === "deposit" ? "إيداع" : "سحب"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="font-semibold">
+                        {Number(transaction.amount).toFixed(2)} ₪
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline">
+                          {transaction.transaction_source === "personal_withdrawal" ? "سحب شخصي" : 
+                            transaction.transaction_source === "case_profit" ? "ربح حالة" : "يدوي"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{transaction.description}</TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <Button size="sm" variant="outline" onClick={() => handleEditTx(transaction)}>
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button size="sm" variant="outline" className="text-red-600"
+                            onClick={() => handleDeleteTransaction(transaction.id)}>
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+        <AddPartnerTransactionDialog open={showAddTransaction} onOpenChange={setShowAddTransaction} />
+      </section>
       {/* 4- واجهات تعديل عمليات السحب الحالية */}
       <EditPartnerTransactionDialog
         open={editTxOpen}

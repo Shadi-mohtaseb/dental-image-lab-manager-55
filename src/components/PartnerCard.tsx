@@ -1,6 +1,7 @@
 
-import { Card, CardHeader, CardTitle, CardContent, Badge } from "@/components/ui/card";
-import { Wallet, Trash2, Users } from "lucide-react";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Wallet, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface Partner {

@@ -1,6 +1,6 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { DollarSign, ArrowDown, ArrowUp } from "lucide-react";
 
 interface Props {
@@ -62,7 +62,7 @@ export default function FinancialSummary({ totalRevenue, totalExpenses, netProfi
                   <Tooltip />
                   <Bar dataKey="value" fill="#2563eb">
                     {chartData.map((entry, idx) => (
-                      <cell key={`cell-${idx}`} fill={entry.color} />
+                      <Cell key={`cell-${idx}`} fill={entry.color} />
                     ))}
                   </Bar>
                 </BarChart>
