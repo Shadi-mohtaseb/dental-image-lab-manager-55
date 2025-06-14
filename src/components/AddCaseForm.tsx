@@ -40,10 +40,6 @@ const formSchema = z.object({
   delivery_date: z.string().optional(),
   status: z.enum(caseStatuses).default("قيد التنفيذ"),
   notes: z.string().optional(),
-  number_of_teeth: z.preprocess(
-    (val) => (val === "" ? undefined : Number(val)),
-    z.number({ invalid_type_error: "يرجى إدخال عدد أسنان صالح" }).min(1, "يرجى إدخال عدد الأسنان")
-  ),
   price: z.preprocess(
     (val) => (val === "" ? undefined : Number(val)),
     z.number({ invalid_type_error: "يرجى إدخال سعر صالح" }).min(0, "يرجى إدخال السعر")
@@ -113,7 +109,6 @@ export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
         status: data.status,
         notes: data.notes || null,
         price: data.price,
-        number_of_teeth: data.number_of_teeth,
       });
       form.reset();
       onSuccess();
