@@ -30,7 +30,6 @@ const PartnershipAccounts = () => {
         supabase.from("partners").delete().eq("id", partnerId)
       );
       if (!error) {
-        refetch?.();
         toast({
           title: "تم حذف الشريك",
           description: "تم حذف الشريك بنجاح",
