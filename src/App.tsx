@@ -9,13 +9,11 @@ import Index from "./pages/Index";
 import PartnershipAccounts from "./pages/PartnershipAccounts";
 import DoctorsAccounts from "./pages/DoctorsAccounts";
 import Expenses from "./pages/Expenses";
-import DoctorsLog from "./pages/DoctorsLog";
 import Cases from "./pages/Cases";
 import CaseDetails from "./pages/CaseDetails";
 import NotFound from "./pages/NotFound";
 import Settings from "./pages/Settings";
 import React from "react";
-import DoctorsDashboard from "./pages/DoctorsDashboard";
 import DoctorsPayments from "./pages/DoctorsPayments";
 
 // مكون للمحتوى الرئيسي يأخذ بعين الاعتبار عرض السايدبار
@@ -52,10 +50,10 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/partnership-accounts" element={<PartnershipAccounts />} />
-              <Route path="/doctors-dashboard" element={<DoctorsDashboard />} />
-              {/* Redirect legacy routes to the combined doctors dashboard */}
-              <Route path="/doctors-accounts" element={<Navigate to="/doctors-dashboard" replace />} />
-              <Route path="/doctors-log" element={<Navigate to="/doctors-dashboard" replace />} />
+              {/* حذف صفحة سجل/إحصائيات الأطباء وتحويلها لقائمة الأطباء */}
+              <Route path="/doctors-dashboard" element={<Navigate to="/doctors-accounts" replace />} />
+              <Route path="/doctors-accounts" element={<DoctorsAccounts />} />
+              <Route path="/doctors-log" element={<Navigate to="/doctors-accounts" replace />} />
               <Route path="/expenses" element={<Expenses />} />
               <Route path="/cases" element={<Cases />} />
               <Route path="/case/:id" element={<CaseDetails />} />
