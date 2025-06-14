@@ -19,6 +19,9 @@ import PartnerCard from "@/components/PartnerCard";
 import AddPartnerTransactionDialog from "@/components/AddPartnerTransactionDialog";
 import { useFinancialSummary } from "@/hooks/useFinancialSummary";
 import WithdrawFromShareDialog from "@/components/WithdrawFromShareDialog";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Wallet } from "lucide-react";
 
 const PartnershipAccounts = () => {
   const [showAddTransaction, setShowAddTransaction] = useState(false);
@@ -35,6 +38,48 @@ const PartnershipAccounts = () => {
   const deleteTx = useDeletePartnerTransaction();
   const calculateCapital = useCalculateCompanyCapital();
   const distributeProfits = useDistributeProfits();
+
+  const { data: doctors = [] } = useDoctors();
+  const { data: cases = [] } = useCases();
+
+  const { data: doctorTransactions = [] } = useQuery({
+    queryKey: ['doctor_transactions'],
+    queryFn: async () => {
+      let { data, error } = await supabase
+        .from("doctor_transactions")
+        .select("*");
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  // احسب مجموع ديون الأطباء بنفس منطق الصفحة الرئيسية
+  function computeDoctorsDebt() {
+    const doctorsCases = doctors.reduce((acc, doc) => {
+      const doctorCasesSum = cases
+        .filter((c) => c.doctor_id === doc.id)
+        .reduce((sum, c) => sum + (Number(c.price) || 0), 0);
+      acc[doc.id] = doctorCasesSum;
+      return acc;
+    }, {} as Record<string, number>);
+
+    const doctorsPaid = doctorTransactions.reduce((acc, tx) => {
+      if (tx.doctor_id && tx.transaction_type === "دفعة") {
+        acc[tx.doctor_id] = (acc[tx.doctor_id] || 0) + Number(tx.amount);
+      }
+      return acc;
+    }, {} as Record<string, number>);
+
+    const doctorsDebtList = Object.keys(doctorsCases).map(doctorId => ({
+      doctorId,
+      debt: (doctorsCases[doctorId] || 0) - (doctorsPaid[doctorId] || 0),
+    }));
+
+    const totalDoctorsDebt = doctorsDebtList.reduce((sum, d) => sum + (d.debt > 0 ? d.debt : 0), 0);
+    return totalDoctorsDebt;
+  }
+
+  const totalDoctorsDebt = computeDoctorsDebt();
 
   const handleDeletePartner = async (partnerId: string) => {
     if (window.confirm("هل أنت متأكد من حذف هذا الشريك؟")) {
@@ -133,6 +178,14 @@ const PartnershipAccounts = () => {
         totalExpenses={totalExpenses}
         netProfit={netProfit}
       />
+
+      {/* عرض مجموع ديون الأطباء */}
+      <div className="bg-orange-50 p-4 rounded-lg flex items-center gap-3 border border-orange-200">
+        <Wallet className="text-orange-600" />
+        <span className="font-bold text-orange-800 text-lg">
+          مجموع ديون الأطباء الحالية: {totalDoctorsDebt.toFixed(2)} ₪
+        </span>
+      </div>
 
       {/* 2- إدارة الشركاء */}
       <section>

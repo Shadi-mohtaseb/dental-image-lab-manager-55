@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,6 +9,7 @@ import {
   Calendar,
   DollarSign,
   Activity,
+  Wallet
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useCases } from "@/hooks/useCases";
@@ -17,6 +17,9 @@ import { useDoctors } from "@/hooks/useDoctors";
 import { useExpenses } from "@/hooks/useExpenses";
 import { usePartners } from "@/hooks/usePartners";
 import { useFinancialSummary } from "@/hooks/useFinancialSummary";
+import { usePartnerTransactions } from "@/hooks/usePartnerTransactions";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -35,6 +38,45 @@ const Index = () => {
   const monthlyExpenses = summary?.totalExpenses || 0;
   const netProfit = summary?.netProfit || 0;
 
+  // حساب مجموع ديون الأطباء (إجمالي الحالات - الدفعات)
+  function computeDoctorsDebt() {
+    const doctorsCases = doctors.reduce((acc, doc) => {
+      const doctorCasesSum = cases
+        .filter((c) => c.doctor_id === doc.id)
+        .reduce((sum, c) => sum + (Number(c.price) || 0), 0);
+      acc[doc.id] = doctorCasesSum;
+      return acc;
+    }, {} as Record<string, number>);
+
+    const doctorsPaid = doctorTransactions.reduce((acc, tx) => {
+      if (tx.doctor_id && tx.transaction_type === "دفعة") {
+        acc[tx.doctor_id] = (acc[tx.doctor_id] || 0) + Number(tx.amount);
+      }
+      return acc;
+    }, {} as Record<string, number>);
+
+    const doctorsDebtList = Object.keys(doctorsCases).map(doctorId => ({
+      doctorId,
+      debt: (doctorsCases[doctorId] || 0) - (doctorsPaid[doctorId] || 0),
+    }));
+
+    const totalDoctorsDebt = doctorsDebtList.reduce((sum, d) => sum + (d.debt > 0 ? d.debt : 0), 0);
+    return totalDoctorsDebt;
+  }
+
+  const { data: doctorTransactions = [] } = useQuery({
+    queryKey: ['doctor_transactions'],
+    queryFn: async () => {
+      let { data, error } = await supabase
+        .from("doctor_transactions")
+        .select("*");
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  const totalDoctorsDebt = computeDoctorsDebt();
+
   const stats = [
     {
       title: "صافي الربح (رأس المال)",
@@ -42,6 +84,13 @@ const Index = () => {
       change: netProfit > 0 ? `ربح صافي` : "لا يوجد ربح",
       icon: DollarSign,
       color: netProfit > 0 ? "text-green-600" : "text-gray-600",
+    },
+    {
+      title: "إجمالي ديون الأطباء",
+      value: `${totalDoctorsDebt.toFixed(0)} ₪`,
+      change: totalDoctorsDebt > 0 ? "يجب تحصيلها" : "لا توجد ديون",
+      icon: Wallet,
+      color: totalDoctorsDebt > 0 ? "text-orange-600" : "text-gray-600",
     },
     {
       title: "إجمالي الإيرادات",
@@ -257,4 +306,3 @@ const Index = () => {
 };
 
 export default Index;
-
