@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -58,21 +59,21 @@ export default function DoctorsAccountsTable({ doctors, cases }: Props) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>اسم الطبيب</TableHead>
-              <TableHead>إجمالي الأسنان</TableHead>
+              <TableHead className="text-right w-[200px]">اسم الطبيب</TableHead>
+              <TableHead className="text-center w-[140px]">إجمالي الأسنان</TableHead>
               {/* <TableHead>سعر الزيركون (شيكل)</TableHead>
               <TableHead>سعر المؤقت (شيكل)</TableHead> */}
-              <TableHead>كشف الحساب</TableHead>
-              <TableHead>إجراءات</TableHead>
+              <TableHead className="text-center w-[140px]">كشف الحساب</TableHead>
+              <TableHead className="text-center w-[195px]">إجراءات</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {doctors.map((doctor) => (
               <TableRow key={doctor.id} className="hover:bg-gray-50">
-                <TableCell className="font-semibold text-primary">
+                <TableCell className="font-semibold text-primary text-right w-[200px]">
                   {doctor.name}
                 </TableCell>
-                <TableCell>
+                <TableCell className="text-center w-[140px]">
                   <span className="text-sm font-bold">{calcTotalTeeth(doctor.id)}</span>
                 </TableCell>
                 {/* <TableCell>
@@ -81,15 +82,15 @@ export default function DoctorsAccountsTable({ doctors, cases }: Props) {
                 <TableCell>
                   <span className="text-sm">{doctor.temp_price} شيكل</span>
                 </TableCell> */}
-                <TableCell>
+                <TableCell className="text-center w-[140px]">
                   <DoctorAccountExportButton
                     doctorId={doctor.id}
                     doctorName={doctor.name}
                     doctorCases={cases.filter((c) => c.doctor_id === doctor.id)}
                   />
                 </TableCell>
-                <TableCell>
-                  <div className="flex gap-2">
+                <TableCell className="text-center w-[195px]">
+                  <div className="flex gap-2 justify-center">
                     <EditDoctorDialog doctor={doctor} />
                     <Button size="sm" variant="outline" className="text-blue-600 hover:bg-blue-50 border-blue-200"
                       title="تفاصيل"

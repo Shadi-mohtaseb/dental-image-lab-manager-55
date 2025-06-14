@@ -9,7 +9,7 @@ import EditDoctorPaymentDialog from "./EditDoctorPaymentDialog";
 import { toast } from "@/hooks/use-toast";
 import { Edit, Trash2 } from "lucide-react";
 
-// حل المشكلة: جلب جميع الأطباء وربط كل دفعة باسم الطبيب الخاص بها يدويًا.
+// حل المشكلة: جلب جميع الأطباء وربط كل دفعة بالاسم الخاص بها يدويًا.
 export default function DoctorsPaymentsLogTable() {
   const queryClient = useQueryClient();
   const [editOpen, setEditOpen] = useState(false);
@@ -66,26 +66,26 @@ export default function DoctorsPaymentsLogTable() {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>اسم الطبيب</TableHead>
-            <TableHead>المبلغ</TableHead>
-            <TableHead>طريقة الدفع</TableHead>
-            <TableHead>التاريخ</TableHead>
-            <TableHead>ملاحظات</TableHead>
-            <TableHead>إجراءات</TableHead>
+            <TableHead className="text-right w-[180px]">اسم الطبيب</TableHead>
+            <TableHead className="text-center w-[110px]">المبلغ</TableHead>
+            <TableHead className="text-center w-[130px]">طريقة الدفع</TableHead>
+            <TableHead className="text-center w-[130px]">التاريخ</TableHead>
+            <TableHead className="text-center w-[160px]">ملاحظات</TableHead>
+            <TableHead className="text-center w-[130px]">إجراءات</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {payments.map((payment: any) => (
             <TableRow key={payment.id}>
-              <TableCell>{getDoctorName(payment.doctor_id)}</TableCell>
-              <TableCell>{Number(payment.amount).toFixed(2)} ₪</TableCell>
-              <TableCell>
+              <TableCell className="text-right w-[180px]">{getDoctorName(payment.doctor_id)}</TableCell>
+              <TableCell className="text-center w-[110px]">{Number(payment.amount).toFixed(2)} ₪</TableCell>
+              <TableCell className="text-center w-[130px]">
                 <Badge>{payment.payment_method ?? "بدون"}</Badge>
               </TableCell>
-              <TableCell>{payment.transaction_date}</TableCell>
-              <TableCell>{payment.notes || "-"}</TableCell>
-              <TableCell>
-                <div className="flex gap-2">
+              <TableCell className="text-center w-[130px]">{payment.transaction_date}</TableCell>
+              <TableCell className="text-center w-[160px]">{payment.notes || "-"}</TableCell>
+              <TableCell className="text-center w-[130px]">
+                <div className="flex gap-2 justify-center">
                   <Button size="sm" variant="outline"
                     onClick={() => { setSelectedPayment(payment); setEditOpen(true); }}>
                     <Edit />

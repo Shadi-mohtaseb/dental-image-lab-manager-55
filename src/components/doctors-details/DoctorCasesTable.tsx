@@ -30,11 +30,11 @@ export function DoctorCasesTable({ cases }: Props) {
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>اسم المريض</TableHead>
-          <TableHead>تاريخ الإستلام</TableHead>
-          <TableHead>نوع العمل</TableHead>
-          <TableHead>عدد الأسنان</TableHead>
-          <TableHead>الحالة</TableHead>
+          <TableHead className="text-right w-[180px]">اسم المريض</TableHead>
+          <TableHead className="text-center w-[130px]">تاريخ الإستلام</TableHead>
+          <TableHead className="text-center w-[140px]">نوع العمل</TableHead>
+          <TableHead className="text-center w-[120px]">عدد الأسنان</TableHead>
+          <TableHead className="text-center w-[120px]">الحالة</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -47,11 +47,11 @@ export function DoctorCasesTable({ cases }: Props) {
         ) : (
           cases.map((c) => (
             <TableRow key={c.id}>
-              <TableCell>{c.patient_name}</TableCell>
-              <TableCell>{c.submission_date}</TableCell>
-              <TableCell>{c.work_type}</TableCell>
-              <TableCell>{getTeethCount(c)}</TableCell>
-              <TableCell>{c.status}</TableCell>
+              <TableCell className="text-right w-[180px]">{c.patient_name}</TableCell>
+              <TableCell className="text-center w-[130px]">{c.submission_date}</TableCell>
+              <TableCell className="text-center w-[140px]">{c.work_type}</TableCell>
+              <TableCell className="text-center w-[120px]">{getTeethCount(c)}</TableCell>
+              <TableCell className="text-center w-[120px]">{c.status}</TableCell>
             </TableRow>
           ))
         )}
