@@ -9,12 +9,22 @@ type CasesFilterBarProps = {
   onSearchTermChange: (v: string) => void;
   statusFilter: string;
   onStatusFilterChange: (v: string) => void;
+  workTypeFilter: string;
+  onWorkTypeFilterChange: (v: string) => void;
   totalCount: number;
 };
 
 const statuses = [
   { label: "قيد التنفيذ", color: "blue-500" },
   { label: "تم التسليم", color: "green-500" },
+  { label: "تجهيز العمل", color: "yellow-500" },
+  { label: "اختبار القوي", color: "orange-500" },
+  { label: "المراجعة النهائية", color: "purple-500" },
+  { label: "معلق", color: "gray-500" },
+  { label: "ملغي", color: "red-500" },
+];
+
+const workTypes = [
   { label: "زيركون", color: "purple-500" },
   { label: "مؤقت", color: "orange-500" },
 ];
@@ -24,6 +34,8 @@ export function CasesFilterBar({
   onSearchTermChange,
   statusFilter,
   onStatusFilterChange,
+  workTypeFilter,
+  onWorkTypeFilterChange,
   totalCount,
 }: CasesFilterBarProps) {
   return (
@@ -42,13 +54,14 @@ export function CasesFilterBar({
           بحث
         </Button>
       </div>
-      <div className="flex gap-2 flex-wrap">
+      <div className="flex gap-2 flex-wrap mb-2">
+        <span className="font-bold text-sm text-gray-600 mt-1">الحالة:</span>
         <Badge
           variant={!statusFilter ? "default" : "outline"}
           className="cursor-pointer hover:bg-primary hover:text-white"
           onClick={() => onStatusFilterChange("")}
         >
-          الكل ({totalCount})
+          الكل
         </Badge>
         {statuses.map(({ label, color }) => (
           <Badge
@@ -56,6 +69,26 @@ export function CasesFilterBar({
             variant={statusFilter === label ? "default" : "outline"}
             className={`cursor-pointer hover:bg-${color} hover:text-white`}
             onClick={() => onStatusFilterChange(label)}
+          >
+            {label}
+          </Badge>
+        ))}
+      </div>
+      <div className="flex gap-2 flex-wrap">
+        <span className="font-bold text-sm text-gray-600 mt-1">نوع العمل:</span>
+        <Badge
+          variant={!workTypeFilter ? "default" : "outline"}
+          className="cursor-pointer hover:bg-primary hover:text-white"
+          onClick={() => onWorkTypeFilterChange("")}
+        >
+          الكل ({totalCount})
+        </Badge>
+        {workTypes.map(({ label, color }) => (
+          <Badge
+            key={label}
+            variant={workTypeFilter === label ? "default" : "outline"}
+            className={`cursor-pointer hover:bg-${color} hover:text-white`}
+            onClick={() => onWorkTypeFilterChange(label)}
           >
             {label}
           </Badge>

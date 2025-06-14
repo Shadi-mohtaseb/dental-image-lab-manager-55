@@ -15,6 +15,7 @@ const Cases = () => {
   const updateCase = useUpdateCase();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [workTypeFilter, setWorkTypeFilter] = useState("");
   const [editOpen, setEditOpen] = useState(false);
   const [selectedCase, setSelectedCase] = useState<Tables<"cases"> | null>(null);
 
@@ -50,12 +51,13 @@ const Cases = () => {
     setSelectedCase(null);
   };
 
-  const filteredCases = cases.filter(caseItem => {
+  const filteredCases = cases.filter((caseItem) => {
     const matchesSearch =
       caseItem.patient_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       caseItem.doctor?.name?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = !statusFilter || caseItem.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    const matchesWorkType = !workTypeFilter || caseItem.work_type === workTypeFilter;
+    return matchesSearch && matchesStatus && matchesWorkType;
   });
 
   if (isLoading) {
@@ -90,6 +92,8 @@ const Cases = () => {
             onSearchTermChange={setSearchTerm}
             statusFilter={statusFilter}
             onStatusFilterChange={setStatusFilter}
+            workTypeFilter={workTypeFilter}
+            onWorkTypeFilterChange={setWorkTypeFilter}
             totalCount={cases.length}
           />
         </CardContent>
@@ -103,13 +107,18 @@ const Cases = () => {
         <CardContent>
           {filteredCases.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
-              {searchTerm || statusFilter ? "لا توجد نتائج مطابقة للبحث" : "لا توجد حالات مسجلة حتى الآن"}
+              {searchTerm || statusFilter || workTypeFilter
+                ? "لا توجد نتائج مطابقة للبحث"
+                : "لا توجد حالات مسجلة حتى الآن"}
             </div>
           ) : (
             <CasesTable
               cases={filteredCases}
               onView={handleViewCase}
-              onEdit={(ci) => { setSelectedCase(ci); setEditOpen(true); }}
+              onEdit={(ci) => {
+                setSelectedCase(ci);
+                setEditOpen(true);
+              }}
               onDelete={handleDeleteCase}
               getStatusColor={getStatusColor}
             />
