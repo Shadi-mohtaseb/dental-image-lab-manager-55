@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -45,8 +46,8 @@ export default function DoctorsAccountsTable({ doctors, cases }: Props) {
           <TableHeader>
             <TableRow>
               <TableHead>اسم الطبيب</TableHead>
-              <TableHead>سعر الزيركون (شيكل)</TableHead>
-              <TableHead>سعر المؤقت (شيكل)</TableHead>
+              {/* <TableHead>سعر الزيركون (شيكل)</TableHead>
+              <TableHead>سعر المؤقت (شيكل)</TableHead> */}
               <TableHead>كشف الحساب</TableHead>
               <TableHead>إجراءات</TableHead>
             </TableRow>
@@ -57,12 +58,12 @@ export default function DoctorsAccountsTable({ doctors, cases }: Props) {
                 <TableCell className="font-semibold text-primary">
                   {doctor.name}
                 </TableCell>
-                <TableCell>
+                {/* <TableCell>
                   <span className="text-sm">{doctor.zircon_price} شيكل</span>
                 </TableCell>
                 <TableCell>
                   <span className="text-sm">{doctor.temp_price} شيكل</span>
-                </TableCell>
+                </TableCell> */}
                 <TableCell>
                   <DoctorAccountExportButton
                     doctorId={doctor.id}
@@ -92,3 +93,4 @@ export default function DoctorsAccountsTable({ doctors, cases }: Props) {
     </Card>
   );
 }
+
