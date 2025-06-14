@@ -9,11 +9,18 @@ import { Users, Plus, Edit, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { usePartners } from "@/hooks/usePartners";
 import { toast } from "@/hooks/use-toast";
+import { usePartnerTransactions, useAddPartnerTransaction, useDeletePartnerTransaction } from "@/hooks/usePartnerTransactions";
+import EditPartnerTransactionDialog from "@/components/EditPartnerTransactionDialog";
 
 const PartnershipAccounts = () => {
   const [showAddTransaction, setShowAddTransaction] = useState(false);
+  const [editTxOpen, setEditTxOpen] = useState(false);
+  const [selectedTx, setSelectedTx] = useState(null);
 
-  const { data: partners = [], isLoading, refetch } = usePartners();
+  const { data: partners = [], isLoading: loadingPartners } = usePartners();
+  const { data: transactions = [], isLoading: loadingTx } = usePartnerTransactions();
+  const addTx = useAddPartnerTransaction();
+  const deleteTx = useDeletePartnerTransaction();
 
   // عمليات السحب (حذف شريك)
   const handleDeletePartner = async (partnerId: string) => {
@@ -38,25 +45,64 @@ const PartnershipAccounts = () => {
     }
   };
 
-  // بيانات المعاملات مثال ثابت مؤقت: بإمكانك ربطها بجدول معاملات الشركاء الحقيقي لاحقًا
-  const transactions = [
-    {
-      id: 1,
-      date: "2025-06-10",
-      partner: partners[0]?.name ?? "-",
-      type: "إيداع",
-      amount: "15000",
-      description: "أرباح الشهر",
-    },
-    {
-      id: 2,
-      date: "2025-06-08",
-      partner: partners[1]?.name ?? "-",
-      type: "سحب",
-      amount: "8000",
-      description: "سحب أرباح",
-    },
-  ];
+  // إضافة معاملة، وتوزيع مبلغ الإيداع أو السحب على جميع الشركاء (ثلث لكل شريك)
+  const handleAddTransaction = async (e: any) => {
+    e.preventDefault();
+    const form = e.target;
+    const partnerId = form.partner.value;
+    const type = form.type.value;
+    const amountRaw = form.amount.value;
+    const date = form.date.value;
+    const desc = form.description.value;
+    const amount = Number(amountRaw);
+
+    if (!partnerId || !type || !amount || !date) {
+      toast({ title: "يرجى تعبئة كل الحقول المطلوبة", variant: "destructive" }); return;
+    }
+
+    // إدراج معاملة رئيسية
+    await addTx.mutateAsync({
+      partner_id: partnerId,
+      amount,
+      transaction_type: type,
+      transaction_date: date,
+      description: desc,
+    });
+
+    // توزيع مبلغ الإيداع أو السحب على جميع الشركاء بنسبة الثلث (أو بالتساوي)
+    if (type === "deposit" || type === "withdraw") {
+      const otherPartners = partners.filter(p => p.id !== partnerId);
+      const partnersToAffect = [partnerId, ...otherPartners.slice(0, 2)];
+      const distributedAmount = amount / 3;
+      for (let pid of partnersToAffect) {
+        // لا تضيف للمعاملة الأصلية مرتين
+        if (pid === partnerId) continue;
+        await addTx.mutateAsync({
+          partner_id: pid,
+          amount: distributedAmount,
+          transaction_type: type,
+          transaction_date: date,
+          description: `[توزيع تلقائي] ${desc || ""}`,
+        });
+      }
+    }
+
+    setShowAddTransaction(false);
+    form.reset();
+  };
+
+  // الحذف
+  const handleDeleteTransaction = async (id: string) => {
+    if (window.confirm("هل أنت متأكد من حذف هذه المعاملة؟")) {
+      await deleteTx.mutateAsync(id);
+    }
+  };
+
+  // فتح التعديل
+  const handleEditTx = (tx: any) => {
+    setSelectedTx(tx);
+    setEditTxOpen(true);
+  };
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -117,22 +163,25 @@ const PartnershipAccounts = () => {
             <CardTitle>إضافة معاملة مالية</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <form className="grid grid-cols-1 md:grid-cols-2 gap-4" onSubmit={handleAddTransaction}>
               <div>
                 <Label htmlFor="partner">الشريك</Label>
-                <Select>
+                <Select name="partner" required>
                   <SelectTrigger>
                     <SelectValue placeholder="اختر الشريك" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="partner1">الشريك الأول</SelectItem>
-                    <SelectItem value="partner2">الشريك الثاني</SelectItem>
+                    {partners.map((p) => (
+                      <SelectItem key={p.id} value={p.id}>
+                        {p.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
               <div>
                 <Label htmlFor="type">نوع المعاملة</Label>
-                <Select>
+                <Select name="type" required>
                   <SelectTrigger>
                     <SelectValue placeholder="نوع المعاملة" />
                   </SelectTrigger>
@@ -144,28 +193,25 @@ const PartnershipAccounts = () => {
               </div>
               <div>
                 <Label htmlFor="amount">المبلغ</Label>
-                <Input placeholder="أدخل المبلغ" />
+                <Input name="amount" placeholder="أدخل المبلغ" type="number" min="0" step="any" required />
               </div>
               <div>
                 <Label htmlFor="date">التاريخ</Label>
-                <Input type="date" defaultValue="2025-06-10" />
+                <Input name="date" type="date" required defaultValue={new Date().toISOString().slice(0, 10)} />
               </div>
               <div className="md:col-span-2">
                 <Label htmlFor="description">الوصف</Label>
-                <Input placeholder="أدخل وصف المعاملة" />
+                <Input name="description" placeholder="أدخل وصف المعاملة" />
               </div>
-            </div>
-            <div className="flex gap-3 mt-6">
-              <Button className="bg-primary hover:bg-primary/90">
-                إضافة المعاملة
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setShowAddTransaction(false)}
-              >
-                إلغاء
-              </Button>
-            </div>
+              <div className="flex gap-3 mt-6 md:col-span-2">
+                <Button className="bg-primary hover:bg-primary/90" type="submit">
+                  إضافة المعاملة
+                </Button>
+                <Button variant="outline" onClick={() => setShowAddTransaction(false)} type="button">
+                  إلغاء
+                </Button>
+              </div>
+            </form>
           </CardContent>
         </Card>
       )}
@@ -188,37 +234,50 @@ const PartnershipAccounts = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {transactions.map((transaction) => (
-                <TableRow key={transaction.id}>
-                  <TableCell>{transaction.date}</TableCell>
-                  <TableCell>{transaction.partner}</TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={transaction.type === "إيداع" ? "default" : "destructive"}
-                    >
-                      {transaction.type}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="font-semibold">
-                    {transaction.amount} ₪
-                  </TableCell>
-                  <TableCell>{transaction.description}</TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      <Button size="sm" variant="outline">
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button size="sm" variant="outline" className="text-red-600">
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {(transactions ?? []).map((transaction) => {
+                const partner = partners.find((p) => p.id === transaction.partner_id);
+                return (
+                  <TableRow key={transaction.id}>
+                    <TableCell>{transaction.transaction_date}</TableCell>
+                    <TableCell>{partner?.name || "-"}</TableCell>
+                    <TableCell>
+                      <Badge variant={transaction.transaction_type === "deposit" ? "default" : "destructive"}>
+                        {transaction.transaction_type === "deposit" ? "إيداع" : "سحب"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="font-semibold">
+                      {Number(transaction.amount).toFixed(2)} ₪
+                    </TableCell>
+                    <TableCell>{transaction.description}</TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        <Button size="sm" variant="outline" onClick={() => handleEditTx(transaction)}>
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button size="sm" variant="outline" className="text-red-600"
+                          onClick={() => handleDeleteTransaction(transaction.id)}>
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
+
+      {/* نافذة التعديل */}
+      <EditPartnerTransactionDialog
+        open={editTxOpen}
+        onOpenChange={(open) => {
+          setEditTxOpen(open);
+          if (!open) setSelectedTx(null);
+        }}
+        partners={partners}
+        initialData={selectedTx}
+      />
     </div>
   );
 };
