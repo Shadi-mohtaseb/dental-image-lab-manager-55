@@ -18,10 +18,10 @@ interface Props {
   partner: Partner;
   onWithdraw: (partner: Partner) => void;
   onDelete: (id: string) => void;
-  onWithdrawShare?: (partner: Partner) => void; // جديد
+  onWithdrawShare?: (partner: Partner) => void;
 }
 
-export default function PartnerCard({ partner, onWithdraw, onDelete, onWithdrawShare }: Props) {
+export default function PartnerCard({ partner, /* onWithdraw,*/ onDelete, onWithdrawShare }: Props) {
   return (
     <Card className="hover:shadow-lg transition-shadow">
       <CardHeader className="pb-3">
@@ -51,10 +51,6 @@ export default function PartnerCard({ partner, onWithdraw, onDelete, onWithdrawS
             <span className="text-gray-600">المتبقي من الحصة:</span>
             <span className="font-semibold text-blue-800">{Number(partner.remaining_share).toFixed(2)} ₪</span>
           </div>
-          <div className="flex justify-between">
-            <span className="text-gray-600">الرصيد الشخصي:</span>
-            <span className="font-semibold text-blue-600">{Number(partner.personal_balance || 0).toFixed(2)} ₪</span>
-          </div>
           <div className="flex gap-2 mt-2">
             <Button
               size="sm"
@@ -63,14 +59,6 @@ export default function PartnerCard({ partner, onWithdraw, onDelete, onWithdrawS
               onClick={() => onWithdrawShare && onWithdrawShare(partner)}
             >
               <Wallet className="w-4 h-4 ml-1" /> سحب من الربح (الحصة)
-            </Button>
-            <Button 
-              size="sm"
-              variant="outline"
-              className="text-blue-600 flex-1"
-              onClick={() => onWithdraw(partner)}
-            >
-              <Wallet className="w-4 h-4 ml-1" /> سحب من الرصيد الشخصي
             </Button>
             <Button 
               size="sm"
