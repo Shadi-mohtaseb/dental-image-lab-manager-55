@@ -64,10 +64,10 @@ export function CasesTable({
                   caseItem.status || "-"
                 )}
               </td>
-              <td className="px-4 py-2 flex gap-2 flex-wrap">
+              <td className="px-4 py-2 flex gap-2 flex-wrap items-center min-w-[160px]">
                 {onView && (
                   <button
-                    className="text-xs px-2 py-1 rounded bg-gray-200 hover:bg-gray-300"
+                    className="text-xs px-2 py-1 rounded bg-gray-200 hover:bg-gray-300 transition-colors"
                     onClick={() => onView(caseItem.id)}
                   >
                     عرض
@@ -75,7 +75,8 @@ export function CasesTable({
                 )}
                 {onEdit && (
                   <button
-                    className="text-xs px-2 py-1 rounded bg-blue-200 hover:bg-blue-300"
+                    className="text-xs px-3 py-1 rounded bg-blue-500 text-white hover:bg-blue-600 shadow-sm transition-all"
+                    style={{ minWidth: 56 }}
                     onClick={() => onEdit(caseItem)}
                   >
                     تعديل
@@ -83,7 +84,7 @@ export function CasesTable({
                 )}
                 {onDelete && (
                   <button
-                    className="text-xs px-2 py-1 rounded bg-red-200 hover:bg-red-300"
+                    className="text-xs px-2 py-1 rounded bg-red-500 text-white hover:bg-red-600 transition-colors"
                     onClick={() => onDelete(caseItem.id)}
                   >
                     حذف
