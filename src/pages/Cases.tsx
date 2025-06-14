@@ -35,16 +35,15 @@ const Cases = () => {
     setSelectedCase(null);
   };
 
-  // Adjust doctor filter to account for "all"
+  // Adjust doctor filter to account for "all" value (acts as "no filter")
   const filteredCases = cases.filter((caseItem) => {
-    // إذا تم اختيار طبيب من القائمة المنسدلة، نعتمد فقط على الـ id (أولوية أساسية). 
-    if (selectedDoctorId) {
-      const matchesDoctor = selectedDoctorId === "all" || caseItem.doctor_id === selectedDoctorId;
+    if (selectedDoctorId && selectedDoctorId !== "all") {
+      const matchesDoctor = caseItem.doctor_id === selectedDoctorId;
       const matchesWorkType = !workTypeFilter || caseItem.work_type === workTypeFilter;
       return matchesDoctor && matchesWorkType;
     }
-    // وإلا نستخدم البحث النصي مع نوع العمل
-    const doctorName = (caseItem.doctor?.name || caseItem.doctor_name || "").toLowerCase();
+    // Otherwise, filter by text search and work type
+    const doctorName = (caseItem.doctor?.name || "").toLowerCase();
     const matchesText = searchTerm ? doctorName.includes(searchTerm.toLowerCase()) : true;
     const matchesWorkType = !workTypeFilter || caseItem.work_type === workTypeFilter;
     return matchesText && matchesWorkType;
