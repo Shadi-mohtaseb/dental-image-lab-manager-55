@@ -19,6 +19,8 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
 import { EditCaseDialog } from "@/components/EditCaseDialog";
+import { WorkflowSteps } from "@/components/case/WorkflowSteps";
+import { ActionButtons } from "@/components/case/ActionButtons";
 
 const CaseDetails = () => {
   const { id } = useParams();
@@ -50,6 +52,10 @@ const CaseDetails = () => {
 
     fetchCase();
   }, [id]);
+
+  const handleUpdateCase = (updated: Tables<"cases">) => {
+    setCaseData(updated);
+  };
 
   // مراحل العمل مبسطة على مرحلتين فقط
   const workflowSteps = [
@@ -207,24 +213,7 @@ const CaseDetails = () => {
               <CardTitle>مراحل العمل</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="relative">
-                {workflowSteps.map((step, index) => (
-                  <div key={step.id} className="relative">
-                    <div className="flex items-center gap-4 pb-8">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${getStepColor(step.status)}`}>
-                        <step.icon className="w-5 h-5" />
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900">{step.title}</h3>
-                        <p className="text-sm text-gray-600">{step.description}</p>
-                      </div>
-                    </div>
-                    {index < workflowSteps.length - 1 && (
-                      <div className={`absolute right-4 top-10 w-0.5 h-6 ${getConnectorColor(step.status)}`} />
-                    )}
-                  </div>
-                ))}
-              </div>
+              <WorkflowSteps status={caseData.status} />
             </CardContent>
           </Card>
         </div>
@@ -255,24 +244,22 @@ const CaseDetails = () => {
             <CardHeader>
               <CardTitle>الإجراءات</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
-              <Button className="w-full bg-green-600 hover:bg-green-700">
-                <CheckCircle className="w-4 h-4 ml-2" />
-                جاهز للتسليم
-              </Button>
-              <Button className="w-full" variant="outline" onClick={() => setEditOpen(true)}>
-                <FileText className="w-4 h-4 ml-2" />
-                تعديل الحالة
-              </Button>
-              <Button className="w-full bg-blue-600 hover:bg-blue-700">
-                <Clock className="w-4 h-4 ml-2" />
-                تحديث الحالة
-              </Button>
+            <CardContent>
+              <ActionButtons
+                caseData={caseData}
+                onEdit={() => setEditOpen(true)}
+                onUpdate={handleUpdateCase}
+              />
             </CardContent>
           </Card>
         </div>
       </div>
-      <EditCaseDialog caseData={caseData} open={editOpen} onOpenChange={setEditOpen} onUpdate={setCaseData} />
+      <EditCaseDialog
+        caseData={caseData}
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        onUpdate={handleUpdateCase}
+      />
     </div>
   );
 };
