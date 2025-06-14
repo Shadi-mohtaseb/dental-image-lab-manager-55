@@ -9,20 +9,34 @@ import EditDoctorPaymentDialog from "./EditDoctorPaymentDialog";
 import { toast } from "@/hooks/use-toast";
 import { Edit, Trash2 } from "lucide-react";
 
+// حل المشكلة: جلب جميع الأطباء وربط كل دفعة باسم الطبيب الخاص بها يدويًا.
 export default function DoctorsPaymentsLogTable() {
   const queryClient = useQueryClient();
   const [editOpen, setEditOpen] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState<any>(null);
 
-  const { data: payments = [], isLoading } = useQuery({
+  // جلب جميع دفعات الأطباء بدون join
+  const { data: payments = [] } = useQuery({
     queryKey: ["doctor_transactions"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("doctor_transactions")
-        .select("*, doctors(name)")
+        .select("*")
         .order("transaction_date", { ascending: false });
       if (error) throw error;
-      return data;
+      return data ?? [];
+    },
+  });
+
+  // جلب جميع الأطباء لربط الدفعة بالاسم يدويًا
+  const { data: doctors = [] } = useQuery({
+    queryKey: ["doctors"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("doctors")
+        .select("id, name");
+      if (error) throw error;
+      return data ?? [];
     },
   });
 
@@ -41,6 +55,12 @@ export default function DoctorsPaymentsLogTable() {
     }
   };
 
+  // دالة مساعد للبحث عن اسم الطبيب بحسب doctor_id
+  const getDoctorName = (doctor_id: string) => {
+    const doc = doctors.find((d: any) => d.id === doctor_id);
+    return doc?.name ?? "-";
+  };
+
   return (
     <div>
       <Table>
@@ -57,7 +77,7 @@ export default function DoctorsPaymentsLogTable() {
         <TableBody>
           {payments.map((payment: any) => (
             <TableRow key={payment.id}>
-              <TableCell>{payment.doctors?.name || "-"}</TableCell>
+              <TableCell>{getDoctorName(payment.doctor_id)}</TableCell>
               <TableCell>{Number(payment.amount).toFixed(2)} ₪</TableCell>
               <TableCell>
                 <Badge>{payment.payment_method ?? "بدون"}</Badge>
