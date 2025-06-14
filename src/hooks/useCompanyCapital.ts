@@ -31,7 +31,7 @@ export const useCalculateCompanyCapital = () => {
       queryClient.invalidateQueries({ queryKey: ["partners"] });
       toast({
         title: "تم تحديث رأس المال",
-        description: "تم حساب رأس المال وتوزيع الأرباح على الشركاء",
+        description: "تم حساب صافي الربح وتحديث رأس المال بنجاح",
       });
     },
   });
@@ -50,7 +50,7 @@ export const useDistributeProfits = () => {
       queryClient.invalidateQueries({ queryKey: ["company_capital"] });
       toast({
         title: "تم توزيع الأرباح",
-        description: "تم توزيع الأرباح على جميع الشركاء بناء على النسب",
+        description: "تم توزيع صافي الربح بنسبة الثلثين والثلث على الشركاء",
       });
     },
   });
