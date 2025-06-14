@@ -92,13 +92,41 @@ export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
     const doctorId = form.watch("doctor_id");
     const workType = form.watch("work_type");
     const numberOfTeeth = form.watch("number_of_teeth");
-    const doctor: any = doctors.find((d: any) => d.id === doctorId);
-    const pricePerTooth = getDoctorWorkTypePrice(doctor, workType);
-    const teethCount = Number(numberOfTeeth) || 1;
-    const totalPrice = pricePerTooth * teethCount;
+    
+    console.log("حساب السعر في AddCaseForm:", {
+      doctorId,
+      workType,
+      numberOfTeeth,
+      numberOfTeethType: typeof numberOfTeeth
+    });
+    
+    if (doctorId && workType && doctors.length > 0) {
+      const doctor: any = doctors.find((d: any) => d.id === doctorId);
+      const pricePerTooth = getDoctorWorkTypePrice(doctor, workType);
+      
+      // تحويل عدد الأسنان إلى رقم صحيح
+      let teethCount = 1;
+      if (numberOfTeeth !== undefined && numberOfTeeth !== null) {
+        teethCount = Number(numberOfTeeth);
+        // التأكد من أن الرقم صحيح
+        if (isNaN(teethCount) || teethCount <= 0) {
+          teethCount = 1;
+        }
+      }
+      
+      const totalPrice = pricePerTooth * teethCount;
+      
+      console.log("تفاصيل حساب السعر في الإضافة:", {
+        doctor: doctor?.name,
+        pricePerTooth,
+        teethCount,
+        totalPrice,
+        calculation: `${pricePerTooth} × ${teethCount} = ${totalPrice}`
+      });
 
-    if (form.getValues("price") !== totalPrice) {
-      form.setValue("price", totalPrice);
+      if (form.getValues("price") !== totalPrice) {
+        form.setValue("price", totalPrice);
+      }
     }
     // eslint-disable-next-line
   }, [

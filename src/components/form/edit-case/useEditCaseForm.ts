@@ -62,6 +62,13 @@ export function useEditCaseForm(
   // Reset form when case data or dialog state changes
   useEffect(() => {
     if (caseData) {
+      console.log("إعادة تحميل بيانات الحالة:", {
+        number_of_teeth: caseData.number_of_teeth,
+        price: caseData.price,
+        work_type: caseData.work_type,
+        doctor_id: caseData.doctor_id
+      });
+      
       reset({
         patient_name: caseData.patient_name,
         doctor_id: caseData.doctor_id || "",
@@ -85,11 +92,38 @@ export function useEditCaseForm(
     const workType = watch("work_type");
     const numberOfTeeth = watch("number_of_teeth");
     
+    console.log("قيم الحساب الحالية:", {
+      doctorId,
+      workType, 
+      numberOfTeeth,
+      numberOfTeethType: typeof numberOfTeeth,
+      doctorsLength: doctors.length
+    });
+    
     if (doctorId && workType && doctors.length > 0) {
       const doctor: any = doctors.find((d: any) => d.id === doctorId);
       const pricePerTooth = getDoctorWorkTypePrice(doctor, workType);
-      const teethCount = Number(numberOfTeeth) || 1;
+      
+      // تحويل عدد الأسنان إلى رقم صحيح
+      let teethCount = 1;
+      if (numberOfTeeth !== "" && numberOfTeeth !== null && numberOfTeeth !== undefined) {
+        teethCount = Number(numberOfTeeth);
+        // التأكد من أن الرقم صحيح
+        if (isNaN(teethCount) || teethCount <= 0) {
+          teethCount = 1;
+        }
+      }
+      
       const totalPrice = pricePerTooth * teethCount;
+      
+      console.log("تفاصيل حساب السعر:", {
+        doctor: doctor?.name,
+        pricePerTooth,
+        teethCount,
+        totalPrice,
+        calculation: `${pricePerTooth} × ${teethCount} = ${totalPrice}`
+      });
+      
       setValue("price", totalPrice);
     }
   }, [watch("doctor_id"), watch("work_type"), watch("number_of_teeth"), doctors, setValue, watch]);
@@ -104,6 +138,9 @@ export function useEditCaseForm(
         price: values.price !== "" ? Number(values.price) : null,
         number_of_teeth: values.number_of_teeth !== "" ? Number(values.number_of_teeth) : null,
       };
+      
+      console.log("إرسال البيانات المحدثة:", payload);
+      
       const updated = await updateCase.mutateAsync(payload);
       toast({
         title: "تم تحديث الحالة بنجاح",
@@ -112,6 +149,7 @@ export function useEditCaseForm(
       onUpdate?.(updated);
       onOpenChange?.(false);
     } catch (e) {
+      console.error("خطأ في تحديث الحالة:", e);
       toast({
         title: "خطأ في تحديث الحالة",
         description: "حدث خطأ عند حفظ البيانات",
