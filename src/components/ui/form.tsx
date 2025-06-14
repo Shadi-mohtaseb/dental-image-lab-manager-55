@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import * as LabelPrimitive from "@radix-ui/react-label"
 import { Slot } from "@radix-ui/react-slot"
@@ -39,12 +40,11 @@ const FormField = <
   )
 }
 
+// التعديل هنا ليعمل مع useFormContext في react-hook-form v7
 const useFormField = () => {
   const fieldContext = React.useContext(FormFieldContext)
   const itemContext = React.useContext(FormItemContext)
-  const { getFieldState, formState } = useFormContext()
-
-  const fieldState = getFieldState(fieldContext.name, formState)
+  const form = useFormContext()
 
   if (!fieldContext) {
     throw new Error("useFormField should be used within <FormField>")
@@ -52,14 +52,35 @@ const useFormField = () => {
 
   const { id } = itemContext
 
+  // معالجة الأخطاء بطريقة متوافقة مع react-hook-form v7
+  const error =
+    form.formState.errors && fieldContext.name
+      ? get(form.formState.errors, fieldContext.name)
+      : undefined
+
   return {
     id,
     name: fieldContext.name,
     formItemId: `${id}-form-item`,
     formDescriptionId: `${id}-form-item-description`,
     formMessageId: `${id}-form-item-message`,
-    ...fieldState,
+    error,
   }
+}
+
+// دالة مساعدة للوصول للمسار الديناميكي (مأخوذة من lodash/get لمنع الإضافة)
+function get(obj: any, path: string | string[], defaultValue?: any) {
+  const travel = (regexp: any) =>
+    String.prototype.split
+      .call(path, regexp)
+      .filter(Boolean)
+      .reduce(
+        (res, key) =>
+          res !== null && res !== undefined ? res[key] : res,
+        obj
+      )
+  const result = travel(/[,[\].]+?/)
+  return result === undefined || result === obj ? defaultValue : result
 }
 
 type FormItemContextValue = {
