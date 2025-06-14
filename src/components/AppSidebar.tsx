@@ -37,7 +37,7 @@ const menuItems = [
   },
   {
     title: "حسابات الأطباء",
-    url: "/doctors-accounts",
+    url: "/doctors-dashboard",
     icon: UserPlus,
   },
   {
@@ -45,11 +45,11 @@ const menuItems = [
     url: "/expenses",
     icon: Receipt,
   },
-  {
-    title: "سجل الأطباء",
-    url: "/doctors-log",
-    icon: FileText,
-  },
+  // {  <--- تم حذف اختصار سجل الأطباء من هنا
+  //   title: "سجل الأطباء",
+  //   url: "/doctors-log",
+  //   icon: FileText,
+  // },
   {
     title: "قائمة الحالات",
     url: "/cases",
