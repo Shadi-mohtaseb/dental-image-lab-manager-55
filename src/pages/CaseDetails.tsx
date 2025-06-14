@@ -39,8 +39,11 @@ const CaseDetails = () => {
       .single()
       .then(({ data }) => {
         setCaseData(data || null);
+        setLoading(false);
       })
-      .finally(() => setLoading(false));
+      .catch(() => {
+        setLoading(false);
+      });
   }, [id]);
 
   // Mock data - in real app, this would come from API
