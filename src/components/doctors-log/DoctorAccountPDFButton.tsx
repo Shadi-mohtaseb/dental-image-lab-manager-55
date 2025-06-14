@@ -73,7 +73,7 @@ export const DoctorAccountPDFButton: React.FC<Props> = ({ doctorName, summary, d
       c.work_type || "",
       c.price?.toLocaleString() ?? "",
       c.status || "",
-      c.delivery_date ?? c.created_at?.slice(0, 10) || "",
+      (c.delivery_date ?? c.created_at?.slice(0, 10)) || "",
       c.id.slice(0, 6) + "..."
     ]));
 
