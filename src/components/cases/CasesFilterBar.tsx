@@ -1,9 +1,12 @@
 
+import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useDoctors } from "@/hooks/useDoctors";
 
 type CasesFilterBarProps = {
+  searchTerm: string;
+  onSearchTermChange: (v: string) => void;
   selectedDoctorId: string;
   onDoctorChange: (v: string) => void;
   workTypeFilter: string;
@@ -17,6 +20,8 @@ const workTypes = [
 ];
 
 export function CasesFilterBar({
+  searchTerm,
+  onSearchTermChange,
   selectedDoctorId,
   onDoctorChange,
   workTypeFilter,
@@ -28,10 +33,18 @@ export function CasesFilterBar({
   return (
     <div className="p-6 flex flex-col gap-4">
       <div className="flex gap-4 items-center flex-wrap">
-        <span className="font-bold text-sm text-gray-600">الطبيب:</span>
+        <div>
+          <Input
+            placeholder="بحث نصي عن اسم الطبيب..."
+            value={searchTerm}
+            onChange={e => onSearchTermChange(e.target.value)}
+            className="min-w-[200px] max-w-[270px]"
+          />
+        </div>
+        <span className="font-bold text-sm text-gray-600">أو اختر الطبيب:</span>
         <Select value={selectedDoctorId} onValueChange={onDoctorChange}>
           <SelectTrigger className="w-48 min-w-[150px]">
-            <SelectValue placeholder="اختر الطبيب" />
+            <SelectValue placeholder="كل الأطباء" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="">الكل ({totalCount})</SelectItem>

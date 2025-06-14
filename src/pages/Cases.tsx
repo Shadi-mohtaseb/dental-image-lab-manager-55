@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
@@ -14,6 +13,7 @@ const Cases = () => {
   const { data: cases = [], isLoading } = useCases();
   const deleteCase = useDeleteCase();
   const updateCase = useUpdateCase();
+  const [searchTerm, setSearchTerm] = useState("");
   const [selectedDoctorId, setSelectedDoctorId] = useState("");
   const [workTypeFilter, setWorkTypeFilter] = useState("");
   const [editOpen, setEditOpen] = useState(false);
@@ -34,11 +34,19 @@ const Cases = () => {
     setSelectedCase(null);
   };
 
-  // تصفية الحالات حسب الطبيب ونوع العمل فقط
+  // تصفية الحالات حسب البحث النصي للطبيب أو Dropdown للطبيب ونوع العمل
   const filteredCases = cases.filter((caseItem) => {
-    const matchesDoctor = !selectedDoctorId || caseItem.doctor_id === selectedDoctorId;
+    // إذا تم اختيار طبيب من القائمة المنسدلة، نعتمد فقط على الـ id (أولوية أساسية). 
+    if (selectedDoctorId) {
+      const matchesDoctor = caseItem.doctor_id === selectedDoctorId;
+      const matchesWorkType = !workTypeFilter || caseItem.work_type === workTypeFilter;
+      return matchesDoctor && matchesWorkType;
+    }
+    // وإلا نستخدم البحث النصي مع نوع العمل
+    const doctorName = (caseItem.doctor?.name || caseItem.doctor_name || "").toLowerCase();
+    const matchesText = searchTerm ? doctorName.includes(searchTerm.toLowerCase()) : true;
     const matchesWorkType = !workTypeFilter || caseItem.work_type === workTypeFilter;
-    return matchesDoctor && matchesWorkType;
+    return matchesText && matchesWorkType;
   });
 
   if (isLoading) {
@@ -69,6 +77,8 @@ const Cases = () => {
       <Card>
         <CardContent className="p-0">
           <CasesFilterBar
+            searchTerm={searchTerm}
+            onSearchTermChange={setSearchTerm}
             selectedDoctorId={selectedDoctorId}
             onDoctorChange={setSelectedDoctorId}
             workTypeFilter={workTypeFilter}
