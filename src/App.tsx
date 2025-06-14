@@ -4,7 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import Index from "./pages/Index";
 import PartnershipAccounts from "./pages/PartnershipAccounts";
@@ -25,12 +25,12 @@ const App = () => (
       <BrowserRouter>
         <SidebarProvider>
           <div className="min-h-screen flex flex-row-reverse w-full">
-            <AppSidebar />
+            {/* السايدبار بعرض ثابت دائم الظهور */}
+            <div className="w-[260px] min-w-[220px] bg-sidebar-primary border-l border-sidebar-border flex-shrink-0">
+              <AppSidebar />
+            </div>
+            {/* المحتوى الرئيسي يأخذ المساحة المتبقية */}
             <main className="flex-1 min-h-screen bg-gray-50 relative">
-              {/* زر الإظهار/الإخفاء سيكون ثابت أعلى يسار المحتوى دائماً */}
-              <div className="fixed top-4 left-4 z-50">
-                <SidebarTrigger />
-              </div>
               <div className="p-6">
                 <Routes>
                   <Route path="/" element={<Index />} />
@@ -52,4 +52,3 @@ const App = () => (
 );
 
 export default App;
-
