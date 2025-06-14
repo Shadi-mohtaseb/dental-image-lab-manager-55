@@ -24,7 +24,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <SidebarProvider>
-          <div className="min-h-screen flex w-full">
+          <div className="min-h-screen flex flex-row-reverse w-full">
             <AppSidebar />
             <main className="flex-1 min-h-screen bg-gray-50">
               <div className="p-6">
