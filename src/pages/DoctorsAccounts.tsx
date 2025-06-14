@@ -1,15 +1,21 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Search, Edit, Trash2, Phone, Mail } from "lucide-react";
-import { useDoctors } from "@/hooks/useDoctors";
+import { Search } from "lucide-react";
+import { useDoctors, useDeleteDoctor } from "@/hooks/useDoctors";
 import { AddDoctorDialog } from "@/components/AddDoctorDialog";
+import { EditDoctorDialog } from "@/components/EditDoctorDialog";
 
 const DoctorsAccounts = () => {
   const { data: doctors = [], isLoading } = useDoctors();
+  const deleteDoctor = useDeleteDoctor();
+
+  const handleDelete = (id: string) => {
+    if (window.confirm("هل أنت متأكد من حذف الطبيب؟")) {
+      deleteDoctor.mutate(id);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -34,25 +40,7 @@ const DoctorsAccounts = () => {
         <AddDoctorDialog />
       </div>
 
-      {/* Search */}
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex gap-4">
-            <div className="flex-1">
-              <Input
-                placeholder="بحث عن طبيب..."
-                className="w-full"
-              />
-            </div>
-            <Button variant="outline" className="gap-2">
-              <Search className="w-4 h-4" />
-              بحث
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Doctors List */}
+      {/* قائمة الأطباء */}
       <Card>
         <CardHeader>
           <CardTitle>قائمة الأطباء ({doctors.length})</CardTitle>
@@ -67,10 +55,7 @@ const DoctorsAccounts = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>اسم الطبيب</TableHead>
-                  <TableHead>التخصص</TableHead>
-                  <TableHead>رقم الهاتف</TableHead>
-                  <TableHead>البريد الإلكتروني</TableHead>
-                  <TableHead>العنوان</TableHead>
+                  <TableHead>سعر الطبيب (شيكل)</TableHead>
                   <TableHead>إجراءات</TableHead>
                 </TableRow>
               </TableHeader>
@@ -81,42 +66,14 @@ const DoctorsAccounts = () => {
                       {doctor.name}
                     </TableCell>
                     <TableCell>
-                      {doctor.specialty ? (
-                        <Badge variant="outline">{doctor.specialty}</Badge>
-                      ) : (
-                        <span className="text-gray-400">غير محدد</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {doctor.phone ? (
-                        <div className="flex items-center gap-2">
-                          <Phone className="w-4 h-4 text-gray-400" />
-                          <span className="text-sm">{doctor.phone}</span>
-                        </div>
-                      ) : (
-                        <span className="text-gray-400">غير محدد</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {doctor.email ? (
-                        <div className="flex items-center gap-2">
-                          <Mail className="w-4 h-4 text-gray-400" />
-                          <span className="text-sm">{doctor.email}</span>
-                        </div>
-                      ) : (
-                        <span className="text-gray-400">غير محدد</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <span className="text-sm">{doctor.address || "غير محدد"}</span>
+                      <span className="text-sm">{doctor.price} شيكل</span>
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-2">
-                        <Button size="sm" variant="outline" className="text-green-600 hover:bg-green-50">
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button size="sm" variant="outline" className="text-red-600 hover:bg-red-50">
-                          <Trash2 className="w-4 h-4" />
+                        <EditDoctorDialog doctor={doctor} />
+                        <Button size="sm" variant="outline" className="text-red-600 hover:bg-red-50" title="حذف"
+                          onClick={() => handleDelete(doctor.id)}>
+                          حذف
                         </Button>
                       </div>
                     </TableCell>

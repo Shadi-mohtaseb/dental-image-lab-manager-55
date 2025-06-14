@@ -21,8 +21,8 @@ import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useAddDoctor } from "@/hooks/useDoctors";
-import { UserPlus } from "lucide-react";
+import { useUpdateDoctor } from "@/hooks/useDoctors";
+import { Edit } from "lucide-react";
 
 const formSchema = z.object({
   name: z.string().min(2, "اسم الطبيب مطلوب"),
@@ -34,44 +34,43 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-export function AddDoctorDialog() {
+export function EditDoctorDialog({ doctor }: { doctor: { id: string; name: string; price: number } }) {
   const [open, setOpen] = useState(false);
-  const addDoctor = useAddDoctor();
+  const updateDoctor = useUpdateDoctor();
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
-      price: 0,
+      name: doctor.name,
+      price: doctor.price,
     },
   });
 
   const onSubmit = async (data: FormData) => {
     try {
-      await addDoctor.mutateAsync({
+      await updateDoctor.mutateAsync({
+        id: doctor.id,
         name: data.name,
         price: data.price,
       });
-      form.reset();
       setOpen(false);
     } catch (error) {
-      console.error("Error adding doctor:", error);
+      console.error("Error updating doctor:", error);
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-blue-600 hover:bg-blue-700">
-          <UserPlus className="w-4 h-4 mr-2" />
-          إضافة طبيب جديد
+        <Button size="sm" variant="outline" className="text-green-600 hover:bg-green-50" title="تعديل">
+          <Edit className="w-4 h-4" />
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>إضافة طبيب جديد</DialogTitle>
+          <DialogTitle>تعديل بيانات الطبيب</DialogTitle>
           <DialogDescription>
-            أدخل اسم الطبيب و سعر العمل بالشيكل
+            تعديل اسم الطبيب أو سعر الطبيب (شيكل)
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -110,8 +109,8 @@ export function AddDoctorDialog() {
               >
                 إلغاء
               </Button>
-              <Button type="submit" disabled={addDoctor.isPending}>
-                {addDoctor.isPending ? "جاري الإضافة..." : "إضافة الطبيب"}
+              <Button type="submit" disabled={updateDoctor.isPending}>
+                {updateDoctor.isPending ? "جاري التعديل..." : "حفظ التغييرات"}
               </Button>
             </div>
           </form>

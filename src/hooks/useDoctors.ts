@@ -4,16 +4,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { Tables, TablesInsert } from "@/integrations/supabase/types";
 import { toast } from "@/hooks/use-toast";
 
-export type Doctor = Tables<"doctors">;
-export type DoctorInsert = TablesInsert<"doctors">;
+export type Doctor = Pick<Tables<"doctors">, "id" | "name" | "price" | "created_at" | "updated_at">;
+export type DoctorInsert = Pick<TablesInsert<"doctors">, "name" | "price">;
 
+// جلب الأطباء
 export const useDoctors = () => {
   return useQuery({
     queryKey: ["doctors"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("doctors")
-        .select("*")
+        .select("id, name, price, created_at, updated_at")
         .order("created_at", { ascending: false });
       
       if (error) throw error;
@@ -22,17 +23,17 @@ export const useDoctors = () => {
   });
 };
 
+// إضافة طبيب
 export const useAddDoctor = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async (doctor: Omit<DoctorInsert, "id" | "created_at" | "updated_at">) => {
+    mutationFn: async (doctor: DoctorInsert) => {
       const { data, error } = await supabase
         .from("doctors")
         .insert(doctor)
-        .select()
+        .select("id, name, price, created_at, updated_at")
         .single();
-      
       if (error) throw error;
       return data;
     },
@@ -48,6 +49,69 @@ export const useAddDoctor = () => {
       toast({
         title: "خطأ في إضافة الطبيب",
         description: "حدث خطأ أثناء إضافة الطبيب، يرجى المحاولة مرة أخرى",
+        variant: "destructive",
+      });
+    },
+  });
+};
+
+// تحديث طبيب
+export const useUpdateDoctor = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, name, price }: { id: string; name: string; price: number }) => {
+      const { data, error } = await supabase
+        .from("doctors")
+        .update({ name, price })
+        .eq("id", id)
+        .select("id, name, price, created_at, updated_at")
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["doctors"] });
+      toast({
+        title: "تم تحديث الطبيب بنجاح",
+        description: "تم حفظ التغييرات",
+      });
+    },
+    onError: (error) => {
+      console.error("Error updating doctor:", error);
+      toast({
+        title: "خطأ في تحديث الطبيب",
+        description: "حدث خطأ أثناء تحديث الطبيب، يرجى المحاولة مرة أخرى",
+        variant: "destructive",
+      });
+    },
+  });
+};
+
+// حذف طبيب
+export const useDeleteDoctor = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("doctors")
+        .delete()
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["doctors"] });
+      toast({
+        title: "تم حذف الطبيب",
+        description: "تم حذف بيانات الطبيب",
+      });
+    },
+    onError: (error) => {
+      console.error("Error deleting doctor:", error);
+      toast({
+        title: "خطأ في حذف الطبيب",
+        description: "حدث خطأ أثناء الحذف، يرجى المحاولة مرة أخرى",
         variant: "destructive",
       });
     },
