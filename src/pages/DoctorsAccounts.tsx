@@ -1,23 +1,18 @@
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Search } from "lucide-react";
-import { useDoctors, useDeleteDoctor } from "@/hooks/useDoctors";
-import { AddDoctorDialog } from "@/components/AddDoctorDialog";
-import { EditDoctorDialog } from "@/components/EditDoctorDialog";
-import type { Doctor } from "@/hooks/useDoctors";
+import { useDoctors } from "@/hooks/useDoctors";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { DoctorAccountExportButton } from "@/components/doctors-log/DoctorAccountExportButton";
-import DoctorsPaymentsLogTable from "@/components/doctors-log/DoctorsPaymentsLogTable";
-import DoctorsPaymentsTable from "@/components/doctors-log/DoctorsPaymentsTable"; // إضافة الاستيراد
+import { AddDoctorDialog } from "@/components/AddDoctorDialog";
+import DoctorsAccountsTable from "@/components/doctors-accounts/DoctorsAccountsTable";
+import DoctorsPaymentsTableSection from "@/components/doctors-accounts/DoctorsPaymentsTableSection";
+import DoctorsPaymentsLogSection from "@/components/doctors-accounts/DoctorsPaymentsLogSection";
 
+// صفحة حسابات الأطباء (مقسمة لأجزاء مركبة)
 const DoctorsAccounts = () => {
   const { data: doctors = [], isLoading, error } = useDoctors();
-  const deleteDoctor = useDeleteDoctor();
 
-  // جلب كل الحالات مرة واحدة حتى نمررها للمكون الجديد
+  // جلب كل الحالات مرة واحدة حتى نمررها للمكونات
   const { data: cases = [] } = useQuery({
     queryKey: ["cases"],
     queryFn: async () => {
@@ -28,12 +23,6 @@ const DoctorsAccounts = () => {
       return data ?? [];
     },
   });
-
-  const handleDelete = (id: string) => {
-    if (window.confirm("هل أنت متأكد من حذف الطبيب؟")) {
-      deleteDoctor.mutate(id);
-    }
-  };
 
   if (isLoading) {
     return (
@@ -57,9 +46,9 @@ const DoctorsAccounts = () => {
     );
   }
 
-  // التأكد من أن البيانات تُطابق نوع Doctor قبل التصيير (لتجنب أخطاء runtime)
+  // التأكد من أن البيانات تُطابق نوع Doctor
   const validDoctors = Array.isArray(doctors) ? doctors.filter(
-    (d: any): d is Doctor =>
+    (d: any) =>
       d && typeof d.id === "string" && typeof d.name === "string" && "zircon_price" in d && "temp_price" in d
   ) : [];
 
@@ -76,74 +65,16 @@ const DoctorsAccounts = () => {
         <AddDoctorDialog />
       </div>
 
-      {/* قائمة الأطباء */}
-      <Card>
-        <CardHeader>
-          <CardTitle>قائمة الأطباء ({validDoctors.length})</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {validDoctors.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              لا يوجد أطباء مسجلين حتى الآن
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>اسم الطبيب</TableHead>
-                  <TableHead>سعر الزيركون (شيكل)</TableHead>
-                  <TableHead>سعر المؤقت (شيكل)</TableHead>
-                  <TableHead>كشف الحساب</TableHead>
-                  <TableHead>إجراءات</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {validDoctors.map((doctor) => (
-                  <TableRow key={doctor.id} className="hover:bg-gray-50">
-                    <TableCell className="font-semibold text-primary">
-                      {doctor.name}
-                    </TableCell>
-                    <TableCell>
-                      <span className="text-sm">{doctor.zircon_price} شيكل</span>
-                    </TableCell>
-                    <TableCell>
-                      <span className="text-sm">{doctor.temp_price} شيكل</span>
-                    </TableCell>
-                    <TableCell>
-                      <DoctorAccountExportButton
-                        doctorId={doctor.id}
-                        doctorName={doctor.name}
-                        doctorCases={cases.filter((c) => c.doctor_id === doctor.id)}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        <EditDoctorDialog doctor={doctor} />
-                        <Button size="sm" variant="outline" className="text-red-600 hover:bg-red-50" title="حذف"
-                          onClick={() => handleDelete(doctor.id)}>
-                          حذف
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+      {/* جدول الأطباء */}
+      <DoctorsAccountsTable doctors={validDoctors} cases={cases} />
 
-      {/*--- هنا إضافة تبويب دفعات الأطباء ---*/}
-      <DoctorsPaymentsTable />
+      {/* تبويب دفعات الأطباء */}
+      <DoctorsPaymentsTableSection />
 
-      {/* سجل دفعات الأطباء (نقلناه هنا) */}
-      <div>
-        <h2 className="text-lg font-semibold my-4">سجل دفعات الأطباء</h2>
-        <DoctorsPaymentsLogTable />
-      </div>
+      {/* سجل دفعات الأطباء */}
+      <DoctorsPaymentsLogSection />
     </div>
   );
 };
 
 export default DoctorsAccounts;
-
