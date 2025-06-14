@@ -6,6 +6,9 @@ import jsPDF from "jspdf";
 import "jspdf-autotable";
 import "@fontsource/cairo/700.css";
 import "@fontsource/cairo/400.css";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
 
 // دعم العربية في الـ PDF
 function arabic(text: string) {
@@ -22,13 +25,31 @@ interface Props {
   };
   doctorCases: any[];
 }
+
 export const DoctorAccountPDFButton: React.FC<Props> = ({ doctorName, summary, doctorCases }) => {
   const [loading, setLoading] = useState(false);
+  const [fromDate, setFromDate] = useState<Date | undefined>(undefined);
+  const [toDate, setToDate] = useState<Date | undefined>(undefined);
+  const [popoverOpen, setPopoverOpen] = useState(false);
+
+  // تصفية الحالات بالفترة المطلوبة
+  const filteredCases = React.useMemo(() => {
+    return doctorCases.filter(c => {
+      // نستخدم تاريخ التسليم أو الإنشاء
+      const dateStr = c.delivery_date ?? c.created_at?.slice(0, 10);
+      if (!dateStr) return false;
+      const caseDate = new Date(dateStr);
+      // بداية الفترة
+      if (fromDate && caseDate < new Date(fromDate.setHours(0,0,0,0))) return false;
+      // نهاية الفترة
+      if (toDate && caseDate > new Date(toDate.setHours(23,59,59,999))) return false;
+      return true;
+    });
+  }, [doctorCases, fromDate, toDate]);
 
   const handleExport = () => {
     setLoading(true);
 
-    // إعداد الـ PDF
     const doc = new jsPDF({
       orientation: "p",
       unit: "mm",
@@ -67,8 +88,8 @@ export const DoctorAccountPDFButton: React.FC<Props> = ({ doctorName, summary, d
     doc.text(`${summary.remaining.toLocaleString()} ₪`, 40, 48, { align: "right" });
     doc.setTextColor(30, 30, 30);
 
-    // جدول الحالات
-    const caseRows = doctorCases.map(c => ([
+    // جدول الحالات (الفترة حسب الفلتر)
+    const caseRows = filteredCases.map(c => ([
       c.patient_name || "",
       c.work_type || "",
       c.price?.toLocaleString() ?? "",
@@ -107,11 +128,50 @@ export const DoctorAccountPDFButton: React.FC<Props> = ({ doctorName, summary, d
 
     doc.save(`كشف_حساب_${doctorName}.pdf`);
     setLoading(false);
-  }
+  };
 
   return (
-    <Button variant="outline" size="sm" disabled={loading} onClick={handleExport} title="تصدير PDF">
-      <Download className="ml-1" /> PDF
-    </Button>
+    <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+      <PopoverTrigger asChild>
+        <Button variant="outline" size="sm" disabled={loading} title="تصدير PDF (اختر الفترة)">
+          <Download className="ml-1" /> PDF
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[330px] pointer-events-auto" align="end" sideOffset={6}>
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-2">
+            <label className="font-medium text-right mr-1">من تاريخ:</label>
+            <Calendar
+              mode="single"
+              selected={fromDate}
+              onSelect={setFromDate}
+              className="p-3 pointer-events-auto"
+              locale="ar"
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <label className="font-medium text-right mr-1">إلى تاريخ:</label>
+            <Calendar
+              mode="single"
+              selected={toDate}
+              onSelect={setToDate}
+              className="p-3 pointer-events-auto"
+              locale="ar"
+            />
+          </div>
+          <Button
+            type="button"
+            disabled={loading}
+            onClick={() => {
+              setPopoverOpen(false);
+              handleExport();
+            }}
+            className="w-full"
+          >
+            <Download className="ml-1" /> تصدير PDF
+          </Button>
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 };
