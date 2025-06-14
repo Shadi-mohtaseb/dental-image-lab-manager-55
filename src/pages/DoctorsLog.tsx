@@ -6,6 +6,10 @@ import { FileText, TrendingUp, Calendar } from "lucide-react";
 import { useDoctors } from "@/hooks/useDoctors";
 import { useCases } from "@/hooks/useCases";
 import { useState } from "react";
+import { DoctorStatsCard } from "@/components/doctors-log/DoctorStatsCard";
+import { MostActiveDoctors } from "@/components/doctors-log/MostActiveDoctors";
+import { RecentSubmissions } from "@/components/doctors-log/RecentSubmissions";
+import { DoctorDetailedLog } from "@/components/doctors-log/DoctorDetailedLog";
 
 // ربط سجل الأطباء بالبيانات الفعلية من Supabase
 const DoctorsLog = () => {
@@ -118,117 +122,23 @@ const DoctorsLog = () => {
       {/* إحصائيات عامة */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         {stats.map((stat, index) => (
-          <Card key={index} className="text-center hover:shadow-lg transition-shadow">
-            <CardContent className="p-4">
-              <div className={`text-3xl font-bold ${stat.color} mb-2`}>
-                {stat.count}
-              </div>
-              <div className="text-sm text-gray-600">{stat.label}</div>
-            </CardContent>
-          </Card>
+          <DoctorStatsCard
+            key={index}
+            count={stat.count}
+            label={stat.label}
+            color={stat.color}
+          />
         ))}
       </div>
 
-      {/* الأطباء الأكثر نشاطًا */}
+      {/* الأطباء الأكثر نشاطًا وآخر التسليمات */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="animate-slide-up">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="w-5 h-5" />
-              الأطباء الأكثر نشاطاً
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {filteredDoctorStats.slice(0, 3).map((doctor, index) => (
-                <div key={doctor.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                      <span className="text-primary font-semibold">
-                        {doctor.name?.split(' ')[1]?.[0] || doctor.name[0]}
-                      </span>
-                    </div>
-                    <div>
-                      <div className="font-semibold">{doctor.name}</div>
-                      <div className="text-sm text-gray-500">
-                        {doctor.caseCount} حالة هذا الشهر
-                      </div>
-                    </div>
-                  </div>
-                  <Badge className="bg-blue-100 text-blue-700">
-                    {doctor.caseCount} حالة
-                  </Badge>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-        {/* آخر التسليمات */}
-        <Card className="animate-slide-up">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Calendar className="w-5 h-5" />
-              آخر التسليمات
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {recentSubmissions.map((submission, index) => (
-                <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                  <div>
-                    <div className="font-semibold">{submission.doctor}</div>
-                    <div className="text-sm text-gray-500">
-                      {submission.case} - آخر زيارة {submission.date}
-                    </div>
-                  </div>
-                  <Badge className={getStatusColor(submission.status)}>
-                    {submission.status}
-                  </Badge>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <MostActiveDoctors doctors={filteredDoctorStats} />
+        <RecentSubmissions submissions={recentSubmissions} getStatusColor={getStatusColor} />
       </div>
 
       {/* السجل المفصل */}
-      <Card>
-        <CardHeader>
-          <CardTitle>قائمة المرضى حسب الطبيب</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {filteredDoctorStats.map((doctor) => (
-              <div key={doctor.id} className="border rounded-lg p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-lg font-semibold text-primary">{doctor.name}</h3>
-                  <Badge variant="outline">
-                    {doctor.caseCount} زيارة
-                  </Badge>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  {doctor.recentCases.length === 0 ? (
-                    <div className="col-span-3 text-gray-400 text-center">لا يوجد حالات حديثة لهذا الطبيب</div>
-                  ) : (
-                    doctor.recentCases.map((case1, caseIndex) => (
-                      <div key={caseIndex} className="p-3 bg-gray-50 rounded-lg">
-                        <div className="text-sm text-gray-600">تاريخ الزيارة</div>
-                        <div className="font-semibold">{case1.date ? new Date(case1.date).toLocaleDateString("en-GB") : "-"}</div>
-                        <div className="flex items-center justify-between mt-2">
-                          <span className="text-sm">المريض: {case1.patient}</span>
-                          <Badge className={getStatusColor(case1.status)} variant="outline">
-                            {case1.status}
-                          </Badge>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      <DoctorDetailedLog doctors={filteredDoctorStats} getStatusColor={getStatusColor} />
     </div>
   );
 };
