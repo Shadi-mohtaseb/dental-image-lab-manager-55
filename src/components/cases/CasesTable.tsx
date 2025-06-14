@@ -16,7 +16,7 @@ export function CasesTable({ cases, onView, onEdit, onDelete, getStatusColor }: 
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>رقم الحالة</TableHead>
+          {/* تم حذف رأس الجدول لرقم الحالة */}
           <TableHead>اسم المريض</TableHead>
           <TableHead>اسم الطبيب</TableHead>
           <TableHead>نوع العمل</TableHead>

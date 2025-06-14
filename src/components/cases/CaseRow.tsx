@@ -1,4 +1,3 @@
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Eye, Edit, Trash2 } from "lucide-react";
@@ -21,7 +20,6 @@ export function CaseRow({ caseItem, onView, onEdit, onDelete, getStatusColor }: 
 
   return (
     <tr className="hover:bg-gray-50">
-      <td className="font-semibold text-primary">{caseItem.case_number}</td>
       <td>{caseItem.patient_name}</td>
       <td>{caseItem.doctor?.name || "غير محدد"}</td>
       <td>
@@ -78,4 +76,3 @@ export function CaseRow({ caseItem, onView, onEdit, onDelete, getStatusColor }: 
     </tr>
   );
 }
-

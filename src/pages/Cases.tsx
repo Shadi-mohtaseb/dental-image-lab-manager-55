@@ -54,8 +54,8 @@ const Cases = () => {
   const filteredCases = cases.filter(caseItem => {
     const matchesSearch =
       caseItem.patient_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      caseItem.doctor?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      caseItem.case_number.toLowerCase().includes(searchTerm.toLowerCase());
+      caseItem.doctor?.name?.toLowerCase().includes(searchTerm.toLowerCase());
+      // caseItem.case_number.toLowerCase().includes(searchTerm.toLowerCase()); <-- تم حذف البحث برقم الحالة
     const matchesStatus = !statusFilter || caseItem.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
