@@ -26,9 +26,12 @@ const App = () => (
         <SidebarProvider>
           <div className="min-h-screen flex flex-row-reverse w-full">
             <AppSidebar />
-            <main className="flex-1 min-h-screen bg-gray-50">
+            <main className="flex-1 min-h-screen bg-gray-50 relative">
+              {/* زر الإظهار/الإخفاء سيكون ثابت أعلى يسار المحتوى دائماً */}
+              <div className="fixed top-4 left-4 z-50">
+                <SidebarTrigger />
+              </div>
               <div className="p-6">
-                <SidebarTrigger className="mb-4" />
                 <Routes>
                   <Route path="/" element={<Index />} />
                   <Route path="/partnership-accounts" element={<PartnershipAccounts />} />
@@ -49,3 +52,4 @@ const App = () => (
 );
 
 export default App;
+
