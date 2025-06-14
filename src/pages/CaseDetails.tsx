@@ -32,18 +32,23 @@ const CaseDetails = () => {
   useEffect(() => {
     if (!id) return;
     setLoading(true);
-    supabase
-      .from("cases")
-      .select("*")
-      .eq("id", id)
-      .single()
-      .then(({ data }) => {
+
+    const fetchCase = async () => {
+      try {
+        const { data } = await supabase
+          .from("cases")
+          .select("*")
+          .eq("id", id)
+          .single();
         setCaseData(data || null);
+      } catch (error) {
+        setCaseData(null);
+      } finally {
         setLoading(false);
-      })
-      .catch(() => {
-        setLoading(false);
-      });
+      }
+    };
+
+    fetchCase();
   }, [id]);
 
   // Mock data - in real app, this would come from API
