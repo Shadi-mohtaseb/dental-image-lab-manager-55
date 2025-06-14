@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -13,8 +14,10 @@ import Cases from "./pages/Cases";
 import CaseDetails from "./pages/CaseDetails";
 import NotFound from "./pages/NotFound";
 import Settings from "./pages/Settings";
-import React from "react";
-// تم حذف الاستيراد المنفصل لصفحة دفعات الأطباء لأنها لم تعد قائمة بذاتها
+import React, { Suspense, lazy } from "react";
+
+// Lazy load DoctorDetails
+const DoctorDetails = lazy(() => import("./pages/DoctorDetails"));
 
 // مكون للمحتوى الرئيسي يأخذ بعين الاعتبار عرض السايدبار
 function MainContent({ children }: { children: React.ReactNode }) {
@@ -60,7 +63,12 @@ const App = () => (
               <Route path="/settings" element={<Settings />} />
               {/* إعادة توجيه صفحة دفعات الأطباء إلى حسابات الأطباء */}
               <Route path="/doctors-payments" element={<Navigate to="/doctors-accounts" replace />} />
-              <Route path="/doctor/:id" element={<import('@/pages/DoctorDetails') />} />
+              {/* إصلاح اللودينج هنا باستخدام React.lazy و Suspense */}
+              <Route path="/doctor/:id" element={
+                <Suspense fallback={<div className="p-8 text-center text-lg">جاري التحميل...</div>}>
+                  <DoctorDetails />
+                </Suspense>
+              } />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </MainContent>
@@ -71,3 +79,4 @@ const App = () => (
 );
 
 export default App;
+
