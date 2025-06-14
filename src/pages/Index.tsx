@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -100,6 +101,15 @@ const Index = () => {
   // آخر النشاطات المترابطة
   const recentCases = cases.slice(0, 3);
 
+  // --- تعديل التاريخ هنا: ---
+  const todayGregorian = new Date().toLocaleDateString('en-GB', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  });
+  // إذا أردت عرضها بالعربي هندسيًا لكن مع أرقام إنجليزية:
+  // const todayGregorian = new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: '2-digit', day: '2-digit' });
+
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Header */}
@@ -108,7 +118,7 @@ const Index = () => {
           مرحباً بك في نظام إدارة مختبر الأسنان
         </h1>
         <p className="text-gray-600">
-          {new Date().toLocaleDateString('ar-SA')} - لوحة التحكم الرئيسية
+          {todayGregorian} - لوحة التحكم الرئيسية
         </p>
       </div>
 
@@ -247,3 +257,4 @@ const Index = () => {
 };
 
 export default Index;
+
