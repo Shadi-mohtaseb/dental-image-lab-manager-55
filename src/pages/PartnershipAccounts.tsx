@@ -23,7 +23,6 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useDoctors } from "@/hooks/useDoctors";
 import { useCases } from "@/hooks/useCases";
-import DoctorsPaymentsTable from "@/components/doctors-log/DoctorsPaymentsTable";
 
 const PartnershipAccounts = () => {
   const [showAddTransaction, setShowAddTransaction] = useState(false);
@@ -188,9 +187,6 @@ const PartnershipAccounts = () => {
           مجموع ديون الأطباء الحالية: {totalDoctorsDebt.toFixed(2)} ₪
         </span>
       </div>
-
-      {/* قسم دفعات الأطباء */}
-      <DoctorsPaymentsTable />
 
       {/* 2- إدارة الشركاء */}
       <section>
