@@ -1,8 +1,8 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import jsPDF from "jspdf";
+// يجب أن تأتي بعد jsPDF
 import "jspdf-autotable";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
@@ -43,22 +43,26 @@ export const DoctorAccountPDFButton: React.FC<Props> = ({ doctorName, summary, d
   const handleExport = () => {
     setLoading(true);
     try {
-      if (!filteredCases.length) {
-        toast({
-          title: "لا يوجد بيانات ضمن المدة المحددة!",
-          description: "يرجى تعديل الفترة أو إضافة حالات للطبيب ضمن تلك الفترة.",
-          variant: "destructive",
-        });
-        setLoading(false);
-        return;
-      }
-
+      // إضافة اختبار هل الخاصية متوفرة
       const doc = new jsPDF({
         orientation: "p",
         unit: "mm",
         format: "a4",
         hotfixes: ["px_scaling"],
       });
+
+      // تحقق من وجود الدالة
+      console.log("typeof autoTable:", typeof (doc as any).autoTable);
+
+      if (typeof (doc as any).autoTable !== "function") {
+        toast({
+          title: "حدث خطأ عند التصدير!",
+          description: "jspdf-autotable لم تدمج بشكل صحيح. يرجى إعادة تحميل الصفحة أو مراجعة الاستيراد.",
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
 
       // رأس الصفحة
       doc.setTextColor(40, 51, 102);
