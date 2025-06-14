@@ -20,11 +20,13 @@ export type Database = {
           number_of_teeth: number | null
           patient_name: string
           price: number | null
+          shade: string | null
           status: Database["public"]["Enums"]["case_status"]
           submission_date: string
           tooth_number: string | null
           updated_at: string
           work_type: Database["public"]["Enums"]["work_type"]
+          zircon_block_type: string | null
         }
         Insert: {
           case_number: string
@@ -36,11 +38,13 @@ export type Database = {
           number_of_teeth?: number | null
           patient_name: string
           price?: number | null
+          shade?: string | null
           status?: Database["public"]["Enums"]["case_status"]
           submission_date?: string
           tooth_number?: string | null
           updated_at?: string
           work_type: Database["public"]["Enums"]["work_type"]
+          zircon_block_type?: string | null
         }
         Update: {
           case_number?: string
@@ -52,11 +56,13 @@ export type Database = {
           number_of_teeth?: number | null
           patient_name?: string
           price?: number | null
+          shade?: string | null
           status?: Database["public"]["Enums"]["case_status"]
           submission_date?: string
           tooth_number?: string | null
           updated_at?: string
           work_type?: Database["public"]["Enums"]["work_type"]
+          zircon_block_type?: string | null
         }
         Relationships: [
           {

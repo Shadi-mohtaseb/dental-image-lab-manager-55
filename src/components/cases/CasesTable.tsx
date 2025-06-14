@@ -1,4 +1,3 @@
-
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tables } from "@/integrations/supabase/types";
 import { CaseRow } from "./CaseRow";
@@ -22,6 +21,8 @@ export function CasesTable({ cases, onView, onEdit, onDelete, getStatusColor }: 
           <TableHead>نوع العمل</TableHead>
           <TableHead>رقم السن</TableHead>
           <TableHead>عدد الأسنان</TableHead>
+          <TableHead>اللون</TableHead>
+          <TableHead>نوع البلوك</TableHead>
           <TableHead>تاريخ الاستلام</TableHead>
           <TableHead>الحالة</TableHead>
           <TableHead>إجراءات</TableHead>

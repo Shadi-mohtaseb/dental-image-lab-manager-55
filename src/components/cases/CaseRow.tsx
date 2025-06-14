@@ -32,7 +32,21 @@ export function CaseRow({ caseItem, onView, onEdit, onDelete, getStatusColor }: 
         )}
       </td>
       <td className="text-center">
-        <span className="text-sm text-gray-600 font-bold">{teethCount}</span>
+        <span className="text-sm text-gray-600 font-bold">{caseItem.number_of_teeth ?? 0}</span>
+      </td>
+      <td className="text-center">
+        {caseItem.shade ? (
+          <Badge className="bg-gray-100 text-gray-700">{caseItem.shade}</Badge>
+        ) : (
+          <span className="text-xs text-gray-400">-</span>
+        )}
+      </td>
+      <td className="text-center">
+        {caseItem.zircon_block_type ? (
+          <Badge className="bg-gray-100 text-gray-700">{caseItem.zircon_block_type}</Badge>
+        ) : (
+          <span className="text-xs text-gray-400">-</span>
+        )}
       </td>
       <td>
         {new Date(caseItem.submission_date).toLocaleDateString('en-US')}

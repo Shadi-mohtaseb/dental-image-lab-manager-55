@@ -1,0 +1,4 @@
+
+ALTER TABLE public.cases
+  ADD COLUMN IF NOT EXISTS shade VARCHAR(50),
+  ADD COLUMN IF NOT EXISTS zircon_block_type VARCHAR(50);

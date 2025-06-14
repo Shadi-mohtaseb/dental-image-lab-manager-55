@@ -22,6 +22,8 @@ import { DatesFields } from "@/components/form/add-case/DatesFields";
 import { NotesField } from "@/components/form/add-case/NotesField";
 import { PriceField } from "@/components/form/add-case/PriceField";
 import { TeethCountField } from "@/components/form/add-case/TeethCountField";
+import { ShadeSelectField } from "@/components/form/add-case/ShadeSelectField";
+import { ZirconBlockTypeField } from "@/components/form/add-case/ZirconBlockTypeField";
 
 const workTypes = ["زيركون", "مؤقت"] as const;
 const caseStatuses = [
@@ -49,6 +51,8 @@ const formSchema = z.object({
     (val) => (val === "" ? undefined : Number(val)),
     z.number({ invalid_type_error: "يرجى إدخال سعر صالح" }).min(0, "يرجى إدخال السعر")
   ),
+  shade: z.string().optional(),
+  zircon_block_type: z.string().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -78,6 +82,8 @@ export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
       status: "قيد التنفيذ",
       notes: "",
       price: 0,
+      shade: "",
+      zircon_block_type: "",
     },
   });
 
@@ -111,6 +117,8 @@ export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
         status: data.status,
         notes: data.notes || null,
         price: data.price,
+        shade: data.shade || null,
+        zircon_block_type: data.zircon_block_type || null,
       });
       form.reset();
       onSuccess();
