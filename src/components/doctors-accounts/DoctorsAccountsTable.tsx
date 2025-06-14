@@ -1,7 +1,7 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { DoctorAccountExportButton } from "@/components/doctors-log/DoctorAccountExportButton";
 import { DoctorAccountPDFButton } from "@/components/doctors-log/DoctorAccountPDFButton";
 import { EditDoctorDialog } from "@/components/EditDoctorDialog";
 import type { Doctor } from "@/hooks/useDoctors";
@@ -62,7 +62,7 @@ export default function DoctorsAccountsTable({ doctors, cases }: Props) {
             <TableRow>
               <TableHead className="text-right w-[200px]">اسم الطبيب</TableHead>
               <TableHead className="text-center w-[140px]">إجمالي الأسنان</TableHead>
-              <TableHead className="text-center w-[140px]">كشف الحساب (Excel)</TableHead>
+              {/* حذف عمود كشف الحساب (Excel) */}
               <TableHead className="text-center w-[120px]">PDF</TableHead>
               <TableHead className="text-center w-[195px]">إجراءات</TableHead>
             </TableRow>
@@ -78,13 +78,7 @@ export default function DoctorsAccountsTable({ doctors, cases }: Props) {
                   <TableCell className="text-center w-[140px]">
                     <span className="text-sm font-bold">{calcTotalTeeth(doctor.id)}</span>
                   </TableCell>
-                  <TableCell className="text-center w-[140px]">
-                    <DoctorAccountExportButton
-                      doctorId={doctor.id}
-                      doctorName={doctor.name}
-                      doctorCases={cases.filter((c) => c.doctor_id === doctor.id)}
-                    />
-                  </TableCell>
+                  {/* حذف زر كشف الحساب Excel */}
                   <TableCell className="text-center w-[120px]">
                     <DoctorAccountPDFButton
                       doctorName={doctor.name}
@@ -119,3 +113,4 @@ export default function DoctorsAccountsTable({ doctors, cases }: Props) {
     </Card>
   );
 }
+
