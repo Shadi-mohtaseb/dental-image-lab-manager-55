@@ -16,6 +16,7 @@ import NotFound from "./pages/NotFound";
 import Settings from "./pages/Settings";
 import React from "react";
 import DoctorsDashboard from "./pages/DoctorsDashboard";
+import DoctorsPayments from "./pages/DoctorsPayments";
 
 // مكون للمحتوى الرئيسي يأخذ بعين الاعتبار عرض السايدبار
 function MainContent({ children }: { children: React.ReactNode }) {
@@ -59,6 +60,7 @@ const App = () => (
               <Route path="/cases" element={<Cases />} />
               <Route path="/case/:id" element={<CaseDetails />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/doctors-payments" element={<DoctorsPayments />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </MainContent>
