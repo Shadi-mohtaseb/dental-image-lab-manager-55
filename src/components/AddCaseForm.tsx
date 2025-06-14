@@ -113,6 +113,7 @@ export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
         status: data.status,
         notes: data.notes || null,
         price: data.price,
+        number_of_teeth: data.number_of_teeth,
       });
       form.reset();
       onSuccess();

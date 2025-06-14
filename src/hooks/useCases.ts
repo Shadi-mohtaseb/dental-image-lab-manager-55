@@ -29,15 +29,16 @@ export const useCases = () => {
 
 export const useAddCase = () => {
   const queryClient = useQueryClient();
-  
+
+  // تم تعديل النوع هنا ليصبح بدون case_number لأنه لم يعد موجوداً في الجدول
   return useMutation({
-    mutationFn: async (caseData: Omit<CaseInsert, "id" | "created_at" | "updated_at">) => {
+    mutationFn: async (caseData: Omit<TablesInsert<"cases">, "case_number" | "id" | "created_at" | "updated_at">) => {
       const { data, error } = await supabase
         .from("cases")
         .insert(caseData)
         .select()
         .single();
-      
+
       if (error) throw error;
       return data;
     },
