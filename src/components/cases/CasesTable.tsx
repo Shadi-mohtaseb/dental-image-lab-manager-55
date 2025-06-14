@@ -18,15 +18,12 @@ export function CasesTable({
 }: CasesTableProps) {
   // دالة لإظهار السعر الإجمالي بناء على المشكلة المذكورة
   const getTotalPrice = (caseItem: any) => {
-    // لو السعر أقل بكثير من المتوقع وعدد الأسنان أكبر من 1 اعتبره سعر سن واحد
     if (
       caseItem.price &&
       caseItem.number_of_teeth &&
       Number(caseItem.number_of_teeth) > 1 &&
       (Number(caseItem.price) === Number(caseItem.price) / Number(caseItem.number_of_teeth) || Number(caseItem.price) < 200)
     ) {
-      // غالبا السعر المدخل هو سعر السن وليس المجموع. أظهر نتيجة الضرب
-      // يمكن ضبط الحد 200 بحسب أسعار الحالات عندك
       return `${Number(caseItem.price) * Number(caseItem.number_of_teeth)} ₪`;
     }
     return caseItem.price ? `${caseItem.price} ₪` : "-";
@@ -37,11 +34,11 @@ export function CasesTable({
       <table className="min-w-full">
         <thead>
           <tr>
+            <th className="px-4 py-2">اسم الطبيب</th>
             <th className="px-4 py-2">اسم المريض</th>
             <th className="px-4 py-2">تاريخ الاستلام</th>
             <th className="px-4 py-2">السعر الإجمالي</th>
             <th className="px-4 py-2">عدد الأسنان</th>
-            <th className="px-4 py-2">اسم الطبيب</th>
             <th className="px-4 py-2">نوع العمل</th>
             <th className="px-4 py-2">اللون</th>
             <th className="px-4 py-2">بلوك الزيركون</th>
@@ -52,6 +49,7 @@ export function CasesTable({
         <tbody>
           {cases.map((caseItem) => (
             <tr key={caseItem.id}>
+              <td className="px-4 py-2">{caseItem.doctor_name || caseItem.doctor?.name || "-"}</td>
               <td className="px-4 py-2">{caseItem.patient_name}</td>
               <td className="px-4 py-2">
                 {caseItem.submission_date
@@ -62,11 +60,8 @@ export function CasesTable({
                     })
                   : "-"}
               </td>
-              <td className="px-4 py-2">
-                {getTotalPrice(caseItem)}
-              </td>
+              <td className="px-4 py-2">{getTotalPrice(caseItem)}</td>
               <td className="px-4 py-2">{caseItem.number_of_teeth || "-"}</td>
-              <td className="px-4 py-2">{caseItem.doctor_name || caseItem.doctor?.name || "-"}</td>
               <td className="px-4 py-2">{caseItem.work_type || "-"}</td>
               <td className="px-4 py-2">{caseItem.shade || "-"}</td>
               <td className="px-4 py-2">{caseItem.zircon_block_type || "-"}</td>
@@ -117,4 +112,3 @@ export function CasesTable({
     </div>
   );
 }
-
