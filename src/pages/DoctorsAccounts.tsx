@@ -7,10 +7,25 @@ import { useDoctors, useDeleteDoctor } from "@/hooks/useDoctors";
 import { AddDoctorDialog } from "@/components/AddDoctorDialog";
 import { EditDoctorDialog } from "@/components/EditDoctorDialog";
 import type { Doctor } from "@/hooks/useDoctors";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { DoctorAccountExportButton } from "@/components/doctors-log/DoctorAccountExportButton";
 
 const DoctorsAccounts = () => {
   const { data: doctors = [], isLoading, error } = useDoctors();
   const deleteDoctor = useDeleteDoctor();
+
+  // جلب كل الحالات مرة واحدة حتى نمررها للمكون الجديد
+  const { data: cases = [] } = useQuery({
+    queryKey: ["cases"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("cases")
+        .select("*");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
 
   const handleDelete = (id: string) => {
     if (window.confirm("هل أنت متأكد من حذف الطبيب؟")) {
@@ -76,6 +91,7 @@ const DoctorsAccounts = () => {
                   <TableHead>اسم الطبيب</TableHead>
                   <TableHead>سعر الزيركون (شيكل)</TableHead>
                   <TableHead>سعر المؤقت (شيكل)</TableHead>
+                  <TableHead>كشف الحساب</TableHead>
                   <TableHead>إجراءات</TableHead>
                 </TableRow>
               </TableHeader>
@@ -90,6 +106,13 @@ const DoctorsAccounts = () => {
                     </TableCell>
                     <TableCell>
                       <span className="text-sm">{doctor.temp_price} شيكل</span>
+                    </TableCell>
+                    <TableCell>
+                      <DoctorAccountExportButton
+                        doctorId={doctor.id}
+                        doctorName={doctor.name}
+                        doctorCases={cases.filter((c) => c.doctor_id === doctor.id)}
+                      />
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-2">
@@ -112,3 +135,4 @@ const DoctorsAccounts = () => {
 };
 
 export default DoctorsAccounts;
+
