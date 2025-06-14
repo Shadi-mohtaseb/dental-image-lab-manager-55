@@ -6,6 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import DoctorPaymentDialog from "./DoctorPaymentDialog";
 import { useState } from "react";
+import {
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+} from "@/components/ui/table";
 
 interface DoctorsPaymentsTableProps {}
 
@@ -60,30 +68,30 @@ export default function DoctorsPaymentsTable({ }: DoctorsPaymentsTableProps) {
   return (
     <div className="bg-white rounded-lg shadow p-4 mt-6">
       <h2 className="text-lg font-bold mb-3">دفعات الأطباء</h2>
-      <table className="min-w-full table-auto mb-2">
-        <thead>
-          <tr>
-            <th className="py-2 px-3 text-right">اسم الطبيب</th>
-            <th className="py-2 px-3 text-right">إجمالي المستحق</th>
-            <th className="py-2 px-3 text-right">المدفوع</th>
-            <th className="py-2 px-3 text-right">الدين/المتبقي</th>
-            <th className="py-2 px-3 text-right">إضافة دفعة</th>
-          </tr>
-        </thead>
-        <tbody>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>اسم الطبيب</TableHead>
+            <TableHead>إجمالي المستحق</TableHead>
+            <TableHead>المدفوع</TableHead>
+            <TableHead>الدين/المتبقي</TableHead>
+            <TableHead>إضافة دفعة</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {doctors.map((doc: any) => {
             const { totalCases, totalPayments, remaining } = getDoctorAmounts(doc.id);
             return (
-              <tr key={doc.id}>
-                <td className="py-2 px-3">{doc.name}</td>
-                <td className="py-2 px-3">{totalCases.toFixed(2)} ₪</td>
-                <td className="py-2 px-3">{totalPayments.toFixed(2)} ₪</td>
-                <td className="py-2 px-3">
+              <TableRow key={doc.id}>
+                <TableCell>{doc.name}</TableCell>
+                <TableCell>{totalCases.toFixed(2)} ₪</TableCell>
+                <TableCell>{totalPayments.toFixed(2)} ₪</TableCell>
+                <TableCell>
                   <Badge variant={remaining > 0 ? "destructive" : "default"}>
                     {remaining > 0 ? `${remaining.toFixed(2)} ₪ دين` : "لا يوجد دين"}
                   </Badge>
-                </td>
-                <td className="py-2 px-3">
+                </TableCell>
+                <TableCell>
                   <Button
                     size="sm"
                     onClick={() => {
@@ -93,12 +101,12 @@ export default function DoctorsPaymentsTable({ }: DoctorsPaymentsTableProps) {
                   >
                     إضافة دفعة
                   </Button>
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             );
           })}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
       {/* نموذج إضافة دفعة */}
       <DoctorPaymentDialog
         open={dialogOpen}
@@ -108,4 +116,3 @@ export default function DoctorsPaymentsTable({ }: DoctorsPaymentsTableProps) {
     </div>
   );
 }
-
