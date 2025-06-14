@@ -38,8 +38,8 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <SidebarProvider>
-          {/* زر إظهار/إخفاء السايدبار أعلى يمين الشاشة ويبقى دائمًا في الأعلى */}
-          <div className="fixed top-4 right-4 z-[100]">
+          {/* زر إظهار/إخفاء السايدبار "دائمًا" أعلى يمين الصفحة وفوق الكل */}
+          <div className="fixed top-4 right-4 z-[110]">
             <SidebarTrigger />
           </div>
           <div className="min-h-screen flex w-full relative">
@@ -68,3 +68,4 @@ const App = () => (
 );
 
 export default App;
+
