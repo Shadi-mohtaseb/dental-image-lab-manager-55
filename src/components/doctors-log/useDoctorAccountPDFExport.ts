@@ -1,8 +1,9 @@
+
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { toast } from "@/components/ui/use-toast";
 
-// تأكد من ربط autoTable مع jsPDF
+// ربط autoTable في jsPDF إذا لم يكن موجوداً
 if (
   typeof (jsPDF as any).API !== "undefined" &&
   !(jsPDF as any).API.autoTable
@@ -23,16 +24,16 @@ interface ExportArgs {
   toDate?: Date;
 }
 
+// هوك مسؤول عن تصدير PDF
 export function useDoctorAccountPDFExport() {
-  // دالة تصدير PDF  
   const exportPDF = async ({
     doctorName,
     summary,
     doctorCases,
     fromDate,
-    toDate
+    toDate,
   }: ExportArgs) => {
-    // تصفية الحالات حسب التواريخ
+    // تصفية الحالات بحسب التاريخ المختار
     const filteredCases = doctorCases.filter((c) => {
       const dateStr = c.delivery_date ?? c.created_at?.slice(0, 10);
       if (!dateStr) return false;
@@ -113,7 +114,6 @@ export function useDoctorAccountPDFExport() {
       c.id?.slice(0, 6) + "...",
     ]);
 
-    // هنا التحويل إلى any لحل مشكلة typescript مع autoTable
     (doc as any).autoTable({
       head: [[
         "اسم المريض",
