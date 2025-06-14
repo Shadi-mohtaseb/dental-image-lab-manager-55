@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -14,6 +13,20 @@ interface Props {
 
 export default function DoctorsAccountsTable({ doctors, cases }: Props) {
   const deleteDoctor = useDeleteDoctor();
+
+  // دالة لحساب إجمالي الأسنان لطبيب معيّن بناءً على كل حالاته
+  const calcTotalTeeth = (doctor_id: string) => {
+    const doctorCases = cases.filter((c) => c.doctor_id === doctor_id);
+    let total = 0;
+    doctorCases.forEach(c => {
+      if (c?.number_of_teeth && Number(c.number_of_teeth) > 0) {
+        total += Number(c.number_of_teeth);
+      } else if (c?.tooth_number) {
+        total += c.tooth_number.split(" ").filter(Boolean).length;
+      }
+    });
+    return total;
+  };
 
   const handleDelete = (id: string) => {
     if (window.confirm("هل أنت متأكد من حذف الطبيب؟")) {
@@ -46,6 +59,7 @@ export default function DoctorsAccountsTable({ doctors, cases }: Props) {
           <TableHeader>
             <TableRow>
               <TableHead>اسم الطبيب</TableHead>
+              <TableHead>إجمالي الأسنان</TableHead>
               {/* <TableHead>سعر الزيركون (شيكل)</TableHead>
               <TableHead>سعر المؤقت (شيكل)</TableHead> */}
               <TableHead>كشف الحساب</TableHead>
@@ -57,6 +71,9 @@ export default function DoctorsAccountsTable({ doctors, cases }: Props) {
               <TableRow key={doctor.id} className="hover:bg-gray-50">
                 <TableCell className="font-semibold text-primary">
                   {doctor.name}
+                </TableCell>
+                <TableCell>
+                  <span className="text-sm font-bold">{calcTotalTeeth(doctor.id)}</span>
                 </TableCell>
                 {/* <TableCell>
                   <span className="text-sm">{doctor.zircon_price} شيكل</span>
@@ -93,4 +110,3 @@ export default function DoctorsAccountsTable({ doctors, cases }: Props) {
     </Card>
   );
 }
-
