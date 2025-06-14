@@ -1,4 +1,3 @@
-
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { toast } from "@/components/ui/use-toast";
@@ -114,7 +113,8 @@ export function useDoctorAccountPDFExport() {
       c.id?.slice(0, 6) + "...",
     ]);
 
-    doc.autoTable({
+    // هنا التحويل إلى any لحل مشكلة typescript مع autoTable
+    (doc as any).autoTable({
       head: [[
         "اسم المريض",
         "نوع العمل",
