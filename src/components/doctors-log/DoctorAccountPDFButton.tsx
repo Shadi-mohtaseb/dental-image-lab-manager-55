@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
@@ -25,6 +24,14 @@ interface Props {
     remaining: number;
   };
   doctorCases: any[];
+}
+
+// التأكيد على ربط autoTable مع jsPDF
+import autoTable from "jspdf-autotable"; // استورد التابع الافتراضي إن وجد
+
+// تأكد من إضافة autoTable يدويًا في حال لم يتم ربطها تلقائيًا
+if (typeof (jsPDF as any).API !== "undefined" && !(jsPDF as any).API.autoTable) {
+  (jsPDF as any).API.autoTable = autoTable;
 }
 
 export const DoctorAccountPDFButton: React.FC<Props> = ({ doctorName, summary, doctorCases }) => {
