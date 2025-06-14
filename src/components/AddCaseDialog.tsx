@@ -45,6 +45,7 @@ const caseStatuses = [
   "ملغي"
 ] as const;
 
+// تم اضافة price للحالة
 const formSchema = z.object({
   patient_name: z.string().min(2, "اسم المريض مطلوب"),
   doctor_id: z.string().min(1, "اختيار الطبيب مطلوب"),
@@ -54,6 +55,10 @@ const formSchema = z.object({
   delivery_date: z.string().optional(),
   status: z.enum(caseStatuses).default("قيد التنفيذ"),
   notes: z.string().optional(),
+  price: z.preprocess(
+    (val) => (val === "" ? undefined : Number(val)),
+    z.number({ invalid_type_error: "يرجى إدخال سعر صالح" }).min(0, "يرجى إدخال السعر")
+  ),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -74,14 +79,25 @@ export function AddCaseDialog() {
       delivery_date: "",
       status: "قيد التنفيذ",
       notes: "",
+      price: 0,
     },
   });
 
+  // تحديث السعر عند تغيير الطبيب أوتوماتيكياً
+  const handleDoctorChange = (doctorId: string) => {
+    form.setValue("doctor_id", doctorId);
+    const doctor = doctors.find((d: any) => d.id === doctorId);
+    if (doctor && typeof doctor.price === "number") {
+      form.setValue("price", doctor.price);
+    } else {
+      form.setValue("price", 0);
+    }
+  };
+
   const onSubmit = async (data: FormData) => {
     try {
-      // Generate case number automatically
       const caseNumber = `C${Date.now().toString().slice(-6)}`;
-      
+
       await addCase.mutateAsync({
         case_number: caseNumber,
         patient_name: data.patient_name,
@@ -92,6 +108,7 @@ export function AddCaseDialog() {
         delivery_date: data.delivery_date || null,
         status: data.status,
         notes: data.notes || null,
+        price: data.price, // أضف السعر هنا
       });
       form.reset();
       setOpen(false);
@@ -137,20 +154,43 @@ export function AddCaseDialog() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>الطبيب *</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select
+                    onValueChange={handleDoctorChange}
+                    value={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="اختر الطبيب" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {doctors.map((doctor) => (
+                      {doctors.map((doctor: any) => (
                         <SelectItem key={doctor.id} value={doctor.id}>
                           {doctor.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="price"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>السعر (شيكل) *</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min={0}
+                      step={0.01}
+                      placeholder="0"
+                      {...field}
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
