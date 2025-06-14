@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -61,6 +60,7 @@ const App = () => (
               <Route path="/settings" element={<Settings />} />
               {/* إعادة توجيه صفحة دفعات الأطباء إلى حسابات الأطباء */}
               <Route path="/doctors-payments" element={<Navigate to="/doctors-accounts" replace />} />
+              <Route path="/doctor/:id" element={<import('@/pages/DoctorDetails') />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </MainContent>
@@ -71,4 +71,3 @@ const App = () => (
 );
 
 export default App;
-

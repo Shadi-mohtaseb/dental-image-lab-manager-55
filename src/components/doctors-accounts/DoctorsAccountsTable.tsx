@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -74,6 +73,11 @@ export default function DoctorsAccountsTable({ doctors, cases }: Props) {
                 <TableCell>
                   <div className="flex gap-2">
                     <EditDoctorDialog doctor={doctor} />
+                    <Button size="sm" variant="outline" className="text-blue-600 hover:bg-blue-50 border-blue-200"
+                      title="تفاصيل"
+                      onClick={() => window.location.href = `/doctor/${doctor.id}`}>
+                      تفاصيل
+                    </Button>
                     <Button size="sm" variant="outline" className="text-red-600 hover:bg-red-50" title="حذف"
                       onClick={() => handleDelete(doctor.id)}>
                       حذف
