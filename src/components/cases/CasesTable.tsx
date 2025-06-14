@@ -23,7 +23,7 @@ export function CasesTable({
           <tr>
             <th className="px-4 py-2">اسم المريض</th>
             <th className="px-4 py-2">تاريخ الاستلام</th>
-            <th className="px-4 py-2">السعر</th>
+            <th className="px-4 py-2">السعر الإجمالي</th>
             <th className="px-4 py-2">عدد الأسنان</th>
             <th className="px-4 py-2">اسم الطبيب</th>
             <th className="px-4 py-2">نوع العمل</th>
@@ -38,8 +38,8 @@ export function CasesTable({
             <tr key={caseItem.id}>
               <td className="px-4 py-2">{caseItem.patient_name}</td>
               <td className="px-4 py-2">
-                {caseItem.receive_date
-                  ? new Date(caseItem.receive_date).toLocaleDateString("en-GB", {
+                {caseItem.submission_date
+                  ? new Date(caseItem.submission_date).toLocaleDateString("en-GB", {
                       year: "numeric",
                       month: "2-digit",
                       day: "2-digit",
