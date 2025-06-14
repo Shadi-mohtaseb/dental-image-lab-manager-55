@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -14,7 +15,7 @@ import CaseDetails from "./pages/CaseDetails";
 import NotFound from "./pages/NotFound";
 import Settings from "./pages/Settings";
 import React from "react";
-import DoctorsPayments from "./pages/DoctorsPayments";
+// تم حذف الاستيراد المنفصل لصفحة دفعات الأطباء لأنها لم تعد قائمة بذاتها
 
 // مكون للمحتوى الرئيسي يأخذ بعين الاعتبار عرض السايدبار
 function MainContent({ children }: { children: React.ReactNode }) {
@@ -58,7 +59,8 @@ const App = () => (
               <Route path="/cases" element={<Cases />} />
               <Route path="/case/:id" element={<CaseDetails />} />
               <Route path="/settings" element={<Settings />} />
-              <Route path="/doctors-payments" element={<DoctorsPayments />} />
+              {/* إعادة توجيه صفحة دفعات الأطباء إلى حسابات الأطباء */}
+              <Route path="/doctors-payments" element={<Navigate to="/doctors-accounts" replace />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </MainContent>
@@ -69,3 +71,4 @@ const App = () => (
 );
 
 export default App;
+

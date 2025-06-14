@@ -10,6 +10,7 @@ import type { Doctor } from "@/hooks/useDoctors";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { DoctorAccountExportButton } from "@/components/doctors-log/DoctorAccountExportButton";
+import DoctorsPaymentsLogTable from "@/components/doctors-log/DoctorsPaymentsLogTable";
 
 const DoctorsAccounts = () => {
   const { data: doctors = [], isLoading, error } = useDoctors();
@@ -62,7 +63,7 @@ const DoctorsAccounts = () => {
   ) : [];
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-10 animate-fade-in">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Search className="w-8 h-8 text-primary" />
@@ -130,6 +131,12 @@ const DoctorsAccounts = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* سجل دفعات الأطباء (نقلناه هنا) */}
+      <div>
+        <h2 className="text-lg font-semibold my-4">سجل دفعات الأطباء</h2>
+        <DoctorsPaymentsLogTable />
+      </div>
     </div>
   );
 };
