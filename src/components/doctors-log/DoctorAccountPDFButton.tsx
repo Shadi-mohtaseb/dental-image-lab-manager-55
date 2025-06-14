@@ -1,12 +1,21 @@
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import jsPDF from "jspdf";
-import "jspdf-autotable";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { ar } from "date-fns/locale";
-import { toast } from "@/components/ui/use-toast"; // الشادكن توست
+import { toast } from "@/components/ui/use-toast";
+
+// استيراد jspdf-autotable مع التأكد من التكامل الصحيح
+import "jspdf-autotable";
+
+declare module "jspdf" {
+  interface jsPDF {
+    autoTable: (options: any) => jsPDF;
+  }
+}
 
 interface Props {
   doctorName: string;
@@ -39,34 +48,10 @@ export const DoctorAccountPDFButton: React.FC<Props> = ({ doctorName, summary, d
     });
   }, [doctorCases, fromDate, toDate]);
 
-  const handleExport = () => {
+  const handleExport = async () => {
     setLoading(true);
+    
     try {
-      // Debugging: اطبع نوع autoTable وصلاحية jsPDF
-      // --------- Debug Prints ---------
-      // console.log يظهر رسالة أوضح الآن
-      // سنوضح الحل الأنسب للمستخدم لو بقي الخطأ
-      const doc = new jsPDF({
-        orientation: "p",
-        unit: "mm",
-        format: "a4",
-        hotfixes: ["px_scaling"],
-      });
-
-      // debug check: show what is autoTable and jsPDF
-      console.log("[debug] jsPDF object:", doc);
-      console.log("[debug] typeof (doc as any).autoTable:", typeof (doc as any).autoTable);
-      if (typeof (doc as any).autoTable !== "function") {
-        toast({
-          title: "حدث خطأ عند التصدير!",
-          description:
-            "jspdf-autotable لم تُدمج بشكل صحيح مع jsPDF. جرب إعادة تحميل الصفحة (Ctrl+F5). إذا استمر الخطأ، تأكد من ضبط الاستيراد بالترتيب الصحيح (jsPDF ثم jspdf-autotable) أو أعد تثبيت الحزمتين.",
-          variant: "destructive",
-        });
-        setLoading(false);
-        return;
-      }
-
       if (!filteredCases.length) {
         toast({
           title: "لا يوجد بيانات ضمن المدة المحددة!",
@@ -76,6 +61,12 @@ export const DoctorAccountPDFButton: React.FC<Props> = ({ doctorName, summary, d
         setLoading(false);
         return;
       }
+
+      const doc = new jsPDF({
+        orientation: "p",
+        unit: "mm",
+        format: "a4",
+      });
 
       // رأس الصفحة
       doc.setTextColor(40, 51, 102);
@@ -101,7 +92,7 @@ export const DoctorAccountPDFButton: React.FC<Props> = ({ doctorName, summary, d
       doc.text(`${summary.remaining.toLocaleString()} ₪`, 40, 48, { align: "right" });
       doc.setTextColor(30, 30, 30);
 
-      // جدول الحالات (الفترة حسب الفلتر)
+      // جدول الحالات
       const caseRows = filteredCases.map((c) => [
         c.patient_name || "",
         c.work_type || "",
@@ -111,7 +102,7 @@ export const DoctorAccountPDFButton: React.FC<Props> = ({ doctorName, summary, d
         c.id?.slice(0, 6) + "...",
       ]);
 
-      (doc as any).autoTable({
+      doc.autoTable({
         head: [["اسم المريض", "نوع العمل", "المبلغ", "الحالة", "تاريخ التسليم", "رقم الحالة"]],
         body: caseRows,
         styles: {
@@ -147,12 +138,12 @@ export const DoctorAccountPDFButton: React.FC<Props> = ({ doctorName, summary, d
         variant: "default",
       });
     } catch (err: any) {
+      console.error("خطأ في تصدير PDF:", err);
       toast({
         title: "حدث خطأ عند التصدير!",
-        description: err?.message || "خطأ غير معروف.",
+        description: err?.message || "خطأ غير معروف. يرجى المحاولة مرة أخرى.",
         variant: "destructive",
       });
-      // يمكنك أيضًا هنا console.error(err);
     } finally {
       setLoading(false);
     }
