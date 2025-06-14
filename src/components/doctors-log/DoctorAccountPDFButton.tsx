@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import jsPDF from "jspdf";
-// يجب أن تأتي بعد jsPDF
 import "jspdf-autotable";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
@@ -43,7 +42,10 @@ export const DoctorAccountPDFButton: React.FC<Props> = ({ doctorName, summary, d
   const handleExport = () => {
     setLoading(true);
     try {
-      // إضافة اختبار هل الخاصية متوفرة
+      // Debugging: اطبع نوع autoTable وصلاحية jsPDF
+      // --------- Debug Prints ---------
+      // console.log يظهر رسالة أوضح الآن
+      // سنوضح الحل الأنسب للمستخدم لو بقي الخطأ
       const doc = new jsPDF({
         orientation: "p",
         unit: "mm",
@@ -51,13 +53,24 @@ export const DoctorAccountPDFButton: React.FC<Props> = ({ doctorName, summary, d
         hotfixes: ["px_scaling"],
       });
 
-      // تحقق من وجود الدالة
-      console.log("typeof autoTable:", typeof (doc as any).autoTable);
-
+      // debug check: show what is autoTable and jsPDF
+      console.log("[debug] jsPDF object:", doc);
+      console.log("[debug] typeof (doc as any).autoTable:", typeof (doc as any).autoTable);
       if (typeof (doc as any).autoTable !== "function") {
         toast({
           title: "حدث خطأ عند التصدير!",
-          description: "jspdf-autotable لم تدمج بشكل صحيح. يرجى إعادة تحميل الصفحة أو مراجعة الاستيراد.",
+          description:
+            "jspdf-autotable لم تُدمج بشكل صحيح مع jsPDF. جرب إعادة تحميل الصفحة (Ctrl+F5). إذا استمر الخطأ، تأكد من ضبط الاستيراد بالترتيب الصحيح (jsPDF ثم jspdf-autotable) أو أعد تثبيت الحزمتين.",
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+
+      if (!filteredCases.length) {
+        toast({
+          title: "لا يوجد بيانات ضمن المدة المحددة!",
+          description: "يرجى تعديل الفترة أو إضافة حالات للطبيب ضمن تلك الفترة.",
           variant: "destructive",
         });
         setLoading(false);
