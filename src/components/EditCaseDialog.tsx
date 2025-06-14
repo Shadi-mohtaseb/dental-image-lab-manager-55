@@ -1,13 +1,34 @@
 
 import React, { useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useForm } from "react-hook-form";
 import { useUpdateCase } from "@/hooks/useCases";
 import { Tables } from "@/integrations/supabase/types";
 import { toast } from "@/hooks/use-toast";
+import { DoctorSelect } from "@/components/form/DoctorSelect";
+import { WorkTypeSelect } from "@/components/form/WorkTypeSelect";
+import { ShadeSelectField } from "@/components/form/add-case/ShadeSelectField";
+import { ZirconBlockTypeField } from "@/components/form/add-case/ZirconBlockTypeField";
+import { StatusSelect } from "@/components/form/StatusSelect";
+
+type CaseForm = {
+  patient_name: string;
+  doctor_id: string;
+  work_type: string;
+  tooth_number: string;
+  number_of_teeth?: number | string;
+  price?: number | string;
+  shade?: string;
+  zircon_block_type?: string;
+  notes?: string;
+  status: string;
+  submission_date: string;
+  delivery_date?: string | null;
+};
 
 export type EditCaseDialogProps = {
   caseData: Tables<"cases"> | null;
@@ -17,26 +38,41 @@ export type EditCaseDialogProps = {
 };
 
 export function EditCaseDialog({ caseData, open, onOpenChange, onUpdate }: EditCaseDialogProps) {
-  const { register, handleSubmit, reset } = useForm({
-    defaultValues: caseData ? {
-      patient_name: caseData.patient_name,
-      work_type: caseData.work_type,
-      tooth_number: caseData.tooth_number || "",
-      notes: caseData.notes || "",
-      status: caseData.status,
-    } : undefined,
+  const { register, handleSubmit, reset, control, setValue } = useForm<CaseForm>({
+    defaultValues: caseData
+      ? {
+          patient_name: caseData.patient_name,
+          doctor_id: caseData.doctor_id || "",
+          work_type: caseData.work_type,
+          tooth_number: caseData.tooth_number || "",
+          number_of_teeth: caseData.number_of_teeth ?? "",
+          price: caseData.price ?? "",
+          shade: caseData.shade || "",
+          zircon_block_type: caseData.zircon_block_type || "",
+          notes: caseData.notes || "",
+          status: caseData.status,
+          submission_date: caseData.submission_date || "",
+          delivery_date: caseData.delivery_date || "",
+        }
+      : {},
   });
   const updateCase = useUpdateCase();
 
-  // reset form values when modal opens and caseData changes
   useEffect(() => {
     if (caseData) {
       reset({
         patient_name: caseData.patient_name,
-        work_type: caseData.work_type,
+        doctor_id: caseData.doctor_id || "",
+        work_type: caseData.work_type || "",
         tooth_number: caseData.tooth_number || "",
+        number_of_teeth: caseData.number_of_teeth ?? "",
+        price: caseData.price ?? "",
+        shade: caseData.shade || "",
+        zircon_block_type: caseData.zircon_block_type || "",
         notes: caseData.notes || "",
         status: caseData.status,
+        submission_date: caseData.submission_date || "",
+        delivery_date: caseData.delivery_date || "",
       });
     }
   }, [caseData, open, reset]);
@@ -44,13 +80,17 @@ export function EditCaseDialog({ caseData, open, onOpenChange, onUpdate }: EditC
   const onSubmit = async (values: any) => {
     if (!caseData) return;
     try {
-      const updated = await updateCase.mutateAsync({
-        id: caseData.id,
+      // تحويل price و number_of_teeth لأرقام صحيحة إن وجد
+      const payload = {
         ...values,
-      });
+        id: caseData.id,
+        price: values.price !== "" ? Number(values.price) : null,
+        number_of_teeth: values.number_of_teeth !== "" ? Number(values.number_of_teeth) : null,
+      };
+      const updated = await updateCase.mutateAsync(payload);
       toast({
         title: "تم تحديث الحالة بنجاح",
-        description: "تم حفظ التغييرات",
+        description: "تم حفظ التغييرات لجميع بيانات الحالة",
       });
       onUpdate?.(updated);
       onOpenChange(false);
@@ -65,35 +105,144 @@ export function EditCaseDialog({ caseData, open, onOpenChange, onUpdate }: EditC
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <DialogContent className="max-w-lg">
+        <Form
+          // @ts-ignore
+          onSubmit={handleSubmit(onSubmit)}
+        >
           <DialogHeader>
-            <DialogTitle>تعديل بيانات الحالة</DialogTitle>
+            <DialogTitle>تعديل بيانات الحالة بالكامل</DialogTitle>
           </DialogHeader>
-          <div>
-            <label className="block mb-1 text-right">اسم المريض</label>
-            <Input {...register("patient_name", { required: true })} />
-          </div>
-          <div>
-            <label className="block mb-1 text-right">نوع العمل</label>
-            <Input {...register("work_type", { required: true })} />
-          </div>
-          <div>
-            <label className="block mb-1 text-right">رقم/تفاصيل الأسنان</label>
-            <Input {...register("tooth_number")} />
-          </div>
-          <div>
-            <label className="block mb-1 text-right">الحالة</label>
-            <Input {...register("status", { required: true })} />
-          </div>
-          <div>
-            <label className="block mb-1 text-right">ملاحظات</label>
-            <Textarea {...register("notes")} />
+          <div className="space-y-4">
+            {/* اسم المريض */}
+            <FormField
+              control={control}
+              name="patient_name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>اسم المريض *</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {/* الطبيب */}
+            <DoctorSelect form={{ control, setValue }} name="doctor_id" />
+            {/* نوع العمل */}
+            <WorkTypeSelect form={{ control, setValue }} name="work_type" />
+            {/* عدد الأسنان */}
+            <FormField
+              control={control}
+              name="number_of_teeth"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>عدد الأسنان</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min={1}
+                      placeholder="مثال: 3"
+                      {...field}
+                      onChange={e => {
+                        const value = e.target.value.replace(/[^0-9]/g, "");
+                        field.onChange(value ? Number(value) : "");
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {/* السعر */}
+            <FormField
+              control={control}
+              name="price"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>السعر (شيكل)</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min={0}
+                      step={0.01}
+                      placeholder="0"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {/* اللون */}
+            <ShadeSelectField form={{ control, setValue }} />
+            {/* نوع بلوك الزيركون */}
+            <ZirconBlockTypeField form={{ control, setValue }} />
+            {/* أرقام الأسنان */}
+            <FormField
+              control={control}
+              name="tooth_number"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>أرقام الأسنان</FormLabel>
+                  <FormControl>
+                    <Input placeholder="مثال: 12 11 21" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {/* التواريخ */}
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={control}
+                name="submission_date"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>تاريخ التسليم *</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={control}
+                name="delivery_date"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>تاريخ الاستلام</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            {/* الحالة */}
+            <StatusSelect form={{ control, setValue }} name="status" />
+            {/* الملاحظات */}
+            <FormField
+              control={control}
+              name="notes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>ملاحظات</FormLabel>
+                  <FormControl>
+                    <Textarea {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
           <DialogFooter>
             <Button type="submit" className="w-full">حفظ التغييرات</Button>
           </DialogFooter>
-        </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );
