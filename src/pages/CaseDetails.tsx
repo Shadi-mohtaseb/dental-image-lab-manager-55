@@ -27,7 +27,7 @@ const CaseDetails = () => {
   const navigate = useNavigate();
 
   // حالة تحميل وجلب بيانات الحالة الفعلية من القاعدة
-  const [caseData, setCaseData] = useState<Tables<"cases"> | null>(null);
+  const [caseData, setCaseData] = useState<any>(null); // temporarily use any to handle related object
   const [loading, setLoading] = useState(true);
   const [editOpen, setEditOpen] = useState(false);
 
@@ -37,9 +37,10 @@ const CaseDetails = () => {
 
     const fetchCase = async () => {
       try {
+        // جلب بيانات الحالة + اسم الطبيب المرتبط بها
         const { data } = await supabase
           .from("cases")
-          .select("*")
+          .select("*, doctor:doctors(id, name)")
           .eq("id", id)
           .single();
         setCaseData(data || null);
@@ -53,7 +54,7 @@ const CaseDetails = () => {
     fetchCase();
   }, [id]);
 
-  const handleUpdateCase = (updated: Tables<"cases">) => {
+  const handleUpdateCase = (updated: any) => {
     setCaseData(updated);
   };
 
@@ -155,7 +156,7 @@ const CaseDetails = () => {
                   <div>
                     <p className="text-sm text-gray-600">اسم الطبيب</p>
                     <p className="font-semibold">
-                      {caseData.doctor?.name ?? "-"}
+                      {caseData?.doctor?.name ?? "-"}
                     </p>
                   </div>
                 </div>
