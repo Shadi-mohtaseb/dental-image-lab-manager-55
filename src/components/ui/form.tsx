@@ -1,4 +1,3 @@
-
 import * as React from "react"
 import * as LabelPrimitive from "@radix-ui/react-label"
 import { Slot } from "@radix-ui/react-slot"
@@ -42,22 +41,36 @@ const FormField = <
 
 // التعديل هنا ليعمل مع useFormContext في react-hook-form v7+
 const useFormField = () => {
-  const fieldContext = React.useContext(FormFieldContext)
-  const itemContext = React.useContext(FormItemContext)
-  const form = useFormContext()
+  const fieldContext = React.useContext(FormFieldContext);
+  const itemContext = React.useContext(FormItemContext);
 
-  if (!fieldContext)
-    throw new Error("useFormField should be used within <FormField>")
-  if (!form || !form.formState)
-    throw new Error("useFormField should be used within a <FormProvider> with a valid form instance")
+  // استخدام try/catch للحماية من أية أخطاء محتملة في useFormContext
+  let form;
+  try {
+    form = useFormContext();
+  } catch {
+    form = undefined;
+  }
 
-  const { id } = itemContext || { id: "" }
+  // إذا لم يكن ضمن سياق FormField أو FormProvider، أرجع قيم افتراضية بدون الأخطاء
+  if (!fieldContext || !form || !form.formState) {
+    return {
+      id: itemContext?.id || "",
+      name: "",
+      formItemId: "",
+      formDescriptionId: "",
+      formMessageId: "",
+      error: undefined,
+    };
+  }
+
+  const { id } = itemContext || { id: "" };
 
   // معالجة الأخطاء بطريقة متوافقة مع react-hook-form v7
   const error =
     form.formState.errors && fieldContext.name
       ? get(form.formState.errors, fieldContext.name)
-      : undefined
+      : undefined;
 
   return {
     id,
@@ -66,7 +79,7 @@ const useFormField = () => {
     formDescriptionId: `${id}-form-item-description`,
     formMessageId: `${id}-form-item-message`,
     error,
-  }
+  };
 }
 
 // دالة مساعدة للوصول للمسار الديناميكي (مأخوذة من lodash/get لمنع الإضافة)
