@@ -1,9 +1,9 @@
 
 import React from "react";
 import { DoctorStatsCard } from "@/components/doctors-log/DoctorStatsCard";
+import { DoctorAccountTable } from "@/components/doctors-log/DoctorAccountTable";
 import { MostActiveDoctors } from "@/components/doctors-log/MostActiveDoctors";
 import { RecentSubmissions } from "@/components/doctors-log/RecentSubmissions";
-import { DoctorDetailedLog } from "@/components/doctors-log/DoctorDetailedLog";
 import { useDoctors } from "@/hooks/useDoctors";
 import { useCases } from "@/hooks/useCases";
 
@@ -19,7 +19,7 @@ const DoctorsLog = () => {
   const { data: doctors = [], isLoading: isLoadingDoctors } = useDoctors();
   const { data: cases = [], isLoading: isLoadingCases } = useCases();
 
-  // حساب الإحصائيات:
+  // إحصائيات عامة:
   const totalCases = cases.length;
   const casesInProgress = cases.filter(
     (c: any) => c.status === "قيد التنفيذ" || c.status === "تجهيز العمل" || c.status === "اختبار القوي" || c.status === "المراجعة النهائية"
@@ -55,48 +55,28 @@ const DoctorsLog = () => {
       status: c.status,
     }));
 
-  // الحالات الأخيرة لكل طبيب
-  const doctorsDetailed = doctors.map((doc) => {
-    const doctorCases = cases
-      .filter((c: any) => c.doctor_id === doc.id)
-      .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-      .slice(0, 5);
-
-    return {
-      id: doc.id,
-      name: doc.name,
-      caseCount: doctorCases.length,
-      recentCases: doctorCases.map((c: any) => ({
-        date: c.delivery_date || c.created_at,
-        status: c.status,
-        caseNumber: c.case_number,
-        patient: c.patient_name,
-      })),
-    };
-  });
-
-  if(isLoadingDoctors || isLoadingCases) {
+  if (isLoadingDoctors || isLoadingCases) {
     return (
       <div className="flex justify-center items-center h-40 text-lg">جاري التحميل ...</div>
     )
   }
 
   return (
-    <div className="grid gap-6 md:grid-cols-3">
-      {/* الكروت الثلاثة العلوية للإحصائيات */}
-      {stats.map((s) => (
-        <DoctorStatsCard key={s.label} {...s} />
-      ))}
-      {/* الأطباء الأكثر نشاطاً & آخر التسليمات */}
-      <div className="md:col-span-2">
+    <div className="space-y-8 animate-fade-in">
+      {/* إحصائيات مختصرة في الأعلى */}
+      <div className="grid md:grid-cols-3 gap-4">
+        {stats.map((s) => (
+          <DoctorStatsCard key={s.label} {...s} />
+        ))}
+      </div>
+
+      {/* جدول كشف حساب الأطباء */}
+      <DoctorAccountTable doctors={doctors} cases={cases} />
+
+      {/* قسم الأطباء الأكثر نشاطاً والتسليمات الأخيرة */}
+      <div className="grid md:grid-cols-2 gap-4">
         <MostActiveDoctors doctors={activeDoctors} />
-      </div>
-      <div>
         <RecentSubmissions submissions={submissions} getStatusColor={getStatusColor} />
-      </div>
-      {/* جدول تفصيلي لكل طبيب */}
-      <div className="md:col-span-3">
-        <DoctorDetailedLog doctors={doctorsDetailed} getStatusColor={getStatusColor} />
       </div>
     </div>
   );
