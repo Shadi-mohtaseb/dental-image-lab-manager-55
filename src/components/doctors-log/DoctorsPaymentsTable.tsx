@@ -71,29 +71,30 @@ export default function DoctorsPaymentsTable({ }: DoctorsPaymentsTableProps) {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>اسم الطبيب</TableHead>
-            <TableHead>إجمالي المستحق</TableHead>
-            <TableHead>المدفوع</TableHead>
-            <TableHead>الدين/المتبقي</TableHead>
-            <TableHead>إضافة دفعة</TableHead>
+            <TableHead className="text-right w-[180px]">اسم الطبيب</TableHead>
+            <TableHead className="text-right w-[140px]">إجمالي المستحق</TableHead>
+            <TableHead className="text-right w-[140px]">المدفوع</TableHead>
+            <TableHead className="text-center w-[170px]">الدين/المتبقي</TableHead>
+            <TableHead className="text-center w-[130px]">إضافة دفعة</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {doctors.map((doc: any) => {
             const { totalCases, totalPayments, remaining } = getDoctorAmounts(doc.id);
             return (
-              <TableRow key={doc.id}>
-                <TableCell>{doc.name}</TableCell>
-                <TableCell>{totalCases.toFixed(2)} ₪</TableCell>
-                <TableCell>{totalPayments.toFixed(2)} ₪</TableCell>
-                <TableCell>
-                  <Badge variant={remaining > 0 ? "destructive" : "default"}>
+              <TableRow key={doc.id} className="align-middle">
+                <TableCell className="text-blue-900 font-semibold text-right w-[180px]">{doc.name}</TableCell>
+                <TableCell className="text-right w-[140px]">{totalCases.toFixed(2)} ₪</TableCell>
+                <TableCell className="text-right w-[140px]">{totalPayments.toFixed(2)} ₪</TableCell>
+                <TableCell className={`text-center w-[170px]`}>
+                  <Badge variant={remaining > 0 ? "destructive" : "default"} className={remaining > 0 ? "bg-red-500 text-white" : "bg-green-100 text-green-700"}>
                     {remaining > 0 ? `${remaining.toFixed(2)} ₪ دين` : "لا يوجد دين"}
                   </Badge>
                 </TableCell>
-                <TableCell>
+                <TableCell className="text-center w-[130px]">
                   <Button
                     size="sm"
+                    className="bg-blue-600 text-white hover:bg-blue-700"
                     onClick={() => {
                       setSelectedDoctor(doc);
                       setDialogOpen(true);
@@ -116,3 +117,4 @@ export default function DoctorsPaymentsTable({ }: DoctorsPaymentsTableProps) {
     </div>
   );
 }
+
