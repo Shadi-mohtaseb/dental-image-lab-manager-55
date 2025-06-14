@@ -40,17 +40,18 @@ const FormField = <
   )
 }
 
-// التعديل هنا ليعمل مع useFormContext في react-hook-form v7
+// التعديل هنا ليعمل مع useFormContext في react-hook-form v7+
 const useFormField = () => {
   const fieldContext = React.useContext(FormFieldContext)
   const itemContext = React.useContext(FormItemContext)
   const form = useFormContext()
 
-  if (!fieldContext) {
+  if (!fieldContext)
     throw new Error("useFormField should be used within <FormField>")
-  }
+  if (!form || !form.formState)
+    throw new Error("useFormField should be used within a <FormProvider> with a valid form instance")
 
-  const { id } = itemContext
+  const { id } = itemContext || { id: "" }
 
   // معالجة الأخطاء بطريقة متوافقة مع react-hook-form v7
   const error =
