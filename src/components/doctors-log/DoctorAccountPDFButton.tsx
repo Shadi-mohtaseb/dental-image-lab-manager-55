@@ -9,6 +9,7 @@ import "@fontsource/cairo/400.css";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
+import { ar } from "date-fns/locale"; // <-- استيراد دعم اللغة العربية
 
 // دعم العربية في الـ PDF
 function arabic(text: string) {
@@ -146,7 +147,7 @@ export const DoctorAccountPDFButton: React.FC<Props> = ({ doctorName, summary, d
               selected={fromDate}
               onSelect={setFromDate}
               className="p-3 pointer-events-auto"
-              locale="ar"
+              locale={ar}
             />
           </div>
           <div className="flex flex-col gap-2">
@@ -156,7 +157,7 @@ export const DoctorAccountPDFButton: React.FC<Props> = ({ doctorName, summary, d
               selected={toDate}
               onSelect={setToDate}
               className="p-3 pointer-events-auto"
-              locale="ar"
+              locale={ar}
             />
           </div>
           <Button
