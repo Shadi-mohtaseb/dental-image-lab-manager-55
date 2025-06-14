@@ -30,12 +30,15 @@ export const useCases = () => {
 export const useAddCase = () => {
   const queryClient = useQueryClient();
 
-  // تم تعديل النوع هنا ليصبح بدون case_number لأنه لم يعد موجوداً في الجدول
   return useMutation({
     mutationFn: async (caseData: Omit<TablesInsert<"cases">, "case_number" | "id" | "created_at" | "updated_at">) => {
+      // يجب توفير case_number عشوائي حاليًا، لأنه مطلوب في الجدول
+      const case_number = Math.random().toString(36).substr(2, 9) + Date.now().toString();
+      const withCaseNumber = { ...caseData, case_number };
+
       const { data, error } = await supabase
         .from("cases")
-        .insert(caseData)
+        .insert(withCaseNumber)
         .select()
         .single();
 
@@ -62,7 +65,7 @@ export const useAddCase = () => {
 
 export const useUpdateCase = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async ({ id, ...updates }: Partial<Case> & { id: string }) => {
       const { data, error } = await supabase
@@ -71,7 +74,7 @@ export const useUpdateCase = () => {
         .eq("id", id)
         .select()
         .single();
-      
+
       if (error) throw error;
       return data;
     },

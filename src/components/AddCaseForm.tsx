@@ -21,6 +21,7 @@ import { ToothNumberField } from "@/components/form/add-case/ToothNumberField";
 import { DatesFields } from "@/components/form/add-case/DatesFields";
 import { NotesField } from "@/components/form/add-case/NotesField";
 import { PriceField } from "@/components/form/add-case/PriceField";
+import { TeethCountField } from "@/components/form/add-case/TeethCountField";
 
 const workTypes = ["زيركون", "مؤقت"] as const;
 const caseStatuses = [
@@ -37,6 +38,8 @@ const formSchema = z.object({
   patient_name: z.string().min(2, "اسم المريض مطلوب"),
   doctor_id: z.string().min(1, "اختيار الطبيب مطلوب"),
   work_type: z.enum(workTypes, { required_error: "نوع العمل مطلوب" }),
+  number_of_teeth: z
+    .preprocess(val => (val === "" ? undefined : Number(val)), z.number({ invalid_type_error: "يرجى إدخال عدد الأسنان" }).min(1, "يرجى إدخال عدد الأسنان").optional()),
   tooth_number: z.string().optional(),
   submission_date: z.string(),
   delivery_date: z.string().optional(),
@@ -69,6 +72,7 @@ export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
       doctor_id: "",
       work_type: "زيركون",
       tooth_number: "",
+      number_of_teeth: undefined,
       submission_date: new Date().toISOString().split('T')[0],
       delivery_date: "",
       status: "قيد التنفيذ",
@@ -101,6 +105,7 @@ export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
         doctor_id: data.doctor_id,
         work_type: data.work_type,
         tooth_number: data.tooth_number || null,
+        number_of_teeth: data.number_of_teeth || null,
         submission_date: data.submission_date,
         delivery_date: data.delivery_date || null,
         status: data.status,

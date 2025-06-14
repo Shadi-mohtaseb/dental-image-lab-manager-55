@@ -12,11 +12,8 @@ type CaseRowProps = {
 };
 
 export function CaseRow({ caseItem, onView, onEdit, onDelete, getStatusColor }: CaseRowProps) {
-  // حساب عدد الأسنان من القيمة المفصولة بفواصل (مثلاً: "16,17,21")
-  const teethCount =
-    caseItem.tooth_number && caseItem.tooth_number.trim().length > 0
-      ? caseItem.tooth_number.split(",").filter((num) => num.trim().length > 0).length
-      : 0;
+  // عرض عدد الأسنان من الحقل مباشرة دون الحساب من رقم السن
+  const teethCount = caseItem.number_of_teeth ?? 0;
 
   return (
     <tr className="hover:bg-gray-50">

@@ -17,6 +17,7 @@ export type Database = {
           doctor_id: string | null
           id: string
           notes: string | null
+          number_of_teeth: number | null
           patient_name: string
           price: number | null
           status: Database["public"]["Enums"]["case_status"]
@@ -32,6 +33,7 @@ export type Database = {
           doctor_id?: string | null
           id?: string
           notes?: string | null
+          number_of_teeth?: number | null
           patient_name: string
           price?: number | null
           status?: Database["public"]["Enums"]["case_status"]
@@ -47,6 +49,7 @@ export type Database = {
           doctor_id?: string | null
           id?: string
           notes?: string | null
+          number_of_teeth?: number | null
           patient_name?: string
           price?: number | null
           status?: Database["public"]["Enums"]["case_status"]
