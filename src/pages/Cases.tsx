@@ -1,16 +1,13 @@
 
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Search, Eye, Edit, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useCases, useDeleteCase, useUpdateCase } from "@/hooks/useCases";
 import { AddCaseDialog } from "@/components/AddCaseDialog";
 import { EditCaseDialog } from "@/components/EditCaseDialog";
 import { Tables } from "@/integrations/supabase/types";
+import { CasesFilterBar } from "@/components/cases/CasesFilterBar";
+import { CasesTable } from "@/components/cases/CasesTable";
 
 const Cases = () => {
   const navigate = useNavigate();
@@ -19,8 +16,6 @@ const Cases = () => {
   const updateCase = useUpdateCase();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
-
-  // جديد: للحوار والتعديل
   const [editOpen, setEditOpen] = useState(false);
   const [selectedCase, setSelectedCase] = useState<Tables<"cases"> | null>(null);
 
@@ -51,19 +46,16 @@ const Cases = () => {
     }
   };
 
-  // في حال تم التحديث من التعديل، نعدل العنصر مباشرة بدون تحميل
   const handleUpdateCase = (updated: Tables<"cases">) => {
     setEditOpen(false);
     setSelectedCase(null);
-    // optionally you could re-fetch, but for a light UX:
-    // تحديث العنصر في القائمة يدوياً لو أردت
-    // (حاليًا الريأكت-كويري يقوم بالتحديث بناء على invalidate)
   };
 
   const filteredCases = cases.filter(caseItem => {
-    const matchesSearch = caseItem.patient_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         caseItem.doctor?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         caseItem.case_number.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch =
+      caseItem.patient_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      caseItem.doctor?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      caseItem.case_number.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = !statusFilter || caseItem.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -82,7 +74,8 @@ const Cases = () => {
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Search className="w-8 h-8 text-primary" />
+          {/* Icon and Title */}
+          <svg className="w-8 h-8 text-primary" viewBox="0 0 24 24" fill="none"><path d="M2 12h20M12 2v20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">قائمة الحالات</h1>
             <p className="text-gray-600">إدارة ومتابعة جميع حالات المختبر</p>
@@ -93,60 +86,14 @@ const Cases = () => {
 
       {/* Search and Filters */}
       <Card>
-        <CardContent className="p-6">
-          <div className="flex gap-4 mb-4">
-            <div className="flex-1">
-              <Input
-                placeholder="بحث عن مريض أو طبيب أو رقم الحالة..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full"
-              />
-            </div>
-            <Button variant="outline" className="gap-2">
-              <Search className="w-4 h-4" />
-              بحث
-            </Button>
-          </div>
-          
-          {/* Filter Badges */}
-          <div className="flex gap-2 flex-wrap">
-            <Badge 
-              variant={!statusFilter ? "default" : "outline"} 
-              className="cursor-pointer hover:bg-primary hover:text-white"
-              onClick={() => setStatusFilter("")}
-            >
-              الكل ({cases.length})
-            </Badge>
-            <Badge 
-              variant={statusFilter === "قيد التنفيذ" ? "default" : "outline"} 
-              className="cursor-pointer hover:bg-blue-500 hover:text-white"
-              onClick={() => setStatusFilter("قيد التنفيذ")}
-            >
-              قيد التنفيذ
-            </Badge>
-            <Badge 
-              variant={statusFilter === "تم التسليم" ? "default" : "outline"} 
-              className="cursor-pointer hover:bg-green-500 hover:text-white"
-              onClick={() => setStatusFilter("تم التسليم")}
-            >
-              تم التسليم
-            </Badge>
-            <Badge 
-              variant={statusFilter === "زيركون" ? "default" : "outline"} 
-              className="cursor-pointer hover:bg-purple-500 hover:text-white"
-              onClick={() => setStatusFilter("زيركون")}
-            >
-              زيركون
-            </Badge>
-            <Badge 
-              variant={statusFilter === "مؤقت" ? "default" : "outline"} 
-              className="cursor-pointer hover:bg-orange-500 hover:text-white"
-              onClick={() => setStatusFilter("مؤقت")}
-            >
-              مؤقت
-            </Badge>
-          </div>
+        <CardContent className="p-0">
+          <CasesFilterBar
+            searchTerm={searchTerm}
+            onSearchTermChange={setSearchTerm}
+            statusFilter={statusFilter}
+            onStatusFilterChange={setStatusFilter}
+            totalCount={cases.length}
+          />
         </CardContent>
       </Card>
 
@@ -161,78 +108,13 @@ const Cases = () => {
               {searchTerm || statusFilter ? "لا توجد نتائج مطابقة للبحث" : "لا توجد حالات مسجلة حتى الآن"}
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>رقم الحالة</TableHead>
-                  <TableHead>اسم المريض</TableHead>
-                  <TableHead>اسم الطبيب</TableHead>
-                  <TableHead>نوع العمل</TableHead>
-                  <TableHead>رقم السن</TableHead>
-                  <TableHead>تاريخ الاستلام</TableHead>
-                  <TableHead>الحالة</TableHead>
-                  <TableHead>إجراءات</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredCases.map((caseItem) => (
-                  <TableRow key={caseItem.id} className="hover:bg-gray-50">
-                    <TableCell className="font-semibold text-primary">
-                      {caseItem.case_number}
-                    </TableCell>
-                    <TableCell>{caseItem.patient_name}</TableCell>
-                    <TableCell>{caseItem.doctor?.name || "غير محدد"}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{caseItem.work_type}</Badge>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {caseItem.tooth_number && (
-                        <Badge className="bg-gray-100 text-gray-700">
-                          {caseItem.tooth_number}
-                        </Badge>
-                      )}
-                    </TableCell>
-                    <TableCell>{new Date(caseItem.submission_date).toLocaleDateString('en-US')}</TableCell>
-                    <TableCell>
-                      <Badge className={getStatusColor(caseItem.status)}>
-                        {caseItem.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleViewCase(caseItem.id)}
-                          className="text-blue-600 hover:bg-blue-50"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="outline" 
-                          className="text-green-600 hover:bg-green-50"
-                          onClick={() => {
-                            setSelectedCase(caseItem);
-                            setEditOpen(true);
-                          }}
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="outline" 
-                          className="text-red-600 hover:bg-red-50"
-                          onClick={() => handleDeleteCase(caseItem.id)}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <CasesTable
+              cases={filteredCases}
+              onView={handleViewCase}
+              onEdit={(ci) => { setSelectedCase(ci); setEditOpen(true); }}
+              onDelete={handleDeleteCase}
+              getStatusColor={getStatusColor}
+            />
           )}
         </CardContent>
       </Card>
@@ -252,4 +134,3 @@ const Cases = () => {
 };
 
 export default Cases;
-
