@@ -46,11 +46,12 @@ const DoctorsAccounts = () => {
     );
   }
 
-  // التأكد من أن البيانات تُطابق نوع Doctor
-  const validDoctors = Array.isArray(doctors) ? doctors.filter(
-    (d: any) =>
-      d && typeof d.id === "string" && typeof d.name === "string" && "zircon_price" in d && "temp_price" in d
-  ) : [];
+  // تحديث شرط الفلترة ليقبل كل طبيب معرفه واسمه صالحان فقط
+  const validDoctors = Array.isArray(doctors)
+    ? doctors.filter(
+        (d: any) => d && typeof d.id === "string" && typeof d.name === "string"
+      )
+    : [];
 
   return (
     <div className="space-y-10 animate-fade-in">
