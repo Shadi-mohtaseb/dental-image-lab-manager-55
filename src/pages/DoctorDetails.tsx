@@ -61,6 +61,11 @@ const DoctorDetails = () => {
 
   // حساب العدد الإجمالي للأسنان عبر الحالات
   const totalTeeth = cases.reduce((sum: number, c: any) => {
+    // أولاً نتحقق من وجود number_of_teeth (عدد أسنان عددي وصريح)
+    if (c?.number_of_teeth && Number(c.number_of_teeth) > 0) {
+      return sum + Number(c.number_of_teeth);
+    }
+    // إذا لم يوجد، نعود للطريقة القديمة بتحليل نص tooth_number
     if (c?.tooth_number) {
       return sum + c.tooth_number.split(" ").filter(Boolean).length;
     }
