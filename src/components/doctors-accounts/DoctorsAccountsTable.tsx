@@ -62,15 +62,12 @@ export default function DoctorsAccountsTable({ doctors, cases }: Props) {
             <TableRow>
               <TableHead className="text-right w-[200px]">اسم الطبيب</TableHead>
               <TableHead className="text-center w-[140px]">إجمالي الأسنان</TableHead>
-              <TableHead className="text-center w-[140px]">إجمالي المستحق</TableHead>
               <TableHead className="text-center w-[120px]">PDF</TableHead>
               <TableHead className="text-center w-[195px]">إجراءات</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {doctors.map((doctor) => {
-              // توحيد بيانات الملخص المالي عبر hook مركزي
-              const summary = useDoctorFinancialSummary(doctor.id);
               return (
                 <TableRow key={doctor.id} className="hover:bg-gray-50">
                   <TableCell className="font-semibold text-primary text-right w-[200px]">
@@ -79,35 +76,10 @@ export default function DoctorsAccountsTable({ doctors, cases }: Props) {
                   <TableCell className="text-center w-[140px]">
                     <span className="text-sm font-bold">{calcTotalTeeth(doctor.id)}</span>
                   </TableCell>
-                  <TableCell className="text-center w-[140px]">
-                    <div>
-                      <div>
-                        {/* المستحق */}
-                        <span className="font-semibold">المستحق: </span>
-                        <span className="text-blue-900">{Number(summary.totalDue ?? 0).toLocaleString()} ₪</span>
-                      </div>
-                      <div>
-                        {/* المدفوع */}
-                        <span className="font-semibold">المدفوع: </span>
-                        <span className="text-green-700">{Number(summary.totalPaid ?? 0).toLocaleString()} ₪</span>
-                      </div>
-                      <div>
-                        {/* الدين/المتبقي */}
-                        <span className="font-semibold">الدين: </span>
-                        <span className={Number(summary.remaining) > 0 ? "text-red-600 font-bold" : "text-green-600 font-bold"}>
-                          {Number(summary.remaining ?? 0).toLocaleString()} ₪
-                        </span>
-                      </div>
-                    </div>
-                  </TableCell>
                   <TableCell className="text-center w-[120px]">
                     <DoctorAccountPDFButton
                       doctorName={doctor.name}
-                      summary={{
-                        totalDue: summary.totalDue,
-                        totalPaid: summary.totalPaid,
-                        remaining: summary.remaining,
-                      }}
+                      summary={{}}
                       doctorCases={cases.filter((c) => c.doctor_id === doctor.id)}
                     />
                   </TableCell>
