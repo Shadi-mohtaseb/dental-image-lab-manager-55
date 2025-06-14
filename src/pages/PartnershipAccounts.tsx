@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,30 +7,43 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Users, Plus, Edit, Trash2 } from "lucide-react";
 import { useState } from "react";
+import { usePartners } from "@/hooks/usePartners";
+import { toast } from "@/hooks/use-toast";
 
 const PartnershipAccounts = () => {
   const [showAddTransaction, setShowAddTransaction] = useState(false);
 
-  const partners = [
-    {
-      name: "الشريك الأول (صاحب المختبر)",
-      percentage: "66.67%",
-      balance: "50000 ر.س",
-      status: "نشط",
-    },
-    {
-      name: "الشريك الثاني",
-      percentage: "33.33%",
-      balance: "25000 ر.س",
-      status: "نشط",
-    },
-  ];
+  const { data: partners = [], isLoading, refetch } = usePartners();
 
+  // عمليات السحب (حذف شريك)
+  const handleDeletePartner = async (partnerId: string) => {
+    if (window.confirm("هل أنت متأكد من حذف هذا الشريك؟")) {
+      // حذف عبر Supabase
+      const { error } = await import("@/integrations/supabase/client").then(({ supabase }) =>
+        supabase.from("partners").delete().eq("id", partnerId)
+      );
+      if (!error) {
+        refetch?.();
+        toast({
+          title: "تم حذف الشريك",
+          description: "تم حذف الشريك بنجاح",
+        });
+      } else {
+        toast({
+          title: "خطأ في حذف الشريك",
+          description: "حدث خطأ يرجى المحاولة مرة أخرى",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  // بيانات المعاملات مثال ثابت مؤقت: بإمكانك ربطها بجدول معاملات الشركاء الحقيقي لاحقًا
   const transactions = [
     {
       id: 1,
       date: "2025-06-10",
-      partner: "الشريك الأول",
+      partner: partners[0]?.name ?? "-",
       type: "إيداع",
       amount: "15000",
       description: "أرباح الشهر",
@@ -39,7 +51,7 @@ const PartnershipAccounts = () => {
     {
       id: 2,
       date: "2025-06-08",
-      partner: "الشريك الثاني",
+      partner: partners[1]?.name ?? "-",
       type: "سحب",
       amount: "8000",
       description: "سحب أرباح",
@@ -68,12 +80,12 @@ const PartnershipAccounts = () => {
       {/* Partners Summary */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {partners.map((partner, index) => (
-          <Card key={index} className="hover:shadow-lg transition-shadow">
+          <Card key={partner.id} className="hover:shadow-lg transition-shadow">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-lg">{partner.name}</CardTitle>
                 <Badge variant="secondary" className="bg-green-100 text-green-700">
-                  {partner.status}
+                  نشط
                 </Badge>
               </div>
             </CardHeader>
@@ -81,14 +93,19 @@ const PartnershipAccounts = () => {
               <div className="space-y-3">
                 <div className="flex justify-between">
                   <span className="text-gray-600">النسبة:</span>
-                  <span className="font-semibold text-primary">{partner.percentage}</span>
+                  <span className="font-semibold text-primary">{partner.partnership_percentage?.toFixed(2)}%</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">الرصيد الحالي:</span>
-                  <span className="font-bold text-2xl text-gray-900">{partner.balance}</span>
+                  <span className="font-bold text-2xl text-gray-900">{Number(partner.total_amount).toFixed(2)} ₪</span>
                 </div>
               </div>
             </CardContent>
+            <div className="flex justify-end p-2">
+              <Button size="sm" variant="outline" className="text-red-600" onClick={() => handleDeletePartner(partner.id)}>
+                <Trash2 className="w-4 h-4" /> حذف
+              </Button>
+            </div>
           </Card>
         ))}
       </div>
@@ -183,7 +200,7 @@ const PartnershipAccounts = () => {
                     </Badge>
                   </TableCell>
                   <TableCell className="font-semibold">
-                    {transaction.amount} ر.س
+                    {transaction.amount} ₪
                   </TableCell>
                   <TableCell>{transaction.description}</TableCell>
                   <TableCell>

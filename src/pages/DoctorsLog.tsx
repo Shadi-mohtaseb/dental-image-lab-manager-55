@@ -1,4 +1,3 @@
-
 import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -38,9 +37,9 @@ const DoctorsLog = () => {
   // إحصائيات عامة
   const stats = useMemo(() => {
     const zircon = cases.filter(c => c.work_type === "زيركون").length;
-    const complete = cases.filter(c => c.status === "تم التسليم" || c.status === "مكتمل").length;
+    const complete = cases.filter(c => c.status === "تم التسليم" ).length;
     const inProgress = cases.filter(c => c.status === "قيد التنفيذ").length;
-    const temp = cases.filter(c => c.work_type === "مؤقتة").length;
+    const temp = cases.filter(c => c.work_type === "مؤقت").length;
     return [
       { count: complete, label: "حالات مكتملة", color: "text-green-600" },
       { count: inProgress, label: "حالات قيد التنفيذ", color: "text-blue-600" },

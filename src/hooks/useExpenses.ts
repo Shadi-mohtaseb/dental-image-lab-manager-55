@@ -32,7 +32,6 @@ export const useAddExpense = () => {
         .insert(expense)
         .select()
         .single();
-      
       if (error) throw error;
       return data;
     },
@@ -56,14 +55,12 @@ export const useAddExpense = () => {
 
 export const useDeleteExpense = () => {
   const queryClient = useQueryClient();
-  
   return useMutation({
     mutationFn: async (expenseId: string) => {
       const { error } = await supabase
         .from("expenses")
         .delete()
         .eq("id", expenseId);
-      
       if (error) throw error;
     },
     onSuccess: () => {
@@ -78,6 +75,37 @@ export const useDeleteExpense = () => {
       toast({
         title: "خطأ في حذف المصروف",
         description: "حدث خطأ أثناء حذف المصروف، يرجى المحاولة مرة أخرى",
+        variant: "destructive",
+      });
+    },
+  });
+};
+
+// جديد: تحديث المصروف
+export const useUpdateExpense = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (expense: Partial<Expense> & { id: string }) => {
+      const { id, ...rest } = expense;
+      const { error } = await supabase
+        .from("expenses")
+        .update(rest)
+        .eq("id", id);
+      if (error) throw error;
+      return expense;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["expenses"] });
+      toast({
+        title: "تم تعديل المصروف بنجاح",
+        description: "تم حفظ التعديلات",
+      });
+    },
+    onError: (error) => {
+      console.error("Error updating expense:", error);
+      toast({
+        title: "خطأ في تعديل المصروف",
+        description: "حدث خطأ أثناء تعديل المصروف، يرجى المحاولة مرة أخرى",
         variant: "destructive",
       });
     },

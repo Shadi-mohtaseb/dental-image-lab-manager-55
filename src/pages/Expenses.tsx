@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,11 +7,14 @@ import { Badge } from "@/components/ui/badge";
 import { Receipt, Edit, Trash2, Search } from "lucide-react";
 import { useExpenses, useDeleteExpense } from "@/hooks/useExpenses";
 import { AddExpenseDialog } from "@/components/AddExpenseDialog";
+import { EditExpenseDialog } from "@/components/EditExpenseDialog";
 
 const Expenses = () => {
   const { data: expenses = [], isLoading } = useExpenses();
   const deleteExpense = useDeleteExpense();
   const [searchTerm, setSearchTerm] = useState("");
+  const [editExpenseOpen, setEditExpenseOpen] = useState(false);
+  const [selectedExpense, setSelectedExpense] = useState(null);
 
   const totalExpenses = expenses.reduce((sum, expense) => sum + Number(expense.total_amount), 0);
 
@@ -20,6 +22,11 @@ const Expenses = () => {
     if (window.confirm("هل أنت متأكد من حذف هذا المصروف؟")) {
       await deleteExpense.mutateAsync(expenseId);
     }
+  };
+
+  const handleEditExpense = (expense) => {
+    setSelectedExpense(expense);
+    setEditExpenseOpen(true);
   };
 
   const filteredExpenses = expenses.filter(expense => 
@@ -110,10 +117,11 @@ const Expenses = () => {
                     <TableCell className="font-semibold text-primary">
                       {Number(expense.total_amount).toFixed(2)} ₪
                     </TableCell>
-                    <TableCell>{new Date(expense.purchase_date).toLocaleDateString('en-US')}</TableCell>
+                    <TableCell>{new Date(expense.purchase_date).toLocaleDateString('en-GB')}</TableCell>
                     <TableCell>
                       <div className="flex gap-2">
-                        <Button size="sm" variant="outline" className="text-green-600 hover:bg-green-50">
+                        <Button size="sm" variant="outline" className="text-green-600 hover:bg-green-50"
+                          onClick={() => handleEditExpense(expense)}>
                           <Edit className="w-4 h-4" />
                         </Button>
                         <Button 
@@ -133,6 +141,16 @@ const Expenses = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* نافذة التعديل */}
+      <EditExpenseDialog
+        open={editExpenseOpen}
+        onOpenChange={(open) => {
+          setEditExpenseOpen(open);
+          if (!open) setSelectedExpense(null);
+        }}
+        expenseData={selectedExpense}
+      />
     </div>
   );
 };
