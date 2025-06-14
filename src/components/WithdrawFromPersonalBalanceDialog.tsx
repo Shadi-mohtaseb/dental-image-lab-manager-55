@@ -12,7 +12,7 @@ import { toast } from "@/hooks/use-toast";
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  partner: { id: string; name: string; personal_balance: number | null };
+  partner: { id: string; name: string; personal_balance: number | null } | null;
 }
 
 export default function WithdrawFromPersonalBalanceDialog({ open, onOpenChange, partner }: Props) {
@@ -20,6 +20,11 @@ export default function WithdrawFromPersonalBalanceDialog({ open, onOpenChange, 
   const [description, setDescription] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const addTransaction = useAddPartnerTransaction();
+
+  // Don't render anything if partner is null
+  if (!partner) {
+    return null;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
