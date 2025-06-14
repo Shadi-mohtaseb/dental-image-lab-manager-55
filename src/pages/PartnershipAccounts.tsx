@@ -14,6 +14,9 @@ import { useCompanyCapital, useCalculateCompanyCapital, useDistributeProfits } f
 import EditPartnerTransactionDialog from "@/components/EditPartnerTransactionDialog";
 import AddPartnerDialog from "@/components/AddPartnerDialog";
 import WithdrawFromPersonalBalanceDialog from "@/components/WithdrawFromPersonalBalanceDialog";
+import FinancialSummary from "@/components/FinancialSummary";
+import PartnerCard from "@/components/PartnerCard";
+import AddPartnerTransactionDialog from "@/components/AddPartnerTransactionDialog";
 
 const PartnershipAccounts = () => {
   const [showAddTransaction, setShowAddTransaction] = useState(false);
@@ -94,186 +97,85 @@ const PartnershipAccounts = () => {
     setWithdrawOpen(true);
   };
 
+  // حساب إجمالي الإيرادات والمصاريف من الشركة وصافي الربح:
+  // نفترض جلبهم من useCompanyCapital وقيمتهم (companyCapital?.total_capital)
+  // سنضع قيم افتراضية لو لم تتوفر.
+  const totalRevenue = companyCapital?.total_revenue ?? 0;
+  const totalExpenses = companyCapital?.total_expenses ?? 0;
+  const netProfit = companyCapital?.total_capital ?? 0;
+
+  // حساب معاملات السحب لكل شريك
+  function getPartnerStats(partner) {
+    const partnerTxs = transactions.filter(
+      (tx) => tx.partner_id === partner.id && tx.transaction_type === "withdraw"
+    );
+    const withdrawals = partnerTxs.reduce((sum, tx) => sum + Number(tx.amount), 0);
+    const remaining_share = Number(partner.total_amount) - withdrawals;
+    return {
+      withdrawals,
+      remaining_share,
+    };
+  }
+
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Users className="w-8 h-8 text-primary" />
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">حسابات الشراكة</h1>
-            <p className="text-gray-600">إدارة حسابات الشركاء والمعاملات المالية</p>
-          </div>
-        </div>
-        <div className="flex gap-2">
-          <AddPartnerDialog />
-          <Button
-            onClick={() => setShowAddTransaction(!showAddTransaction)}
-            className="bg-primary hover:bg-primary/90"
-          >
-            <Plus className="w-4 h-4 ml-2" />
-            إضافة معاملة
-          </Button>
-        </div>
+    <div className="space-y-8 animate-fade-in">
+      {/* 1- قسم الملخص المالي */}
+      <FinancialSummary
+        totalRevenue={totalRevenue}
+        totalExpenses={totalExpenses}
+        netProfit={netProfit}
+      />
+
+      {/* 2- إدارة الشركاء */}
+      <div className="flex items-center justify-between mt-6">
+        <h1 className="text-2xl font-bold text-gray-900 flex gap-2 items-center">
+          <Users className="w-7 h-7 text-primary" /> الشركاء
+        </h1>
+        <AddPartnerDialog />
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        {partners.map((partner) => {
+          const stats = getPartnerStats(partner);
+          return (
+            <PartnerCard
+              key={partner.id}
+              partner={{
+                ...partner,
+                withdrawals: stats.withdrawals,
+                remaining_share: stats.remaining_share,
+              }}
+              onWithdraw={handleWithdraw}
+              onDelete={handleDeletePartner}
+            />
+          );
+        })}
       </div>
 
-      {/* Company Capital Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="bg-gradient-to-r from-green-500 to-green-600 text-white">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-green-100">صافي الربح (رأس المال)</p>
-                <p className="text-2xl font-bold">{(companyCapital?.total_capital || 0).toFixed(2)} ₪</p>
-                <p className="text-xs text-green-200">الإيرادات - المصاريف</p>
-              </div>
-              <DollarSign className="w-8 h-8 text-green-200" />
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-6">
-            <Button 
-              onClick={() => calculateCapital.mutate()}
-              disabled={calculateCapital.isPending}
-              className="w-full"
-            >
-              <Calculator className="w-4 h-4 ml-2" />
-              {calculateCapital.isPending ? "جاري الحساب..." : "إعادة حساب صافي الربح"}
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <Button 
-              onClick={() => distributeProfits.mutate()}
-              disabled={distributeProfits.isPending}
-              className="w-full bg-green-600 hover:bg-green-700"
-            >
-              <Users className="w-4 h-4 ml-2" />
-              {distributeProfits.isPending ? "جاري التوزيع..." : "توزيع الأرباح (ثلثين/ثلث)"}
-            </Button>
-          </CardContent>
-        </Card>
+      {/* 3- عمليات السحب و المعاملات */}
+      <div className="flex items-center justify-between mt-10">
+        <h2 className="text-xl font-bold text-gray-700 flex gap-1 items-center">سجل المعاملات</h2>
+        {/* نموذج إضافة المعاملة في مودال منفصل */}
+        <Button
+          onClick={() => setShowAddTransaction(true)}
+          className="bg-primary hover:bg-primary/90"
+        >
+          <Plus className="w-4 h-4 ml-1" />
+          إضافة معاملة
+        </Button>
       </div>
-
-      {/* Partners Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {partners.map((partner, index) => (
-          <Card key={partner.id} className="hover:shadow-lg transition-shadow">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">{partner.name}</CardTitle>
-                <div className="flex items-center gap-2">
-                  <Badge variant="secondary" className="bg-blue-100 text-blue-700">
-                    {partner.partnership_percentage?.toFixed(1)}%
-                  </Badge>
-                  <Badge variant="outline" className="text-xs">
-                    {index === 0 ? "الثلثين" : "الثلث"}
-                  </Badge>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="flex justify-between border-b pb-2">
-                  <span className="text-gray-600">حصة من صافي الربح:</span>
-                  <span className="font-bold text-2xl text-green-600">{Number(partner.total_amount).toFixed(2)} ₪</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">الرصيد الشخصي:</span>
-                  <span className="font-semibold text-blue-600">{Number(partner.personal_balance || 0).toFixed(2)} ₪</span>
-                </div>
-                <div className="flex gap-2">
-                  <Button 
-                    size="sm" 
-                    variant="outline" 
-                    className="text-blue-600 flex-1"
-                    onClick={() => handleWithdraw(partner)}
-                    disabled={!partner.personal_balance || partner.personal_balance <= 0}
-                  >
-                    <Wallet className="w-4 h-4 ml-1" /> سحب
-                  </Button>
-                  <Button 
-                    size="sm" 
-                    variant="outline" 
-                    className="text-red-600" 
-                    onClick={() => handleDeletePartner(partner.id)}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+      {/* شريط بحث بسيط وفلاتر */}
+      <div className="flex flex-col md:flex-row gap-4 mt-2">
+        <Input
+          placeholder="بحث عن شريك/وصف"
+          className="w-full max-w-xs"
+          // ...حفظ وتطبيق البحث في الحالة
+        />
+        {/* إمكانية إضافة مزيد من الفلاتر في المستقبل */}
       </div>
-
-      {/* Add Transaction Form */}
-      {showAddTransaction && (
-        <Card className="animate-slide-up">
-          <CardHeader>
-            <CardTitle>إضافة معاملة مالية</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form className="grid grid-cols-1 md:grid-cols-2 gap-4" onSubmit={handleAddTransaction}>
-              <div>
-                <Label htmlFor="partner">الشريك</Label>
-                <Select name="partner" required>
-                  <SelectTrigger>
-                    <SelectValue placeholder="اختر الشريك" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {partners.map((p) => (
-                      <SelectItem key={p.id} value={p.id}>
-                        {p.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="type">نوع المعاملة</Label>
-                <Select name="type" required>
-                  <SelectTrigger>
-                    <SelectValue placeholder="نوع المعاملة" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="deposit">إيداع</SelectItem>
-                    <SelectItem value="withdraw">سحب</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="amount">المبلغ</Label>
-                <Input name="amount" placeholder="أدخل المبلغ" type="number" min="0" step="any" required />
-              </div>
-              <div>
-                <Label htmlFor="date">التاريخ</Label>
-                <Input name="date" type="date" required defaultValue={new Date().toISOString().slice(0, 10)} />
-              </div>
-              <div className="md:col-span-2">
-                <Label htmlFor="description">الوصف</Label>
-                <Input name="description" placeholder="أدخل وصف المعاملة" />
-              </div>
-              <div className="flex gap-3 mt-6 md:col-span-2">
-                <Button className="bg-primary hover:bg-primary/90" type="submit">
-                  إضافة المعاملة
-                </Button>
-                <Button variant="outline" onClick={() => setShowAddTransaction(false)} type="button">
-                  إلغاء
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Transactions History */}
-      <Card>
+      {/* جدول المعاملات (محسن) */}
+      <Card className="mt-4">
         <CardHeader>
-          <CardTitle>سجل المعاملات</CardTitle>
+          <CardTitle>جدول المعاملات المالية</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
@@ -328,8 +230,10 @@ const PartnershipAccounts = () => {
           </Table>
         </CardContent>
       </Card>
+      {/* حوار إضافة المعاملة */}
+      <AddPartnerTransactionDialog open={showAddTransaction} onOpenChange={setShowAddTransaction} />
 
-      {/* Dialogs */}
+      {/* 4- واجهات تعديل عمليات السحب الحالية */}
       <EditPartnerTransactionDialog
         open={editTxOpen}
         onOpenChange={(open) => {
@@ -339,7 +243,6 @@ const PartnershipAccounts = () => {
         partners={partners}
         initialData={selectedTx}
       />
-
       <WithdrawFromPersonalBalanceDialog
         open={withdrawOpen}
         onOpenChange={(open) => {
@@ -348,8 +251,10 @@ const PartnershipAccounts = () => {
         }}
         partner={selectedPartner}
       />
+      {/* يمكنك إضافة المزيد من إحصاءات المعاملات وأقسام ثانوية هنا لاحقاً */}
     </div>
   );
 };
 
 export default PartnershipAccounts;
+// ملاحظة: هذا الملف أصبح كبيرًا جدًا. أنصحك الآن بطلب إعادة تقسيم الملف إلى أجزاء أصغر.
