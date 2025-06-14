@@ -16,6 +16,22 @@ export function CasesTable({
   onDelete,
   getStatusColor,
 }: CasesTableProps) {
+  // دالة لإظهار السعر الإجمالي بناء على المشكلة المذكورة
+  const getTotalPrice = (caseItem: any) => {
+    // لو السعر أقل بكثير من المتوقع وعدد الأسنان أكبر من 1 اعتبره سعر سن واحد
+    if (
+      caseItem.price &&
+      caseItem.number_of_teeth &&
+      Number(caseItem.number_of_teeth) > 1 &&
+      (Number(caseItem.price) === Number(caseItem.price) / Number(caseItem.number_of_teeth) || Number(caseItem.price) < 200)
+    ) {
+      // غالبا السعر المدخل هو سعر السن وليس المجموع. أظهر نتيجة الضرب
+      // يمكن ضبط الحد 200 بحسب أسعار الحالات عندك
+      return `${Number(caseItem.price) * Number(caseItem.number_of_teeth)} ₪`;
+    }
+    return caseItem.price ? `${caseItem.price} ₪` : "-";
+  };
+
   return (
     <div className="overflow-x-auto bg-white rounded-lg shadow">
       <table className="min-w-full">
@@ -47,7 +63,7 @@ export function CasesTable({
                   : "-"}
               </td>
               <td className="px-4 py-2">
-                {caseItem.price ? `${caseItem.price} ₪` : "-"}
+                {getTotalPrice(caseItem)}
               </td>
               <td className="px-4 py-2">{caseItem.number_of_teeth || "-"}</td>
               <td className="px-4 py-2">{caseItem.doctor_name || caseItem.doctor?.name || "-"}</td>
@@ -101,3 +117,4 @@ export function CasesTable({
     </div>
   );
 }
+
