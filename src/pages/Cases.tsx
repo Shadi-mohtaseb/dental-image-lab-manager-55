@@ -37,7 +37,10 @@ const Cases = () => {
   };
 
   // دالة تحديث الحالة عند الضغط على زر الحالة
-  const handleStatusChange = async (caseItem: Tables<"cases">, targetStatus: string) => {
+  const handleStatusChange = async (
+    caseItem: Tables<"cases">,
+    targetStatus: Tables<"cases">["status"] // هذا هو التعديل، نستخدم النوع من enum مباشرةً
+  ) => {
     try {
       await updateCase.mutateAsync({ id: caseItem.id, status: targetStatus });
       toast({
