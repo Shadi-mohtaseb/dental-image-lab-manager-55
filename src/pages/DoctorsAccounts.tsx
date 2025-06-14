@@ -11,6 +11,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { DoctorAccountExportButton } from "@/components/doctors-log/DoctorAccountExportButton";
 import DoctorsPaymentsLogTable from "@/components/doctors-log/DoctorsPaymentsLogTable";
+import DoctorsPaymentsTable from "@/components/doctors-log/DoctorsPaymentsTable"; // إضافة الاستيراد
 
 const DoctorsAccounts = () => {
   const { data: doctors = [], isLoading, error } = useDoctors();
@@ -131,6 +132,9 @@ const DoctorsAccounts = () => {
           )}
         </CardContent>
       </Card>
+
+      {/*--- هنا إضافة تبويب دفعات الأطباء ---*/}
+      <DoctorsPaymentsTable />
 
       {/* سجل دفعات الأطباء (نقلناه هنا) */}
       <div>
