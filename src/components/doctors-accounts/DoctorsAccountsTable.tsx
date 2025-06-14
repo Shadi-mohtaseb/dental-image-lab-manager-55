@@ -1,11 +1,12 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DoctorAccountExportButton } from "@/components/doctors-log/DoctorAccountExportButton";
+import { DoctorAccountPDFButton } from "@/components/doctors-log/DoctorAccountPDFButton";
 import { EditDoctorDialog } from "@/components/EditDoctorDialog";
 import type { Doctor } from "@/hooks/useDoctors";
 import { useDeleteDoctor } from "@/hooks/useDoctors";
+import { useDoctorFinancialSummary } from "@/hooks/useDoctorFinancialSummary";
 
 interface Props {
   doctors: Doctor[];
@@ -61,50 +62,57 @@ export default function DoctorsAccountsTable({ doctors, cases }: Props) {
             <TableRow>
               <TableHead className="text-right w-[200px]">اسم الطبيب</TableHead>
               <TableHead className="text-center w-[140px]">إجمالي الأسنان</TableHead>
-              {/* <TableHead>سعر الزيركون (شيكل)</TableHead>
-              <TableHead>سعر المؤقت (شيكل)</TableHead> */}
-              <TableHead className="text-center w-[140px]">كشف الحساب</TableHead>
+              <TableHead className="text-center w-[140px]">كشف الحساب (Excel)</TableHead>
+              <TableHead className="text-center w-[120px]">PDF</TableHead>
               <TableHead className="text-center w-[195px]">إجراءات</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {doctors.map((doctor) => (
-              <TableRow key={doctor.id} className="hover:bg-gray-50">
-                <TableCell className="font-semibold text-primary text-right w-[200px]">
-                  {doctor.name}
-                </TableCell>
-                <TableCell className="text-center w-[140px]">
-                  <span className="text-sm font-bold">{calcTotalTeeth(doctor.id)}</span>
-                </TableCell>
-                {/* <TableCell>
-                  <span className="text-sm">{doctor.zircon_price} شيكل</span>
-                </TableCell>
-                <TableCell>
-                  <span className="text-sm">{doctor.temp_price} شيكل</span>
-                </TableCell> */}
-                <TableCell className="text-center w-[140px]">
-                  <DoctorAccountExportButton
-                    doctorId={doctor.id}
-                    doctorName={doctor.name}
-                    doctorCases={cases.filter((c) => c.doctor_id === doctor.id)}
-                  />
-                </TableCell>
-                <TableCell className="text-center w-[195px]">
-                  <div className="flex gap-2 justify-center">
-                    <EditDoctorDialog doctor={doctor} />
-                    <Button size="sm" variant="outline" className="text-blue-600 hover:bg-blue-50 border-blue-200"
-                      title="تفاصيل"
-                      onClick={() => window.location.href = `/doctor/${doctor.id}`}>
-                      تفاصيل
-                    </Button>
-                    <Button size="sm" variant="outline" className="text-red-600 hover:bg-red-50" title="حذف"
-                      onClick={() => handleDelete(doctor.id)}>
-                      حذف
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
+            {doctors.map((doctor) => {
+              const summary = useDoctorFinancialSummary(doctor.id);
+              return (
+                <TableRow key={doctor.id} className="hover:bg-gray-50">
+                  <TableCell className="font-semibold text-primary text-right w-[200px]">
+                    {doctor.name}
+                  </TableCell>
+                  <TableCell className="text-center w-[140px]">
+                    <span className="text-sm font-bold">{calcTotalTeeth(doctor.id)}</span>
+                  </TableCell>
+                  <TableCell className="text-center w-[140px]">
+                    <DoctorAccountExportButton
+                      doctorId={doctor.id}
+                      doctorName={doctor.name}
+                      doctorCases={cases.filter((c) => c.doctor_id === doctor.id)}
+                    />
+                  </TableCell>
+                  <TableCell className="text-center w-[120px]">
+                    <DoctorAccountPDFButton
+                      doctorName={doctor.name}
+                      summary={{
+                        totalDue: summary.totalDue,
+                        totalPaid: summary.totalPaid,
+                        remaining: summary.remaining,
+                      }}
+                      doctorCases={cases.filter((c) => c.doctor_id === doctor.id)}
+                    />
+                  </TableCell>
+                  <TableCell className="text-center w-[195px]">
+                    <div className="flex gap-2 justify-center">
+                      <EditDoctorDialog doctor={doctor} />
+                      <Button size="sm" variant="outline" className="text-blue-600 hover:bg-blue-50 border-blue-200"
+                        title="تفاصيل"
+                        onClick={() => window.location.href = `/doctor/${doctor.id}`}>
+                        تفاصيل
+                      </Button>
+                      <Button size="sm" variant="outline" className="text-red-600 hover:bg-red-50" title="حذف"
+                        onClick={() => handleDelete(doctor.id)}>
+                        حذف
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              )
+            })}
           </TableBody>
         </Table>
       </CardContent>
