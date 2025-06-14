@@ -73,7 +73,14 @@ export function CasesTable({
                     عرض
                   </button>
                 )}
-                {/* تم حذف زر التعديل */}
+                {onEdit && (
+                  <button
+                    className="text-xs px-2 py-1 rounded bg-blue-200 hover:bg-blue-300"
+                    onClick={() => onEdit(caseItem)}
+                  >
+                    تعديل
+                  </button>
+                )}
                 {onDelete && (
                   <button
                     className="text-xs px-2 py-1 rounded bg-red-200 hover:bg-red-300"

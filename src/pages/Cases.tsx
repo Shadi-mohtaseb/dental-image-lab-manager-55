@@ -54,7 +54,6 @@ const Cases = () => {
     const matchesSearch =
       caseItem.patient_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       caseItem.doctor?.name?.toLowerCase().includes(searchTerm.toLowerCase());
-      // caseItem.case_number.toLowerCase().includes(searchTerm.toLowerCase()); <-- تم حذف البحث برقم الحالة
     const matchesStatus = !statusFilter || caseItem.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -110,6 +109,7 @@ const Cases = () => {
             <CasesTable
               cases={filteredCases}
               onView={handleViewCase}
+              onEdit={(ci) => { setSelectedCase(ci); setEditOpen(true); }}
               onDelete={handleDeleteCase}
               getStatusColor={getStatusColor}
             />
