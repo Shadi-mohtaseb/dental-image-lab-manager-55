@@ -227,10 +227,6 @@ const CaseDetails = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="text-center">
-                {/* placeholder progress: يمكنك لاحقاً استخدام نسبة الحالة الحقيقية لو كانت متاحة */}
-                <div className="text-3xl font-bold text-primary mb-2">
-                  0%
-                </div>
                 <Progress value={0} className="mb-3" />
                 <Badge className="bg-blue-100 text-blue-700">
                   {caseData.status}
