@@ -33,17 +33,28 @@ export const DoctorAccountPDFButton: React.FC<Props> = ({ doctorName, summary, d
   const [toDate, setToDate] = useState<Date | undefined>(undefined);
   const [popoverOpen, setPopoverOpen] = useState(false);
 
-  // تصفية الحالات بالفترة المطلوبة
+  // تصفية الحالات بالفترة المطلوبة - إصلاح مشكلة infinite loop
   const filteredCases = React.useMemo(() => {
     return doctorCases.filter((c) => {
       // نستخدم تاريخ التسليم أو الإنشاء
       const dateStr = c.delivery_date ?? c.created_at?.slice(0, 10);
       if (!dateStr) return false;
       const caseDate = new Date(dateStr);
-      // بداية الفترة
-      if (fromDate && caseDate < new Date(fromDate.setHours(0,0,0,0))) return false;
-      // نهاية الفترة
-      if (toDate && caseDate > new Date(toDate.setHours(23,59,59,999))) return false;
+      
+      // بداية الفترة - إنشاء نسخة جديدة من التاريخ بدلاً من تعديل الأصل
+      if (fromDate) {
+        const startOfDay = new Date(fromDate);
+        startOfDay.setHours(0, 0, 0, 0);
+        if (caseDate < startOfDay) return false;
+      }
+      
+      // نهاية الفترة - إنشاء نسخة جديدة من التاريخ بدلاً من تعديل الأصل
+      if (toDate) {
+        const endOfDay = new Date(toDate);
+        endOfDay.setHours(23, 59, 59, 999);
+        if (caseDate > endOfDay) return false;
+      }
+      
       return true;
     });
   }, [doctorCases, fromDate, toDate]);
