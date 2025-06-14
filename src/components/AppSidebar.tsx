@@ -55,6 +55,11 @@ const menuItems = [
     url: "/cases",
     icon: Search,
   },
+  {
+    title: "الإعدادات",
+    url: "/settings",
+    icon: Settings,
+  },
 ];
 
 export function AppSidebar() {
@@ -106,14 +111,7 @@ export function AppSidebar() {
 
       <SidebarFooter className="p-4">
         <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild>
-              <button className="flex items-center gap-3 w-full text-sidebar-foreground/70 hover:text-sidebar-foreground">
-                <Settings className="w-5 h-5" />
-                <span>الإعدادات</span>
-              </button>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+          {/* زر تسجيل الخروج فقط */}
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
               <button className="flex items-center gap-3 w-full text-sidebar-foreground/70 hover:text-sidebar-foreground">

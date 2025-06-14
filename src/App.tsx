@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -13,6 +14,7 @@ import DoctorsLog from "./pages/DoctorsLog";
 import Cases from "./pages/Cases";
 import CaseDetails from "./pages/CaseDetails";
 import NotFound from "./pages/NotFound";
+import Settings from "./pages/Settings";
 import React from "react";
 
 // مكون للمحتوى الرئيسي يأخذ بعين الاعتبار عرض السايدبار
@@ -54,6 +56,7 @@ const App = () => (
               <Route path="/doctors-log" element={<DoctorsLog />} />
               <Route path="/cases" element={<Cases />} />
               <Route path="/case/:id" element={<CaseDetails />} />
+              <Route path="/settings" element={<Settings />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </MainContent>

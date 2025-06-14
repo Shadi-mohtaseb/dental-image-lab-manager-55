@@ -1,45 +1,42 @@
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Tables } from "@/integrations/supabase/types";
-import { CaseRow } from "./CaseRow";
+import React from "react";
 
-type CasesTableProps = {
-  cases: (Tables<"cases"> & { doctor?: { name?: string } })[];
-  onView: (caseId: string) => void;
-  onEdit: (caseItem: Tables<"cases">) => void;
-  onDelete: (caseId: string) => void;
-  getStatusColor: (status: string) => string;
-};
-
-export function CasesTable({ cases, onView, onEdit, onDelete, getStatusColor }: CasesTableProps) {
+export function CasesTable({ cases }: { cases: any[] }) {
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          {/* تم حذف رأس الجدول لرقم الحالة */}
-          <TableHead>اسم المريض</TableHead>
-          <TableHead>اسم الطبيب</TableHead>
-          <TableHead>نوع العمل</TableHead>
-          <TableHead>رقم السن</TableHead>
-          <TableHead>عدد الأسنان</TableHead>
-          <TableHead>اللون</TableHead>
-          <TableHead>نوع البلوك</TableHead>
-          <TableHead>تاريخ الاستلام</TableHead>
-          <TableHead>الحالة</TableHead>
-          <TableHead>إجراءات</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {cases.map((caseItem) => (
-          <CaseRow
-            key={caseItem.id}
-            caseItem={caseItem}
-            onView={onView}
-            onEdit={onEdit}
-            onDelete={onDelete}
-            getStatusColor={getStatusColor}
-          />
-        ))}
-      </TableBody>
-    </Table>
+    <div className="overflow-x-auto bg-white rounded-lg shadow">
+      <table className="min-w-full">
+        <thead>
+          <tr>
+            <th className="px-4 py-2">اسم المريض</th>
+            <th className="px-4 py-2">تاريخ الاستلام</th>
+            <th className="px-4 py-2">السعر</th>
+            {/* ... باقي الأعمدة ... */}
+            <th className="px-4 py-2">الإجراءات</th>
+          </tr>
+        </thead>
+        <tbody>
+          {cases.map((caseItem) => (
+            <tr key={caseItem.id}>
+              <td className="px-4 py-2">{caseItem.patient_name}</td>
+              <td className="px-4 py-2">
+                {caseItem.receive_date
+                  ? new Date(caseItem.receive_date).toLocaleDateString("en-GB", {
+                      year: "numeric",
+                      month: "2-digit",
+                      day: "2-digit",
+                    })
+                  : "-"}
+              </td>
+              <td className="px-4 py-2">
+                {caseItem.price ? `${caseItem.price} ₪` : "-"}
+              </td>
+              {/* ... باقي الأعمدة ... */}
+              <td className="px-4 py-2">
+                {/* ... الإجراءات ... */}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
