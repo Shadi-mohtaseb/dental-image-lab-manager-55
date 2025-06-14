@@ -1,4 +1,3 @@
-
 import {
   Sidebar,
   SidebarContent,
@@ -50,6 +49,11 @@ const menuItems = [
   //   url: "/doctors-log",
   //   icon: FileText,
   // },
+  {
+    title: "سجل دفعات الأطباء",
+    url: "/doctors-payments",
+    icon: FileText,
+  },
   {
     title: "قائمة الحالات",
     url: "/cases",
