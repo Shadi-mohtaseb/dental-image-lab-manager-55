@@ -1,3 +1,4 @@
+
 import {
   Sidebar,
   SidebarContent,
@@ -12,7 +13,6 @@ import {
 } from "@/components/ui/sidebar";
 import {
   Users,
-  UserPlus,
   Receipt,
   FileText,
   Search,
@@ -34,25 +34,16 @@ const menuItems = [
     url: "/partnership-accounts",
     icon: Users,
   },
+  // حذف قائمة حسابات الأطباء السابقة إن وجدت، وإبقاء فقط "حسابات الأطباء" لرابط "/doctors-accounts"
   {
     title: "حسابات الأطباء",
-    url: "/doctors-dashboard",
-    icon: UserPlus,
+    url: "/doctors-accounts",
+    icon: FileText,
   },
   {
     title: "إدارة المصاريف",
     url: "/expenses",
     icon: Receipt,
-  },
-  // {  <--- تم حذف اختصار سجل الأطباء من هنا
-  //   title: "سجل الأطباء",
-  //   url: "/doctors-log",
-  //   icon: FileText,
-  // },
-  {
-    title: "سجل دفعات الأطباء",
-    url: "/doctors-payments",
-    icon: FileText,
   },
   {
     title: "قائمة الحالات",
