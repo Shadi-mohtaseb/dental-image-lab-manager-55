@@ -1,6 +1,6 @@
 
 import { useDoctors } from "@/hooks/useDoctors";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,12 +9,12 @@ import { useState } from "react";
 
 interface DoctorsPaymentsTableProps {}
 
-export default function DoctorsPaymentsTable({}: DoctorsPaymentsTableProps) {
+export default function DoctorsPaymentsTable({ }: DoctorsPaymentsTableProps) {
   const { data: doctors = [], isLoading } = useDoctors();
   const [selectedDoctor, setSelectedDoctor] = useState<any>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  // استدعاء جميع الدفعات المرتبطة بالأطباء
+  // جلب جميع الدفعات للطبيب
   const { data: doctorPayments = [] } = useQuery({
     queryKey: ["doctor_transactions"],
     queryFn: async () => {
@@ -23,19 +23,33 @@ export default function DoctorsPaymentsTable({}: DoctorsPaymentsTableProps) {
         .select("*")
         .order("transaction_date", { ascending: false });
       if (error) throw error;
-      return data;
+      return data ?? [];
     },
   });
 
-  // **دفع إجمالي مستحق وزيادة الدفعات**
+  // جلب جميع الحالات
+  const { data: cases = [] } = useQuery({
+    queryKey: ["cases"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("cases")
+        .select("*");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  // حساب المستحق والمدفوع والمتبقي لكل طبيب
   function getDoctorAmounts(doctorId: string) {
-    const doctorTxs = doctorPayments.filter((tx) => tx.doctor_id === doctorId);
-    const totalCases = doctorTxs
-      .filter((tx) => tx.transaction_type === "مستحق")
-      .reduce((sum, tx) => sum + Number(tx.amount), 0);
-    const totalPayments = doctorTxs
-      .filter((tx) => tx.transaction_type === "دفعة")
-      .reduce((sum, tx) => sum + Number(tx.amount), 0);
+    // المستحق = مجموع أسعار الحالات لهذا الطبيب
+    const doctorCases = cases.filter((c: any) => c.doctor_id === doctorId);
+    const totalCases = doctorCases.reduce((sum: number, c: any) => sum + (Number(c.price) || 0), 0);
+
+    // المدفوع = مجموع الدفعات من جدول doctor_transactions
+    const doctorTxs = doctorPayments.filter((tx: any) => tx.doctor_id === doctorId && tx.transaction_type === "دفعة");
+    const totalPayments = doctorTxs.reduce((sum: number, tx: any) => sum + (Number(tx.amount) || 0), 0);
+
+    // الباقي
     return {
       totalCases,
       totalPayments,
@@ -57,7 +71,7 @@ export default function DoctorsPaymentsTable({}: DoctorsPaymentsTableProps) {
           </tr>
         </thead>
         <tbody>
-          {doctors.map((doc) => {
+          {doctors.map((doc: any) => {
             const { totalCases, totalPayments, remaining } = getDoctorAmounts(doc.id);
             return (
               <tr key={doc.id}>
@@ -94,3 +108,4 @@ export default function DoctorsPaymentsTable({}: DoctorsPaymentsTableProps) {
     </div>
   );
 }
+
