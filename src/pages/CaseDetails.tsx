@@ -51,42 +51,26 @@ const CaseDetails = () => {
     fetchCase();
   }, [id]);
 
-  // Mock data - in real app, this would come from API
+  // مراحل العمل مبسطة على مرحلتين فقط
   const workflowSteps = [
     {
       id: 1,
-      title: "تم التسليم",
-      description: "تم استلام الحالة من الطبيب",
-      status: "completed",
-      icon: CheckCircle,
+      title: "قيد التنفيذ",
+      description: "جاري العمل على تصنيع القطعة",
+      status: caseData?.status === "قيد التنفيذ" ? "current" : "completed",
+      icon: caseData?.status === "قيد التنفيذ" ? AlertCircle : CheckCircle,
     },
     {
       id: 2,
-      title: "المراجعة الأولية",
-      description: "مراجعة تفاصيل الحالة والمتطلبات",
-      status: "completed",
-      icon: CheckCircle,
-    },
-    {
-      id: 3,
-      title: "قيد التنفيذ",
-      description: "جاري العمل على تصنيع القطعة",
-      status: "completed",
-      icon: CheckCircle,
-    },
-    {
-      id: 4,
-      title: "اختبار القوي",
-      description: "فحص جودة العمل والتأكد من المطابقة",
-      status: "current",
-      icon: AlertCircle,
-    },
-    {
-      id: 5,
-      title: "تجميع العمل",
-      description: "تجميع القطع النهائية وإعدادها للتسليم",
-      status: "pending",
-      icon: Circle,
+      title: "جاهز للتسليم",
+      description: "تم الإنتهاء من العمل والحالة جاهزة للتسليم",
+      status: caseData?.status === "تم التسليم" ? "current" : caseData?.status === "قيد التنفيذ" ? "pending" : "completed",
+      icon:
+        caseData?.status === "تم التسليم"
+          ? AlertCircle
+          : caseData?.status === "قيد التنفيذ"
+          ? Circle
+          : CheckCircle,
     },
   ];
 
