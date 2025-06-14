@@ -21,7 +21,8 @@ import { useFinancialSummary } from "@/hooks/useFinancialSummary";
 import WithdrawFromShareDialog from "@/components/WithdrawFromShareDialog";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Wallet } from "lucide-react";
+import { useDoctors } from "@/hooks/useDoctors";
+import { useCases } from "@/hooks/useCases";
 
 const PartnershipAccounts = () => {
   const [showAddTransaction, setShowAddTransaction] = useState(false);
