@@ -87,20 +87,24 @@ export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
     },
   });
 
-  // تحديث السعر عند تغيير الطبيب أو نوع العمل (تم حذف number_of_teeth)
+  // تحديث السعر عند تغيير الطبيب أو نوع العمل أو عدد الأسنان
   useEffect(() => {
     const doctorId = form.watch("doctor_id");
     const workType = form.watch("work_type");
+    const numberOfTeeth = form.watch("number_of_teeth");
     const doctor: any = doctors.find((d: any) => d.id === doctorId);
     const pricePerTooth = getDoctorWorkTypePrice(doctor, workType);
+    const teethCount = Number(numberOfTeeth) || 1;
+    const totalPrice = pricePerTooth * teethCount;
 
-    if (form.getValues("price") !== pricePerTooth) {
-      form.setValue("price", pricePerTooth);
+    if (form.getValues("price") !== totalPrice) {
+      form.setValue("price", totalPrice);
     }
     // eslint-disable-next-line
   }, [
     form.watch("doctor_id"),
     form.watch("work_type"),
+    form.watch("number_of_teeth"),
     doctors,
   ]);
 

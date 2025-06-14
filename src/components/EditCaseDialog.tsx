@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useForm } from "react-hook-form";
 import { useUpdateCase } from "@/hooks/useCases";
+import { useDoctors } from "@/hooks/useDoctors";
 import { Tables } from "@/integrations/supabase/types";
 import { toast } from "@/hooks/use-toast";
 import { DoctorSelect } from "@/components/form/DoctorSelect";
@@ -38,7 +39,8 @@ export type EditCaseDialogProps = {
 };
 
 export function EditCaseDialog({ caseData, open, onOpenChange, onUpdate }: EditCaseDialogProps) {
-  const { register, handleSubmit, reset, control, setValue } = useForm<CaseForm>({
+  const { data: doctors = [] } = useDoctors();
+  const { register, handleSubmit, reset, control, setValue, watch } = useForm<CaseForm>({
     defaultValues: caseData
       ? {
           patient_name: caseData.patient_name,
@@ -58,6 +60,14 @@ export function EditCaseDialog({ caseData, open, onOpenChange, onUpdate }: EditC
   });
   const updateCase = useUpdateCase();
 
+  // لإيجاد السعر المناسب لنوع العمل للطبيب المختار
+  const getDoctorWorkTypePrice = (doctor: any, workType: string) => {
+    if (!doctor) return 0;
+    if (workType === "زيركون") return Number(doctor.zircon_price) || 0;
+    if (workType === "مؤقت") return Number(doctor.temp_price) || 0;
+    return 0;
+  };
+
   useEffect(() => {
     if (caseData) {
       reset({
@@ -76,6 +86,21 @@ export function EditCaseDialog({ caseData, open, onOpenChange, onUpdate }: EditC
       });
     }
   }, [caseData, open, reset]);
+
+  // تحديث السعر تلقائياً عند تغيير الطبيب أو نوع العمل أو عدد الأسنان
+  useEffect(() => {
+    const doctorId = watch("doctor_id");
+    const workType = watch("work_type");
+    const numberOfTeeth = watch("number_of_teeth");
+    
+    if (doctorId && workType && doctors.length > 0) {
+      const doctor: any = doctors.find((d: any) => d.id === doctorId);
+      const pricePerTooth = getDoctorWorkTypePrice(doctor, workType);
+      const teethCount = Number(numberOfTeeth) || 1;
+      const totalPrice = pricePerTooth * teethCount;
+      setValue("price", totalPrice);
+    }
+  }, [watch("doctor_id"), watch("work_type"), watch("number_of_teeth"), doctors, setValue, watch]);
 
   const onSubmit = async (values: any) => {
     if (!caseData) return;
@@ -161,7 +186,7 @@ export function EditCaseDialog({ caseData, open, onOpenChange, onUpdate }: EditC
               name="price"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>السعر (شيكل)</FormLabel>
+                  <FormLabel>السعر (شيكل) - يتم حسابه تلقائياً</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
@@ -169,6 +194,8 @@ export function EditCaseDialog({ caseData, open, onOpenChange, onUpdate }: EditC
                       step={0.01}
                       placeholder="0"
                       {...field}
+                      readOnly
+                      className="bg-gray-50"
                     />
                   </FormControl>
                   <FormMessage />

@@ -1,3 +1,4 @@
+
 import React from "react";
 
 interface CasesTableProps {
@@ -23,6 +24,7 @@ export function CasesTable({
             <th className="px-4 py-2">اسم المريض</th>
             <th className="px-4 py-2">تاريخ الاستلام</th>
             <th className="px-4 py-2">السعر</th>
+            <th className="px-4 py-2">عدد الأسنان</th>
             <th className="px-4 py-2">اسم الطبيب</th>
             <th className="px-4 py-2">نوع العمل</th>
             <th className="px-4 py-2">اللون</th>
@@ -47,6 +49,7 @@ export function CasesTable({
               <td className="px-4 py-2">
                 {caseItem.price ? `${caseItem.price} ₪` : "-"}
               </td>
+              <td className="px-4 py-2">{caseItem.number_of_teeth || "-"}</td>
               <td className="px-4 py-2">{caseItem.doctor_name || caseItem.doctor?.name || "-"}</td>
               <td className="px-4 py-2">{caseItem.work_type || "-"}</td>
               <td className="px-4 py-2">{caseItem.shade || "-"}</td>
