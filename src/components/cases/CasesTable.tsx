@@ -1,4 +1,3 @@
-
 import React from "react";
 
 interface CasesTableProps {
@@ -25,7 +24,6 @@ export function CasesTable({
             <th className="px-4 py-2">تاريخ الاستلام</th>
             <th className="px-4 py-2">السعر</th>
             <th className="px-4 py-2">اسم الطبيب</th>
-            <th className="px-4 py-2">اسم الشراكة</th>
             <th className="px-4 py-2">نوع العمل</th>
             <th className="px-4 py-2">اللون</th>
             <th className="px-4 py-2">بلوك الزيركون</th>
@@ -50,7 +48,6 @@ export function CasesTable({
                 {caseItem.price ? `${caseItem.price} ₪` : "-"}
               </td>
               <td className="px-4 py-2">{caseItem.doctor_name || caseItem.doctor?.name || "-"}</td>
-              <td className="px-4 py-2">{caseItem.partnership_name || "-"}</td>
               <td className="px-4 py-2">{caseItem.work_type || "-"}</td>
               <td className="px-4 py-2">{caseItem.shade || "-"}</td>
               <td className="px-4 py-2">{caseItem.zircon_block_type || "-"}</td>
@@ -68,7 +65,6 @@ export function CasesTable({
                 )}
               </td>
               <td className="px-4 py-2 flex gap-2 flex-wrap">
-                {/* View Button */}
                 {onView && (
                   <button
                     className="text-xs px-2 py-1 rounded bg-gray-200 hover:bg-gray-300"
@@ -77,7 +73,6 @@ export function CasesTable({
                     عرض
                   </button>
                 )}
-                {/* Edit Button */}
                 {onEdit && (
                   <button
                     className="text-xs px-2 py-1 rounded bg-blue-200 hover:bg-blue-300"
@@ -86,7 +81,6 @@ export function CasesTable({
                     تعديل
                   </button>
                 )}
-                {/* Delete Button */}
                 {onDelete && (
                   <button
                     className="text-xs px-2 py-1 rounded bg-red-200 hover:bg-red-300"
@@ -103,4 +97,3 @@ export function CasesTable({
     </div>
   );
 }
-
