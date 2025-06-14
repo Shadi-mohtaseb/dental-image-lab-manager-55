@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -68,6 +67,12 @@ export default function DoctorsAccountsTable({ doctors, cases }: Props) {
           </TableHeader>
           <TableBody>
             {doctors.map((doctor) => {
+              // Provide a default summary object for DoctorAccountPDFButton to satisfy TS
+              const summary = {
+                totalDue: 0,
+                totalPaid: 0,
+                remaining: 0,
+              };
               return (
                 <TableRow key={doctor.id} className="hover:bg-gray-50">
                   <TableCell className="font-semibold text-primary text-right w-[200px]">
@@ -79,7 +84,7 @@ export default function DoctorsAccountsTable({ doctors, cases }: Props) {
                   <TableCell className="text-center w-[120px]">
                     <DoctorAccountPDFButton
                       doctorName={doctor.name}
-                      summary={{}}
+                      summary={summary}
                       doctorCases={cases.filter((c) => c.doctor_id === doctor.id)}
                     />
                   </TableCell>
@@ -106,4 +111,3 @@ export default function DoctorsAccountsTable({ doctors, cases }: Props) {
     </Card>
   );
 }
-
