@@ -35,16 +35,18 @@ const Cases = () => {
     setSelectedCase(null);
   };
 
-  // Adjust doctor filter to account for "all" value (acts as "no filter")
+  // التصفية حسب البحث النصي للمريض أو dropdown للطبيب ونوع العمل
   const filteredCases = cases.filter((caseItem) => {
+    // إذا تم اختيار طبيب من القائمة المنسدلة، نعتمد فقط على الـ id (أولوية أساسية).
     if (selectedDoctorId && selectedDoctorId !== "all") {
       const matchesDoctor = caseItem.doctor_id === selectedDoctorId;
       const matchesWorkType = !workTypeFilter || caseItem.work_type === workTypeFilter;
       return matchesDoctor && matchesWorkType;
     }
-    // Otherwise, filter by text search and work type
-    const doctorName = (caseItem.doctor?.name || "").toLowerCase();
-    const matchesText = searchTerm ? doctorName.includes(searchTerm.toLowerCase()) : true;
+    // البحث النصي هنا سيتم على اسم المريض
+    const matchesText = searchTerm
+      ? (caseItem.patient_name || "").toLowerCase().includes(searchTerm.toLowerCase())
+      : true;
     const matchesWorkType = !workTypeFilter || caseItem.work_type === workTypeFilter;
     return matchesText && matchesWorkType;
   });
