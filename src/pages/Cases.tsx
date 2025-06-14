@@ -7,6 +7,7 @@ import { EditCaseDialog } from "@/components/EditCaseDialog";
 import { Tables } from "@/integrations/supabase/types";
 import { CasesFilterBar } from "@/components/cases/CasesFilterBar";
 import { CasesTable } from "@/components/cases/CasesTable";
+import { toast } from "@/hooks/use-toast";
 
 const Cases = () => {
   const navigate = useNavigate();
@@ -33,6 +34,23 @@ const Cases = () => {
   const handleUpdateCase = (updated: Tables<"cases">) => {
     setEditOpen(false);
     setSelectedCase(null);
+  };
+
+  // دالة تحديث الحالة عند الضغط على زر الحالة
+  const handleStatusChange = async (caseItem: Tables<"cases">, targetStatus: string) => {
+    try {
+      await updateCase.mutateAsync({ id: caseItem.id, status: targetStatus });
+      toast({
+        title: "تم تغيير حالة التنفيذ",
+        description: `تم تحديث الحالة إلى: ${targetStatus}`,
+      });
+    } catch (error) {
+      toast({
+        title: "حدث خطأ أثناء تحديث الحالة",
+        description: (error as Error)?.message || "يرجى المحاولة لاحقًا",
+        variant: "destructive",
+      });
+    }
   };
 
   // التصفية حسب البحث النصي للمريض أو dropdown للطبيب ونوع العمل
@@ -109,6 +127,7 @@ const Cases = () => {
                 setEditOpen(true);
               }}
               onDelete={handleDeleteCase}
+              onStatusChange={handleStatusChange}
             />
           )}
         </CardContent>
