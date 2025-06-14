@@ -24,8 +24,8 @@ function MainContent({ children }: { children: React.ReactNode }) {
         open ? "mr-[260px]" : "mr-0"
       }`}
     >
-      {/* زر اظهار السايدبار في أعلى يمين الصفحة (محتوى الصفحة وليس نافذة التطبيق) */}
-      <div className="flex justify-end items-center mb-4">
+      {/* زر اظهار السايدبار في أعلى يسار الصفحة (محتوى الصفحة وليس نافذة التطبيق) */}
+      <div className="flex justify-start items-center mb-4">
         <SidebarTrigger />
       </div>
       <div className="p-6 pt-0">{children}</div>
