@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -16,25 +15,35 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Tables } from "@/integrations/supabase/types";
+import { EditCaseDialog } from "@/components/EditCaseDialog";
 
 const CaseDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  // Mock data - in real app, this would come from API
-  const caseData = {
-    id: id || "A23",
-    caseNumber: "1",
-    patientName: "عبدالله محمد",
-    doctorName: "د. أحمد محمد",
-    workType: "زيركون",
-    submissionDate: "2025-06-05",
-    deliveryDate: "2025-06-15",
-    toothNumbers: "28 27 26 25 24 23 22 21 11 12 13 14 15 17 18",
-    currentStatus: "اختبار القوي",
-    progress: 75,
-  };
+  // حالة تحميل وجلب بيانات الحالة الفعلية من القاعدة
+  const [caseData, setCaseData] = useState<Tables<"cases"> | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [editOpen, setEditOpen] = useState(false);
 
+  useEffect(() => {
+    if (!id) return;
+    setLoading(true);
+    supabase
+      .from("cases")
+      .select("*")
+      .eq("id", id)
+      .single()
+      .then(({ data }) => {
+        setCaseData(data || null);
+      })
+      .finally(() => setLoading(false));
+  }, [id]);
+
+  // Mock data - in real app, this would come from API
   const workflowSteps = [
     {
       id: 1,
@@ -88,6 +97,23 @@ const CaseDetails = () => {
     return status === "completed" ? "bg-green-500" : "bg-gray-300";
   };
 
+  // إذا يقب تحميل بيانات الحالة
+  if (loading) {
+    return (
+      <div className="p-12 text-center text-lg animate-fade-in">
+        جاري تحميل تفاصيل الحالة...
+      </div>
+    );
+  }
+
+  if (!caseData) {
+    return (
+      <div className="p-12 text-center text-red-600">
+        لم يتم العثور على الحالة المطلوبة
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
@@ -123,28 +149,28 @@ const CaseDetails = () => {
                   <User className="w-5 h-5 text-primary" />
                   <div>
                     <p className="text-sm text-gray-600">اسم المريض</p>
-                    <p className="font-semibold">{caseData.patientName}</p>
+                    <p className="font-semibold">{caseData.patient_name}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <Stethoscope className="w-5 h-5 text-primary" />
                   <div>
                     <p className="text-sm text-gray-600">اسم الطبيب</p>
-                    <p className="font-semibold">{caseData.doctorName}</p>
+                    <p className="font-semibold">{caseData.doctor_id /* لاحقاً يمكن جلب اسم الدكتور */}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <Calendar className="w-5 h-5 text-primary" />
                   <div>
                     <p className="text-sm text-gray-600">تاريخ الإستلام</p>
-                    <p className="font-semibold">{caseData.submissionDate}</p>
+                    <p className="font-semibold">{caseData.submission_date}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <Clock className="w-5 h-5 text-primary" />
                   <div>
                     <p className="text-sm text-gray-600">تاريخ التسليم المتوقع</p>
-                    <p className="font-semibold">{caseData.deliveryDate}</p>
+                    <p className="font-semibold">{caseData.delivery_date || "-"}</p>
                   </div>
                 </div>
               </div>
@@ -155,7 +181,7 @@ const CaseDetails = () => {
                 <div>
                   <p className="text-sm text-gray-600">نوع العمل</p>
                   <Badge className="bg-purple-100 text-purple-700">
-                    {caseData.workType}
+                    {caseData.work_type}
                   </Badge>
                 </div>
                 <div>
@@ -163,14 +189,14 @@ const CaseDetails = () => {
                   <div className="mt-2 p-3 bg-gray-50 rounded-lg">
                     <div className="text-center">
                       <div className="grid grid-cols-9 gap-1 text-xs mb-2">
-                        {caseData.toothNumbers.split(' ').slice(0, 9).map((tooth, index) => (
+                        {(caseData.tooth_number?.split(' ') || []).slice(0, 9).map((tooth, index) => (
                           <div key={index} className="p-1 bg-blue-100 text-blue-700 rounded text-center">
                             {tooth}
                           </div>
                         ))}
                       </div>
                       <div className="grid grid-cols-9 gap-1 text-xs">
-                        {caseData.toothNumbers.split(' ').slice(9).map((tooth, index) => (
+                        {(caseData.tooth_number?.split(' ') || []).slice(9).map((tooth, index) => (
                           <div key={index} className="p-1 bg-blue-100 text-blue-700 rounded text-center">
                             {tooth}
                           </div>
@@ -220,12 +246,13 @@ const CaseDetails = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="text-center">
+                {/* placeholder progress: يمكنك لاحقاً استخدام نسبة الحالة الحقيقية لو كانت متاحة */}
                 <div className="text-3xl font-bold text-primary mb-2">
-                  {caseData.progress}%
+                  0%
                 </div>
-                <Progress value={caseData.progress} className="mb-3" />
+                <Progress value={0} className="mb-3" />
                 <Badge className="bg-blue-100 text-blue-700">
-                  {caseData.currentStatus}
+                  {caseData.status}
                 </Badge>
               </div>
             </CardContent>
@@ -241,7 +268,7 @@ const CaseDetails = () => {
                 <CheckCircle className="w-4 h-4 ml-2" />
                 جاهز للتسليم
               </Button>
-              <Button className="w-full" variant="outline">
+              <Button className="w-full" variant="outline" onClick={() => setEditOpen(true)}>
                 <FileText className="w-4 h-4 ml-2" />
                 تعديل الحالة
               </Button>
@@ -253,6 +280,7 @@ const CaseDetails = () => {
           </Card>
         </div>
       </div>
+      <EditCaseDialog caseData={caseData} open={editOpen} onOpenChange={setEditOpen} onUpdate={setCaseData} />
     </div>
   );
 };
