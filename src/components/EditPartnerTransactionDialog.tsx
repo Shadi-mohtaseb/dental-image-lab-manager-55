@@ -26,6 +26,7 @@ export default function EditPartnerTransactionDialog({ open, onOpenChange, partn
       transaction_type: "",
       transaction_date: "",
       description: "",
+      transaction_source: "manual",
     },
   });
 
@@ -37,21 +38,28 @@ export default function EditPartnerTransactionDialog({ open, onOpenChange, partn
         transaction_type: initialData.transaction_type,
         transaction_date: initialData.transaction_date,
         description: initialData.description ?? "",
+        transaction_source: initialData.transaction_source ?? "manual",
       });
     }
   }, [initialData, form]);
 
   const onSubmit = async (data: any) => {
     if (!initialData) return;
-    await updateTx.mutateAsync({
-      id: initialData.id,
-      partner_id: data.partner_id,
-      amount: Number(data.amount),
-      transaction_type: data.transaction_type,
-      transaction_date: data.transaction_date,
-      description: data.description,
-    });
-    onOpenChange(false);
+    
+    try {
+      await updateTx.mutateAsync({
+        id: initialData.id,
+        partner_id: data.partner_id,
+        amount: Number(data.amount),
+        transaction_type: data.transaction_type,
+        transaction_date: data.transaction_date,
+        description: data.description,
+        transaction_source: data.transaction_source,
+      });
+      onOpenChange(false);
+    } catch (error) {
+      console.error("Error updating transaction:", error);
+    }
   };
 
   return (
@@ -77,6 +85,7 @@ export default function EditPartnerTransactionDialog({ open, onOpenChange, partn
               </SelectContent>
             </Select>
           </div>
+          
           <div>
             <Label>نوع المعاملة</Label>
             <Select
@@ -92,6 +101,7 @@ export default function EditPartnerTransactionDialog({ open, onOpenChange, partn
               </SelectContent>
             </Select>
           </div>
+          
           <div>
             <Label>المبلغ</Label>
             <Input
@@ -101,6 +111,7 @@ export default function EditPartnerTransactionDialog({ open, onOpenChange, partn
               onChange={e => form.setValue("amount", e.target.value)}
             />
           </div>
+          
           <div>
             <Label>التاريخ</Label>
             <Input
@@ -109,6 +120,24 @@ export default function EditPartnerTransactionDialog({ open, onOpenChange, partn
               onChange={e => form.setValue("transaction_date", e.target.value)}
             />
           </div>
+          
+          <div>
+            <Label>مصدر المعاملة</Label>
+            <Select
+              value={form.watch("transaction_source")}
+              onValueChange={val => form.setValue("transaction_source", val)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="مصدر المعاملة" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="manual">يدوي</SelectItem>
+                <SelectItem value="case_profit">ربح حالة</SelectItem>
+                <SelectItem value="personal_withdrawal">سحب شخصي</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
           <div>
             <Label>الوصف</Label>
             <Textarea
@@ -116,12 +145,13 @@ export default function EditPartnerTransactionDialog({ open, onOpenChange, partn
               onChange={e => form.setValue("description", e.target.value)}
             />
           </div>
+          
           <div className="flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               إلغاء
             </Button>
             <Button type="submit" disabled={updateTx.isPending}>
-              {updateTx.isPending ? "جاري الحفظ..." : "حفظ"}
+              {updateTx.isPending ? "جاري الحفظ..." : "حفظ التعديلات"}
             </Button>
           </div>
         </form>

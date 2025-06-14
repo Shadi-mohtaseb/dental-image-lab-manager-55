@@ -74,6 +74,27 @@ export type Database = {
           },
         ]
       }
+      company_capital: {
+        Row: {
+          created_at: string
+          id: string
+          total_capital: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          total_capital?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          total_capital?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       doctor_transactions: {
         Row: {
           amount: number
@@ -215,35 +236,55 @@ export type Database = {
       partner_transactions: {
         Row: {
           amount: number
+          case_id: string | null
           created_at: string
           description: string | null
           id: string
           partner_id: string
           transaction_date: string
+          transaction_source: string | null
           transaction_type: string
           updated_at: string
         }
         Insert: {
           amount: number
+          case_id?: string | null
           created_at?: string
           description?: string | null
           id?: string
           partner_id: string
           transaction_date?: string
+          transaction_source?: string | null
           transaction_type: string
           updated_at?: string
         }
         Update: {
           amount?: number
+          case_id?: string | null
           created_at?: string
           description?: string | null
           id?: string
           partner_id?: string
           transaction_date?: string
+          transaction_source?: string | null
           transaction_type?: string
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "partner_transactions_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_transactions_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partner_balances"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "partner_transactions_partner_id_fkey"
             columns: ["partner_id"]
@@ -261,6 +302,7 @@ export type Database = {
           id: string
           name: string
           partnership_percentage: number
+          personal_balance: number | null
           phone: string | null
           total_amount: number
           updated_at: string
@@ -272,6 +314,7 @@ export type Database = {
           id?: string
           name: string
           partnership_percentage?: number
+          personal_balance?: number | null
           phone?: string | null
           total_amount?: number
           updated_at?: string
@@ -283,6 +326,7 @@ export type Database = {
           id?: string
           name?: string
           partnership_percentage?: number
+          personal_balance?: number | null
           phone?: string | null
           total_amount?: number
           updated_at?: string
@@ -291,10 +335,27 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      partner_balances: {
+        Row: {
+          calculated_balance: number | null
+          id: string | null
+          name: string | null
+          partnership_percentage: number | null
+          personal_balance: number | null
+          total_amount: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
-      [_ in never]: never
+      calculate_company_capital: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      distribute_profits_to_partners: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
       case_status:

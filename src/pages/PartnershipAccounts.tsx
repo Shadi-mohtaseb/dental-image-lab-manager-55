@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -5,27 +6,33 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Users, Plus, Edit, Trash2 } from "lucide-react";
+import { Users, Plus, Edit, Trash2, DollarSign, Calculator, Wallet } from "lucide-react";
 import { useState } from "react";
 import { usePartners } from "@/hooks/usePartners";
 import { toast } from "@/hooks/use-toast";
 import { usePartnerTransactions, useAddPartnerTransaction, useDeletePartnerTransaction } from "@/hooks/usePartnerTransactions";
+import { useCompanyCapital, useCalculateCompanyCapital, useDistributeProfits } from "@/hooks/useCompanyCapital";
 import EditPartnerTransactionDialog from "@/components/EditPartnerTransactionDialog";
+import AddPartnerDialog from "@/components/AddPartnerDialog";
+import WithdrawFromPersonalBalanceDialog from "@/components/WithdrawFromPersonalBalanceDialog";
 
 const PartnershipAccounts = () => {
   const [showAddTransaction, setShowAddTransaction] = useState(false);
   const [editTxOpen, setEditTxOpen] = useState(false);
   const [selectedTx, setSelectedTx] = useState(null);
+  const [withdrawOpen, setWithdrawOpen] = useState(false);
+  const [selectedPartner, setSelectedPartner] = useState(null);
 
   const { data: partners = [], isLoading: loadingPartners } = usePartners();
   const { data: transactions = [], isLoading: loadingTx } = usePartnerTransactions();
+  const { data: companyCapital } = useCompanyCapital();
   const addTx = useAddPartnerTransaction();
   const deleteTx = useDeletePartnerTransaction();
+  const calculateCapital = useCalculateCompanyCapital();
+  const distributeProfits = useDistributeProfits();
 
-  // عمليات السحب (حذف شريك)
   const handleDeletePartner = async (partnerId: string) => {
     if (window.confirm("هل أنت متأكد من حذف هذا الشريك؟")) {
-      // حذف عبر Supabase
       const { error } = await import("@/integrations/supabase/client").then(({ supabase }) =>
         supabase.from("partners").delete().eq("id", partnerId)
       );
@@ -44,7 +51,6 @@ const PartnershipAccounts = () => {
     }
   };
 
-  // إضافة معاملة، وتوزيع مبلغ الإيداع أو السحب على جميع الشركاء (ثلث لكل شريك)
   const handleAddTransaction = async (e: any) => {
     e.preventDefault();
     const form = e.target;
@@ -56,51 +62,37 @@ const PartnershipAccounts = () => {
     const amount = Number(amountRaw);
 
     if (!partnerId || !type || !amount || !date) {
-      toast({ title: "يرجى تعبئة كل الحقول المطلوبة", variant: "destructive" }); return;
+      toast({ title: "يرجى تعبئة كل الحقول المطلوبة", variant: "destructive" }); 
+      return;
     }
 
-    // إدراج معاملة رئيسية
     await addTx.mutateAsync({
       partner_id: partnerId,
       amount,
       transaction_type: type,
       transaction_date: date,
       description: desc,
+      transaction_source: "manual",
     });
-
-    // توزيع مبلغ الإيداع أو السحب على جميع الشركاء بنسبة الثلث (أو بالتساوي)
-    if (type === "deposit" || type === "withdraw") {
-      const otherPartners = partners.filter(p => p.id !== partnerId);
-      const partnersToAffect = [partnerId, ...otherPartners.slice(0, 2)];
-      const distributedAmount = amount / 3;
-      for (let pid of partnersToAffect) {
-        // لا تضيف للمعاملة الأصلية مرتين
-        if (pid === partnerId) continue;
-        await addTx.mutateAsync({
-          partner_id: pid,
-          amount: distributedAmount,
-          transaction_type: type,
-          transaction_date: date,
-          description: `[توزيع تلقائي] ${desc || ""}`,
-        });
-      }
-    }
 
     setShowAddTransaction(false);
     form.reset();
   };
 
-  // الحذف
   const handleDeleteTransaction = async (id: string) => {
     if (window.confirm("هل أنت متأكد من حذف هذه المعاملة؟")) {
       await deleteTx.mutateAsync(id);
     }
   };
 
-  // فتح التعديل
   const handleEditTx = (tx: any) => {
     setSelectedTx(tx);
     setEditTxOpen(true);
+  };
+
+  const handleWithdraw = (partner: any) => {
+    setSelectedPartner(partner);
+    setWithdrawOpen(true);
   };
 
   return (
@@ -113,18 +105,62 @@ const PartnershipAccounts = () => {
             <p className="text-gray-600">إدارة حسابات الشركاء والمعاملات المالية</p>
           </div>
         </div>
-        <Button
-          onClick={() => setShowAddTransaction(!showAddTransaction)}
-          className="bg-primary hover:bg-primary/90"
-        >
-          <Plus className="w-4 h-4 ml-2" />
-          إضافة معاملة
-        </Button>
+        <div className="flex gap-2">
+          <AddPartnerDialog />
+          <Button
+            onClick={() => setShowAddTransaction(!showAddTransaction)}
+            className="bg-primary hover:bg-primary/90"
+          >
+            <Plus className="w-4 h-4 ml-2" />
+            إضافة معاملة
+          </Button>
+        </div>
+      </div>
+
+      {/* Company Capital Summary */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-blue-100">رأس المال الإجمالي</p>
+                <p className="text-2xl font-bold">{(companyCapital?.total_capital || 0).toFixed(2)} ₪</p>
+              </div>
+              <DollarSign className="w-8 h-8 text-blue-200" />
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-6">
+            <Button 
+              onClick={() => calculateCapital.mutate()}
+              disabled={calculateCapital.isPending}
+              className="w-full"
+            >
+              <Calculator className="w-4 h-4 ml-2" />
+              {calculateCapital.isPending ? "جاري الحساب..." : "إعادة حساب رأس المال"}
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <Button 
+              onClick={() => distributeProfits.mutate()}
+              disabled={distributeProfits.isPending}
+              className="w-full bg-green-600 hover:bg-green-700"
+            >
+              <Users className="w-4 h-4 ml-2" />
+              {distributeProfits.isPending ? "جاري التوزيع..." : "توزيع الأرباح"}
+            </Button>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Partners Summary */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {partners.map((partner, index) => (
+        {partners.map((partner) => (
           <Card key={partner.id} className="hover:shadow-lg transition-shadow">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
@@ -141,16 +177,34 @@ const PartnershipAccounts = () => {
                   <span className="font-semibold text-primary">{partner.partnership_percentage?.toFixed(2)}%</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">الرصيد الحالي:</span>
+                  <span className="text-gray-600">الرصيد الإجمالي:</span>
                   <span className="font-bold text-2xl text-gray-900">{Number(partner.total_amount).toFixed(2)} ₪</span>
+                </div>
+                <div className="flex justify-between border-t pt-2">
+                  <span className="text-gray-600">الرصيد الشخصي:</span>
+                  <span className="font-semibold text-green-600">{Number(partner.personal_balance || 0).toFixed(2)} ₪</span>
+                </div>
+                <div className="flex gap-2">
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    className="text-blue-600 flex-1"
+                    onClick={() => handleWithdraw(partner)}
+                    disabled={!partner.personal_balance || partner.personal_balance <= 0}
+                  >
+                    <Wallet className="w-4 h-4 ml-1" /> سحب
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    className="text-red-600" 
+                    onClick={() => handleDeletePartner(partner.id)}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
                 </div>
               </div>
             </CardContent>
-            <div className="flex justify-end p-2">
-              <Button size="sm" variant="outline" className="text-red-600" onClick={() => handleDeletePartner(partner.id)}>
-                <Trash2 className="w-4 h-4" /> حذف
-              </Button>
-            </div>
           </Card>
         ))}
       </div>
@@ -228,6 +282,7 @@ const PartnershipAccounts = () => {
                 <TableHead>الشريك</TableHead>
                 <TableHead>نوع المعاملة</TableHead>
                 <TableHead>المبلغ</TableHead>
+                <TableHead>المصدر</TableHead>
                 <TableHead>الوصف</TableHead>
                 <TableHead>إجراءات</TableHead>
               </TableRow>
@@ -246,6 +301,12 @@ const PartnershipAccounts = () => {
                     </TableCell>
                     <TableCell className="font-semibold">
                       {Number(transaction.amount).toFixed(2)} ₪
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline">
+                        {transaction.transaction_source === "personal_withdrawal" ? "سحب شخصي" : 
+                         transaction.transaction_source === "case_profit" ? "ربح حالة" : "يدوي"}
+                      </Badge>
                     </TableCell>
                     <TableCell>{transaction.description}</TableCell>
                     <TableCell>
@@ -267,7 +328,7 @@ const PartnershipAccounts = () => {
         </CardContent>
       </Card>
 
-      {/* نافذة التعديل */}
+      {/* Dialogs */}
       <EditPartnerTransactionDialog
         open={editTxOpen}
         onOpenChange={(open) => {
@@ -276,6 +337,15 @@ const PartnershipAccounts = () => {
         }}
         partners={partners}
         initialData={selectedTx}
+      />
+
+      <WithdrawFromPersonalBalanceDialog
+        open={withdrawOpen}
+        onOpenChange={(open) => {
+          setWithdrawOpen(open);
+          if (!open) setSelectedPartner(null);
+        }}
+        partner={selectedPartner}
       />
     </div>
   );

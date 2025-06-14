@@ -15,48 +15,55 @@ import { useNavigate } from "react-router-dom";
 import { useCases } from "@/hooks/useCases";
 import { useDoctors } from "@/hooks/useDoctors";
 import { useExpenses } from "@/hooks/useExpenses";
+import { usePartners } from "@/hooks/usePartners";
+import { useCompanyCapital } from "@/hooks/useCompanyCapital";
 
 const Index = () => {
   const navigate = useNavigate();
   const { data: cases = [] } = useCases();
   const { data: doctors = [] } = useDoctors();
   const { data: expenses = [] } = useExpenses();
+  const { data: partners = [] } = usePartners();
+  const { data: companyCapital } = useCompanyCapital();
 
-  // حساب الإحصائيات الحقيقية
+  // حساب الإحصائيات المترابطة
   const totalCases = cases.length;
   const activeDoctors = doctors.length;
+  const activePartners = partners.length;
   const inProgressCases = cases.filter(c => c.status === 'قيد التنفيذ').length;
   const totalRevenue = cases.reduce((sum, c) => sum + (c.price || 0), 0);
   const monthlyExpenses = expenses.reduce((sum, e) => sum + e.total_amount, 0);
+  const companyCapitalAmount = companyCapital?.total_capital || 0;
+  const netProfit = totalRevenue - monthlyExpenses;
 
   const stats = [
     {
+      title: "رأس المال",
+      value: `${companyCapitalAmount.toFixed(0)} ₪`,
+      change: netProfit > 0 ? `+${((netProfit / (totalRevenue || 1)) * 100).toFixed(1)}%` : "0%",
+      icon: DollarSign,
+      color: "text-green-600",
+    },
+    {
       title: "إجمالي الحالات",
       value: totalCases.toString(),
-      change: "+12%",
+      change: `${inProgressCases} جارية`,
       icon: FileText,
       color: "text-blue-600",
     },
     {
-      title: "الأطباء النشطون",
-      value: activeDoctors.toString(),
-      change: "+2",
-      icon: UserPlus,
-      color: "text-green-600",
-    },
-    {
-      title: "إجمالي الإيرادات",
-      value: `${totalRevenue.toLocaleString()} ر.س`,
-      change: "+8%",
-      icon: DollarSign,
+      title: "الشركاء النشطون",
+      value: activePartners.toString(),
+      change: `${((activePartners / Math.max(activePartners, 1)) * 100).toFixed(0)}% نشط`,
+      icon: Users,
       color: "text-purple-600",
     },
     {
-      title: "الحالات الجارية",
-      value: inProgressCases.toString(),
-      change: "+5",
-      icon: Activity,
-      color: "text-orange-600",
+      title: "صافي الربح",
+      value: `${netProfit.toFixed(0)} ₪`,
+      change: netProfit > 0 ? "+ربح" : "خسارة",
+      icon: TrendingUp,
+      color: netProfit > 0 ? "text-green-600" : "text-red-600",
     },
   ];
 
@@ -91,7 +98,7 @@ const Index = () => {
     },
   ];
 
-  // آخر النشاطات الحقيقية
+  // آخر النشاطات المترابطة
   const recentCases = cases.slice(0, 3);
 
   return (
@@ -156,7 +163,7 @@ const Index = () => {
         </CardContent>
       </Card>
 
-      {/* Recent Activity */}
+      {/* Recent Activity & Performance Summary */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="animate-slide-up">
           <CardHeader>
@@ -168,7 +175,7 @@ const Index = () => {
           <CardContent>
             <div className="space-y-4">
               {recentCases.length > 0 ? (
-                recentCases.map((caseItem, index) => (
+                recentCases.map((caseItem) => (
                   <div key={caseItem.id} className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
                     <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                     <div>
@@ -192,29 +199,36 @@ const Index = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <TrendingUp className="w-5 h-5" />
-              ملخص الأداء
+              ملخص الأداء المالي
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">إجمالي الحالات</span>
-                <span className="text-lg font-bold text-green-600">{totalCases}</span>
+                <span className="text-sm text-gray-600">رأس المال</span>
+                <span className="text-lg font-bold text-blue-600">{companyCapitalAmount.toFixed(2)} ₪</span>
               </div>
               
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">الأطباء المسجلون</span>
-                <span className="text-lg font-bold text-blue-600">{activeDoctors}</span>
+                <span className="text-sm text-gray-600">إجمالي الإيرادات</span>
+                <span className="text-lg font-bold text-green-600">{totalRevenue.toFixed(2)} ₪</span>
               </div>
 
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">إجمالي المصاريف</span>
-                <span className="text-lg font-bold text-red-600">{monthlyExpenses.toLocaleString()} ر.س</span>
+                <span className="text-lg font-bold text-red-600">{monthlyExpenses.toFixed(2)} ₪</span>
+              </div>
+
+              <div className="flex justify-between items-center border-t pt-2">
+                <span className="text-sm text-gray-600">صافي الربح</span>
+                <span className={`text-lg font-bold ${netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {netProfit.toFixed(2)} ₪
+                </span>
               </div>
 
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">الحالات الجارية</span>
-                <span className="text-lg font-bold text-purple-600">{inProgressCases}</span>
+                <span className="text-sm text-gray-600">عدد الشركاء</span>
+                <span className="text-lg font-bold text-purple-600">{activePartners}</span>
               </div>
             </div>
           </CardContent>
