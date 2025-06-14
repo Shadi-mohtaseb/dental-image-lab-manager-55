@@ -83,8 +83,39 @@ export function useEditCaseForm(
         submission_date: caseData.submission_date || "",
         delivery_date: caseData.delivery_date || "",
       });
+
+      // Force recalculate price after form reset
+      setTimeout(() => {
+        const doctorId = caseData.doctor_id;
+        const workType = caseData.work_type;
+        const numberOfTeeth = caseData.number_of_teeth;
+        
+        console.log("فرض إعادة حساب السعر:", {
+          doctorId,
+          workType,
+          numberOfTeeth,
+          doctorsAvailable: doctors.length > 0
+        });
+
+        if (doctorId && workType && doctors.length > 0 && numberOfTeeth) {
+          const doctor: any = doctors.find((d: any) => d.id === doctorId);
+          const pricePerTooth = getDoctorWorkTypePrice(doctor, workType);
+          const teethCount = Number(numberOfTeeth);
+          const totalPrice = pricePerTooth * teethCount;
+          
+          console.log("إجبار حساب السعر:", {
+            doctor: doctor?.name,
+            pricePerTooth,
+            teethCount,
+            totalPrice,
+            calculation: `${pricePerTooth} × ${teethCount} = ${totalPrice}`
+          });
+          
+          setValue("price", totalPrice);
+        }
+      }, 100);
     }
-  }, [caseData, open, reset]);
+  }, [caseData, open, reset, doctors, setValue]);
 
   // Auto-calculate price when doctor, work type, or number of teeth changes
   useEffect(() => {
@@ -92,7 +123,7 @@ export function useEditCaseForm(
     const workType = watch("work_type");
     const numberOfTeeth = watch("number_of_teeth");
     
-    console.log("قيم الحساب الحالية:", {
+    console.log("مراقبة تغيير القيم:", {
       doctorId,
       workType, 
       numberOfTeeth,
@@ -107,10 +138,9 @@ export function useEditCaseForm(
       // تحويل عدد الأسنان إلى رقم صحيح
       let teethCount = 1;
       if (numberOfTeeth !== "" && numberOfTeeth !== null && numberOfTeeth !== undefined) {
-        teethCount = Number(numberOfTeeth);
-        // التأكد من أن الرقم صحيح
-        if (isNaN(teethCount) || teethCount <= 0) {
-          teethCount = 1;
+        const parsedTeeth = Number(numberOfTeeth);
+        if (!isNaN(parsedTeeth) && parsedTeeth > 0) {
+          teethCount = parsedTeeth;
         }
       }
       
@@ -121,10 +151,15 @@ export function useEditCaseForm(
         pricePerTooth,
         teethCount,
         totalPrice,
-        calculation: `${pricePerTooth} × ${teethCount} = ${totalPrice}`
+        calculation: `${pricePerTooth} × ${teethCount} = ${totalPrice}`,
+        currentPrice: watch("price")
       });
       
-      setValue("price", totalPrice);
+      // Only update if price has actually changed
+      if (watch("price") !== totalPrice) {
+        console.log("تحديث السعر من", watch("price"), "إلى", totalPrice);
+        setValue("price", totalPrice);
+      }
     }
   }, [watch("doctor_id"), watch("work_type"), watch("number_of_teeth"), doctors, setValue, watch]);
 

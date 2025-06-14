@@ -1,3 +1,4 @@
+
 import {
   Form,
   FormControl,
@@ -107,10 +108,9 @@ export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
       // تحويل عدد الأسنان إلى رقم صحيح
       let teethCount = 1;
       if (numberOfTeeth !== undefined && numberOfTeeth !== null) {
-        teethCount = Number(numberOfTeeth);
-        // التأكد من أن الرقم صحيح
-        if (isNaN(teethCount) || teethCount <= 0) {
-          teethCount = 1;
+        const parsedTeeth = Number(numberOfTeeth);
+        if (!isNaN(parsedTeeth) && parsedTeeth > 0) {
+          teethCount = parsedTeeth;
         }
       }
       
@@ -121,10 +121,13 @@ export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
         pricePerTooth,
         teethCount,
         totalPrice,
-        calculation: `${pricePerTooth} × ${teethCount} = ${totalPrice}`
+        calculation: `${pricePerTooth} × ${teethCount} = ${totalPrice}`,
+        currentPrice: form.getValues("price")
       });
 
+      // Only update if the calculated price is different
       if (form.getValues("price") !== totalPrice) {
+        console.log("تحديث السعر في الإضافة من", form.getValues("price"), "إلى", totalPrice);
         form.setValue("price", totalPrice);
       }
     }
@@ -138,6 +141,7 @@ export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
 
   const onSubmit = async (data: FormData) => {
     try {
+      console.log("إرسال بيانات الحالة الجديدة:", data);
       await addCase.mutateAsync({
         patient_name: data.patient_name,
         doctor_id: data.doctor_id,
