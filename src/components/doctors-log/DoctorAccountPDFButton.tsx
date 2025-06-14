@@ -30,11 +30,18 @@ interface Props {
 import autoTable from "jspdf-autotable"; // استورد التابع الافتراضي إن وجد
 
 // تأكد من إضافة autoTable يدويًا في حال لم يتم ربطها تلقائيًا
-if (typeof (jsPDF as any).API !== "undefined" && !(jsPDF as any).API.autoTable) {
+if (
+  typeof (jsPDF as any).API !== "undefined" &&
+  !(jsPDF as any).API.autoTable
+) {
   (jsPDF as any).API.autoTable = autoTable;
 }
 
-export const DoctorAccountPDFButton: React.FC<Props> = ({ doctorName, summary, doctorCases }) => {
+export const DoctorAccountPDFButton: React.FC<Props> = ({
+  doctorName,
+  summary,
+  doctorCases,
+}) => {
   const [loading, setLoading] = useState(false);
   const [fromDate, setFromDate] = useState<Date | undefined>(undefined);
   const [toDate, setToDate] = useState<Date | undefined>(undefined);
@@ -68,17 +75,34 @@ export const DoctorAccountPDFButton: React.FC<Props> = ({ doctorName, summary, d
 
   const handleExport = async () => {
     setLoading(true);
-    
+
     try {
       if (!filteredCases.length) {
         toast({
           title: "لا يوجد بيانات ضمن المدة المحددة!",
-          description: "يرجى تعديل الفترة أو إضافة حالات للطبيب ضمن تلك الفترة.",
+          description:
+            "يرجى تعديل الفترة أو إضافة حالات للطبيب ضمن تلك الفترة.",
           variant: "destructive",
         });
         setLoading(false);
         return;
       }
+
+      // إضافة اختبار أن autoTable معرفة في jsPDF
+      if (
+        typeof (jsPDF as any).API === "undefined" ||
+        typeof (jsPDF as any).API.autoTable !== "function"
+      ) {
+        toast({
+          title: "خطأ في تصدير PDF",
+          description:
+            "لم يتم تحميل ميزة الجدول (autoTable) بشكل صحيح. أعد تحميل الصفحة أو تواصل مع الدعم.",
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+      console.log("هل autoTable متوفرة؟", typeof (jsPDF as any).API.autoTable);
 
       const doc = new jsPDF({
         orientation: "p",
@@ -121,7 +145,16 @@ export const DoctorAccountPDFButton: React.FC<Props> = ({ doctorName, summary, d
       ]);
 
       doc.autoTable({
-        head: [["اسم المريض", "نوع العمل", "المبلغ", "الحالة", "تاريخ التسليم", "رقم الحالة"]],
+        head: [
+          [
+            "اسم المريض",
+            "نوع العمل",
+            "المبلغ",
+            "الحالة",
+            "تاريخ التسليم",
+            "رقم الحالة",
+          ],
+        ],
         body: caseRows,
         styles: {
           fontSize: 10,
@@ -146,7 +179,12 @@ export const DoctorAccountPDFButton: React.FC<Props> = ({ doctorName, summary, d
       // ذيل الصفحة
       doc.setFontSize(11);
       doc.setTextColor(90);
-      doc.text("تم توليد كشف الحساب عبر نظام إدارة المختبر", 105, 285, { align: "center" });
+      doc.text(
+        "تم توليد كشف الحساب عبر نظام إدارة المختبر",
+        105,
+        285,
+        { align: "center" }
+      );
 
       doc.save(`كشف_حساب_${doctorName}.pdf`);
 
@@ -159,7 +197,8 @@ export const DoctorAccountPDFButton: React.FC<Props> = ({ doctorName, summary, d
       console.error("خطأ في تصدير PDF:", err);
       toast({
         title: "حدث خطأ عند التصدير!",
-        description: err?.message || "خطأ غير معروف. يرجى المحاولة مرة أخرى.",
+        description:
+          err?.message || "خطأ غير معروف. يرجى المحاولة مرة أخرى.",
         variant: "destructive",
       });
     } finally {
