@@ -6,6 +6,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { toast } from "@/components/ui/use-toast";
 import { DoctorPDFDateRangePicker } from "./DoctorPDFDateRangePicker";
 import { useDoctorAccountPDFExport } from "./useDoctorAccountPDFExport";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Props {
   doctorName: string;
@@ -14,12 +16,14 @@ interface Props {
     totalPaid: number;
     remaining: number;
   };
-  doctorCases: any[];
+  doctorCases?: any[]; // سنعتمد على الجلب التلقائي وليس props غالباً
+  doctorId?: string;    // ضروري لجلب الحالات مباشرة
 }
 
 export const DoctorAccountPDFButton: React.FC<Props> = ({
   doctorName,
   summary,
+  doctorId,
   doctorCases,
 }) => {
   const [loading, setLoading] = useState(false);
@@ -27,15 +31,34 @@ export const DoctorAccountPDFButton: React.FC<Props> = ({
   const [toDate, setToDate] = useState<Date | undefined>(undefined);
   const [popoverOpen, setPopoverOpen] = useState(false);
 
+  // جلب كل الحالات الخاصة بهذا الطبيب (يفضل دائماً الاعتماد على قاعدة البيانات في لحظة التصدير)
+  const { data: fetchedDoctorCases = [], isFetching } = useQuery({
+    queryKey: ["export-cases", doctorId],
+    queryFn: async () => {
+      if (!doctorId) return [];
+      const { data, error } = await supabase
+        .from("cases")
+        .select("*")
+        .eq("doctor_id", doctorId);
+
+      if (error) {
+        throw error;
+      }
+      return data ?? [];
+    },
+    enabled: !!doctorId,
+  });
+
   const { exportPDF } = useDoctorAccountPDFExport();
 
   const handleExport = async () => {
     setLoading(true);
     try {
+      // استخدم الحالات المجلبة حديثاً دائماً (ولا تعتمد على prop doctorCases)
       await exportPDF({
         doctorName,
         summary,
-        doctorCases,
+        doctorCases: fetchedDoctorCases,
         fromDate,
         toDate,
       });
@@ -63,11 +86,11 @@ export const DoctorAccountPDFButton: React.FC<Props> = ({
           toDate={toDate}
           onFromDateChange={setFromDate}
           onToDateChange={setToDate}
-          disabled={loading}
+          disabled={loading || isFetching}
         />
         <Button
           type="button"
-          disabled={loading}
+          disabled={loading || isFetching}
           onClick={() => {
             setPopoverOpen(false);
             handleExport();

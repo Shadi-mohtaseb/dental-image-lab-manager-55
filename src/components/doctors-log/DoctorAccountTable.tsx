@@ -1,4 +1,3 @@
-
 import React, { useMemo, useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
@@ -118,7 +117,7 @@ export default function DoctorAccountTable({ doctors, cases }: Props) {
                         <DoctorAccountPDFButton
                           doctorName={doc.name}
                           summary={{ totalDue, totalPaid, remaining }}
-                          doctorCases={doctorCases}
+                          doctorId={doc.id}
                         />
                       )}
                     </TableCell>
@@ -153,7 +152,7 @@ export default function DoctorAccountTable({ doctors, cases }: Props) {
                       <DoctorAccountPDFButton
                         doctorName={doc.name}
                         summary={{ totalDue, totalPaid, remaining }}
-                        doctorCases={doctorCases}
+                        doctorId={doc.id}
                       />
                     </TableCell>
                     <TableCell className="text-center w-[240px]">
