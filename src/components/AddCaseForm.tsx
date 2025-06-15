@@ -1,3 +1,4 @@
+
 import {
   Form,
   FormControl,
@@ -43,12 +44,19 @@ const formSchema = z.object({
   number_of_teeth: z
     .preprocess(val => (val === "" ? undefined : Number(val)), z.number({ invalid_type_error: "يرجى إدخال عدد الأسنان" }).min(1, "يرجى إدخال عدد الأسنان").optional()),
   tooth_number: z.string().optional(),
-  delivery_date: z.preprocess((val) => (typeof val === "string" && val !== "" ? val : new Date().toISOString().split('T')[0]), z.string({ required_error: "تاريخ الاستلام مطلوب" })),
-  submission_date: z.preprocess((val) => {
-    // يحول القيم الفارغة إلى null! أي قيمة نصية فارغة أو قيمة null تصبح null
-    if (typeof val === "string" && val.trim() === "") return null;
-    return val;
-  }, z.string().nullable()), // نجعلها nullable فقط
+  delivery_date: z.preprocess(
+    (val) =>
+      typeof val === "string" && val !== ""
+        ? val
+        : new Date().toISOString().split('T')[0],
+    z.string({ required_error: "تاريخ الاستلام مطلوب" })
+  ),
+  // الآن نجعل submission_date (تاريخ التسليم) إجباري:
+  submission_date: z.preprocess(
+    (val) => (typeof val === "string" && val.trim() === "" ? undefined : val),
+    z.string({ required_error: "تاريخ التسليم مطلوب" })
+      .min(1, "تاريخ التسليم مطلوب")
+  ),
   status: z.enum(caseStatuses).default("قيد التنفيذ"),
   notes: z.string().optional(),
   price: z.preprocess(
