@@ -1,3 +1,4 @@
+
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { toast } from "@/components/ui/use-toast";
@@ -33,81 +34,67 @@ export function useDoctorAccountPDFExport() {
         description: "لم يتم جلب أي حالة (cases) من قاعدة البيانات للطبيب المطلوب.",
         variant: "destructive",
       });
-      console.warn("⚠️ doctorCases غير موجود أو فارغ:", doctorCases);
-      throw new Error("لا يوجد بيانات للحالات.");
+      // لا ترمي خطأ، فقط أكمل بتصدير ملف فارغ بعنوان فقط
     }
 
     // سجل قبل الفلترة
-    console.log("🔸 عدد الحالات قبل الفلترة:", doctorCases.length);
-    let countRejected = 0;
+    console.log("🔸 عدد الحالات قبل الفلترة:", doctorCases?.length ?? 0);
 
-    // تصفية الحالات بحسب التاريخ المختار (مع تحديد أسباب الرفض)
+    // فلترة اختيارية للتواريخ فقط (لكن لا نمنع أي صف عن التصدير)
+    let warningCount = 0;
     const filteredCases = (doctorCases || []).filter((c, idx) => {
-      const rawDelivery = c.delivery_date;
-      const rawCreated = c.created_at;
+      let include = true;
+      // إذا تم اختيار فترة تصفية حسب التاريخ
+      if (fromDate || toDate) {
+        const rawDelivery = c.delivery_date;
+        const rawCreated = c.created_at;
+        let dateStr = rawDelivery ?? (typeof rawCreated === "string" ? rawCreated.slice(0, 10) : null);
 
-      let dateStr = rawDelivery ?? (typeof rawCreated === "string" ? rawCreated.slice(0, 10) : null);
-      if (!dateStr) {
-        console.log(`[فلترة] idx=${idx} رفضت: لا يوجد delivery_date ولا created_at`, c);
-        countRejected++;
-        return false;
-      }
+        let caseDateObj: Date | undefined;
+        if (dateStr) {
+          try {
+            caseDateObj = typeof dateStr === "string" ? new Date(dateStr) : dateStr;
+          } catch (err) {
+            include = false;
+            warningCount++;
+          }
+        } else {
+          // بدون تاريخ، لا يمكن الفلترة
+          include = false;
+          warningCount++;
+        }
 
-      let caseDateObj: Date | undefined;
-      try {
-        caseDateObj = typeof dateStr === "string" ? new Date(dateStr) : dateStr;
-        if (isNaN(caseDateObj.getTime())) {
-          // تاريخ غير صالح!
-          console.log(`[فلترة] idx=${idx} رفضت: تاريخ غير قابل للتحويل`, { dateStr, case: c });
-          countRejected++;
-          return false;
+        if (include && fromDate && caseDateObj) {
+          const startOfDay = new Date(fromDate);
+          startOfDay.setHours(0, 0, 0, 0);
+          if (caseDateObj < startOfDay) {
+            include = false;
+          }
         }
-      } catch (err) {
-        console.log(`[فلترة] idx=${idx} رفضت: خطأ في تحويل التاريخ`, { dateStr, err, case: c });
-        countRejected++;
-        return false;
-      }
-
-      if (fromDate) {
-        const startOfDay = new Date(fromDate);
-        startOfDay.setHours(0, 0, 0, 0);
-        if (caseDateObj < startOfDay) {
-          console.log(`[فلترة] idx=${idx} رفضت: قبل fromDate`, { caseDateObj, fromDate });
-          countRejected++;
-          return false;
+        if (include && toDate && caseDateObj) {
+          const endOfDay = new Date(toDate);
+          endOfDay.setHours(23, 59, 59, 999);
+          if (caseDateObj > endOfDay) {
+            include = false;
+          }
         }
+        return include;
       }
-      if (toDate) {
-        const endOfDay = new Date(toDate);
-        endOfDay.setHours(23, 59, 59, 999);
-        if (caseDateObj > endOfDay) {
-          console.log(`[فلترة] idx=${idx} رفضت: بعد toDate`, { caseDateObj, toDate });
-          countRejected++;
-          return false;
-        }
-      }
+      // بدون تصفية زمنية، مرر كل الصفوف
       return true;
     });
 
-    console.log("🟢 عدد الحالات (بعد الفلترة):", filteredCases.length, "✓ - تم استبعاد", countRejected, "حالة");
-    if (filteredCases.length === 0) {
+    if (doctorCases && doctorCases.length > 0 && filteredCases.length === 0) {
       toast({
-        title: "لا يوجد بيانات ضمن المدة المحددة!",
-        description:
-          "يرجى تعديل الفترة أو إضافة حالات للطبيب ضمن تلك الفترة، أو التأكد من أن الطبيب المحدد لديه حالات.\nتأكد من توفر (delivery_date) أو (created_at) في كل حالة وصحتها.",
+        title: "لا يوجد بيانات مطابقة للفترة الزمنية المحددة",
+        description: "يرجى تعديل الفترة الزمنية أو إزالة الفلترة لعرض جميع الحالات.",
         variant: "destructive",
       });
-      // أطبع كل الحالات الخام مع تواريخها للمتابعة
-      console.log("🔴 جميع تواريخ الحالات الخام:", (doctorCases || []).map((c, i) => ({
-        i,
-        patient_name: c?.patient_name,
-        delivery_date: c?.delivery_date,
-        created_at: c?.created_at,
-        price: c?.price,
-        status: c?.status,
-      })));
-      throw new Error("لا يوجد بيانات صالحة للتصدير.");
+      // ولكن سنكمل التصدير مع ترك الجدول فارغ
     }
+
+    // ملاحظة: نستخدم filteredCases (ملفترة بالفترة الزمنية فقط وليس بحسب اكتمال البيانات)
+    const exportRows = filteredCases && filteredCases.length > 0 ? filteredCases : [];
 
     let doc: jsPDF;
     try {
@@ -127,7 +114,7 @@ export function useDoctorAccountPDFExport() {
             "لم يتم تحميل ميزة الجدول (autoTable) بشكل صحيح. أعد تحميل الصفحة أو تواصل مع الدعم.",
           variant: "destructive",
         });
-        throw new Error("autoTable not loaded");
+        return; // لا ترمي خطأ فقط أوقف العملية
       }
 
       doc.setTextColor(40, 51, 102);
@@ -152,54 +139,75 @@ export function useDoctorAccountPDFExport() {
       doc.setTextColor(30, 30, 30);
 
       // جدول الحالات
-      const caseRows = filteredCases.map((c) => [
+      const caseRows = exportRows.map((c) => [
         c?.patient_name ?? "",
         c?.work_type ?? "",
         (c?.price != null && c?.price !== undefined && !isNaN(Number(c.price))) ? Number(c.price).toLocaleString() : "",
         c?.status ?? "",
-        (c?.delivery_date ?? c?.created_at?.slice(0, 10)) ?? "",
-        c?.id?.slice(0, 6) ? c.id.slice(0, 6) + "..." : "",
+        (c?.delivery_date ?? (c?.created_at ? String(c.created_at).slice(0,10) : "")) ?? "",
+        (c?.id?.slice(0, 6) ? c.id.slice(0, 6) + "..." : ""),
       ]);
       console.log("صفوف الجدول للحالة:", caseRows);
 
-      if (!caseRows.length) {
-        toast({
-          title: "لا يوجد حالات مرتبطة للطبيب!",
-          description: "لا يوجد بيانات حالات للطبيب المحدد للتصدير.",
-          variant: "destructive",
+      if (caseRows.length === 0) {
+        // جدول بلا بيانات
+        (doc as any).autoTable({
+          head: [[
+            "اسم المريض",
+            "نوع العمل",
+            "المبلغ",
+            "الحالة",
+            "تاريخ التسليم",
+            "رقم الحالة",
+          ]],
+          body: [],
+          styles: {
+            fontSize: 10,
+            cellWidth: "wrap",
+            textColor: [33, 37, 41],
+            halign: "right",
+          },
+          headStyles: {
+            fillColor: [40, 51, 102],
+            textColor: [255, 255, 255],
+            fontStyle: "bold",
+            halign: "center",
+          },
+          startY: 62,
+          theme: "grid",
+          margin: { left: 12, right: 12 },
         });
-        throw new Error("لا يوجد صفوف بيانات للحالات.");
+      } else {
+        (doc as any).autoTable({
+          head: [[
+            "اسم المريض",
+            "نوع العمل",
+            "المبلغ",
+            "الحالة",
+            "تاريخ التسليم",
+            "رقم الحالة",
+          ]],
+          body: caseRows,
+          styles: {
+            fontSize: 10,
+            cellWidth: "wrap",
+            textColor: [33, 37, 41],
+            halign: "right",
+          },
+          headStyles: {
+            fillColor: [40, 51, 102],
+            textColor: [255, 255, 255],
+            fontStyle: "bold",
+            halign: "center",
+          },
+          startY: 62,
+          theme: "grid",
+          margin: { left: 12, right: 12 },
+          didParseCell: (data: any) => {
+            data.cell.styles.halign = "right";
+          },
+        });
       }
-
-      (doc as any).autoTable({
-        head: [[
-          "اسم المريض",
-          "نوع العمل",
-          "المبلغ",
-          "الحالة",
-          "تاريخ التسليم",
-          "رقم الحالة",
-        ]],
-        body: caseRows,
-        styles: {
-          fontSize: 10,
-          cellWidth: "wrap",
-          textColor: [33, 37, 41],
-          halign: "right",
-        },
-        headStyles: {
-          fillColor: [40, 51, 102],
-          textColor: [255, 255, 255],
-          fontStyle: "bold",
-          halign: "center",
-        },
-        startY: 62,
-        theme: "grid",
-        margin: { left: 12, right: 12 },
-        didParseCell: (data: any) => {
-          data.cell.styles.halign = "right";
-        },
-      });
 
       doc.setFontSize(11);
       doc.setTextColor(90);
@@ -213,7 +221,9 @@ export function useDoctorAccountPDFExport() {
 
       toast({
         title: "تم تصدير الملف بنجاح",
-        description: "تم حفظ ملف PDF في جهازك.",
+        description: (caseRows.length === 0
+          ? "لم توجد بيانات حالات لهذا الطبيب في الفترة المحددة (تم التصدير ببيانات الحساب فقط)."
+          : "تم حفظ ملف PDF في جهازك."),
         variant: "default",
       });
     } catch (err: any) {
@@ -223,7 +233,6 @@ export function useDoctorAccountPDFExport() {
         variant: "destructive",
       });
       console.error("خطأ أثناء تصدير PDF:", err);
-      throw err;
     }
   };
 
