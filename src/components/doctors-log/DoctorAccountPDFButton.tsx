@@ -33,6 +33,8 @@ export const DoctorAccountPDFButton: React.FC<Props> = ({
 
   const handlePrint = () => {
     setPopoverOpen(false);
+    // إضافة لوج لمراقبة الحالات للطبيب الحالي
+    console.log('doctorCases to print for', doctorName, doctorId, doctorCases);
     if (!doctorCases || doctorCases.length === 0) {
       toast({
         title: "لا توجد حالات للعرض",
