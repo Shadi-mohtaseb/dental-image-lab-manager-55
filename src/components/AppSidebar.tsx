@@ -9,6 +9,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import {
   Users,
@@ -61,10 +62,14 @@ const menuItems = [
 export function AppSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { open, isMobile } = useSidebar();
+
+  // عند الإغلاق في الديسكتوب (غـيـر الجوال)، نخفي تماما العنصر.
+  const sidebarVisibilityClass = !isMobile && !open ? "hidden md:block" : "";
 
   return (
     <Sidebar
-      className="!fixed !top-0 !right-0 !h-screen !w-64 z-40 border-l-0 border-r border-sidebar-border shadow-lg overflow-hidden"
+      className={`!fixed !top-0 !right-0 !h-screen !w-64 z-40 border-l-0 border-r border-sidebar-border shadow-lg overflow-hidden ${sidebarVisibilityClass}`}
       side="right"
       style={{
         minHeight: "100vh",
