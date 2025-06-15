@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 export function DatesFields({ form }: { form: any }) {
   return (
     <div className="grid grid-cols-2 gap-4">
-      {/* حقل تاريخ الاستلام (مطلوب) */}
+      {/* حقل تاريخ الاستلام (إجباري، افتراضي اليوم) */}
       <FormField
         control={form.control}
         name="delivery_date"
@@ -13,7 +13,11 @@ export function DatesFields({ form }: { form: any }) {
           <FormItem>
             <FormLabel>تاريخ الاستلام *</FormLabel>
             <FormControl>
-              <Input type="date" {...field} />
+              <Input
+                type="date"
+                {...field}
+                // اجعل القيمة الافتراضية لتاريخ اليوم من defaultValues وليس هنا!
+              />
             </FormControl>
             <FormMessage />
           </FormItem>

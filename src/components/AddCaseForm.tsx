@@ -77,8 +77,8 @@ export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
       work_type: "زيركون",
       tooth_number: "",
       number_of_teeth: undefined,
-      delivery_date: new Date().toISOString().split('T')[0], // الاستلام افتراضياً اليوم (الحقل الإجباري الجديد)
-      submission_date: "", // التسليم اختياري وفارغ افتراضياً
+      delivery_date: new Date().toISOString().split('T')[0], // افتراضي اليوم
+      submission_date: "", // اختياري وافتراضي فارغ
       status: "قيد التنفيذ",
       notes: "",
       price: 0,
