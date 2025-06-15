@@ -1,3 +1,4 @@
+
 import {
   Form,
   FormControl,
@@ -18,7 +19,7 @@ import { useEffect } from "react";
 import { PatientInfoFields } from "@/components/form/add-case/PatientInfoFields";
 import { TeethDetailsFields } from "@/components/form/add-case/TeethDetailsFields";
 import { ToothNumberField } from "@/components/form/add-case/ToothNumberField";
-import { DatesFields } from "@/components/form/add-case/DatesFields";
+// تم حذف DatesFields
 import { NotesField } from "@/components/form/add-case/NotesField";
 import { PriceField } from "@/components/form/add-case/PriceField";
 import { TeethCountField } from "@/components/form/add-case/TeethCountField";
@@ -43,19 +44,7 @@ const formSchema = z.object({
   number_of_teeth: z
     .preprocess(val => (val === "" ? undefined : Number(val)), z.number({ invalid_type_error: "يرجى إدخال عدد الأسنان" }).min(1, "يرجى إدخال عدد الأسنان").optional()),
   tooth_number: z.string().optional(),
-  // "تاريخ التسليم" (submission_date): اختياري ولا يُملأ تلقائيًا
-  submission_date: z.preprocess(
-    (val) => (typeof val === "string" && val.trim() === "" ? undefined : val),
-    z.string().optional()
-  ),
-  // "تاريخ الاستلام" (delivery_date): إجباري ويُملأ افتراضيًا اليوم
-  delivery_date: z.preprocess(
-    (val) =>
-      typeof val === "string" && val !== ""
-        ? val
-        : new Date().toISOString().split('T')[0],
-    z.string({ required_error: "تاريخ الاستلام مطلوب" })
-  ),
+  // تم حذف حقلي التاريخين نهائياً
   status: z.enum(caseStatuses).default("قيد التنفيذ"),
   notes: z.string().optional(),
   price: z.preprocess(
@@ -88,10 +77,7 @@ export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
       work_type: "زيركون",
       tooth_number: "",
       number_of_teeth: undefined,
-      // "تاريخ التسليم": اختياري، افتراضي فارغ
-      submission_date: "",
-      // "تاريخ الاستلام": افتراضي اليوم
-      delivery_date: new Date().toISOString().split('T')[0],
+      // تم حذف حقلي التاريخ من القيم الافتراضية
       status: "قيد التنفيذ",
       notes: "",
       price: 0,
@@ -105,19 +91,9 @@ export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
     const doctorId = form.watch("doctor_id");
     const workType = form.watch("work_type");
     const numberOfTeeth = form.watch("number_of_teeth");
-    
-    console.log("حساب السعر في AddCaseForm:", {
-      doctorId,
-      workType,
-      numberOfTeeth,
-      numberOfTeethType: typeof numberOfTeeth
-    });
-    
     if (doctorId && workType && doctors.length > 0) {
       const doctor: any = doctors.find((d: any) => d.id === doctorId);
       const pricePerTooth = getDoctorWorkTypePrice(doctor, workType);
-      
-      // تحويل عدد الأسنان إلى رقم صحيح
       let teethCount = 1;
       if (numberOfTeeth !== undefined && numberOfTeeth !== null) {
         const parsedTeeth = Number(numberOfTeeth);
@@ -125,21 +101,8 @@ export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
           teethCount = parsedTeeth;
         }
       }
-      
       const totalPrice = pricePerTooth * teethCount;
-      
-      console.log("تفاصيل حساب السعر في الإضافة:", {
-        doctor: doctor?.name,
-        pricePerTooth,
-        teethCount,
-        totalPrice,
-        calculation: `${pricePerTooth} × ${teethCount} = ${totalPrice}`,
-        currentPrice: form.getValues("price")
-      });
-
-      // Only update if the calculated price is different
       if (form.getValues("price") !== totalPrice) {
-        console.log("تحديث السعر في الإضافة من", form.getValues("price"), "إلى", totalPrice);
         form.setValue("price", totalPrice);
       }
     }
@@ -155,25 +118,13 @@ export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
     try {
       const sanitizedData = {
         ...data,
-        // submission_date: تبقى كما هي (قد تكون فارغة/null)
-        submission_date:
-          typeof data.submission_date === "string" && data.submission_date.trim() !== ""
-            ? data.submission_date
-            : null,
-        // delivery_date: دائماً تحوي قيمة صالحة (اليوم الحالي افتراضيًا)
-        delivery_date:
-          typeof data.delivery_date === "string" && data.delivery_date.trim() !== ""
-            ? data.delivery_date
-            : new Date().toISOString().split('T')[0],
         tooth_number: data.tooth_number || null,
         number_of_teeth: data.number_of_teeth || null,
         notes: data.notes || null,
         shade: data.shade || null,
         zircon_block_type: data.zircon_block_type || null,
+        // حذف قيم التاريخ من البيانات المرسلة
       };
-
-      // سجل ما سيتم حفظه فعلياً
-      console.log("تمرير البيانات الى API:", sanitizedData);
 
       await addCase.mutateAsync({
         patient_name: sanitizedData.patient_name,
@@ -181,8 +132,7 @@ export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
         work_type: sanitizedData.work_type,
         tooth_number: sanitizedData.tooth_number,
         number_of_teeth: sanitizedData.number_of_teeth,
-        delivery_date: sanitizedData.delivery_date,        // إجباري
-        submission_date: sanitizedData.submission_date,    // اختياري
+        // لا إرسال delivery_date أو submission_date 
         status: sanitizedData.status,
         notes: sanitizedData.notes,
         price: sanitizedData.price,
@@ -202,7 +152,7 @@ export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
         <PatientInfoFields form={form} />
         <TeethDetailsFields form={form} />
         <ToothNumberField form={form} />
-        <DatesFields form={form} />
+        {/* تم حذف DatesFields */}
         <StatusSelect form={form} name="status" />
         <NotesField form={form} />
         <PriceField form={form} />
@@ -222,3 +172,5 @@ export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
     </Form>
   );
 }
+
+// انتهى
