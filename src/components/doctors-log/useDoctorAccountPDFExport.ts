@@ -1,4 +1,3 @@
-
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { toast } from "@/components/ui/use-toast";
@@ -26,13 +25,31 @@ export function useDoctorAccountPDFExport() {
     toDate,
   }: ExportArgs) => {
     console.log("🟢 بدأت عملية تصدير PDF");
-    console.log("بيانات doctorCases الخام:", doctorCases);
+    console.log("🔵 جميع بيانات doctorCases القادمة:", doctorCases);
 
-    // تصفية الحالات بحسب التاريخ المختار (مع الحرص على التعامل مع صيغ التاريخ)
+    if (!doctorCases || !Array.isArray(doctorCases) || doctorCases.length === 0) {
+      toast({
+        title: "لا يوجد بيانات للحالات لهذا الطبيب!",
+        description: "لم يتم جلب أي حالة (cases) من قاعدة البيانات للطبيب المطلوب.",
+        variant: "destructive",
+      });
+      console.warn("⚠️ doctorCases غير موجود أو فارغ:", doctorCases);
+      throw new Error("لا يوجد بيانات للحالات.");
+    }
+
+    // سجل قبل الفلترة
+    console.log("🔸 عدد الحالات قبل الفلترة:", doctorCases.length);
+    let countRejected = 0;
+
+    // تصفية الحالات بحسب التاريخ المختار (مع تحديد أسباب الرفض)
     const filteredCases = (doctorCases || []).filter((c, idx) => {
-      let dateStr = c.delivery_date ?? c.created_at?.slice(0, 10);
+      const rawDelivery = c.delivery_date;
+      const rawCreated = c.created_at;
+
+      let dateStr = rawDelivery ?? (typeof rawCreated === "string" ? rawCreated.slice(0, 10) : null);
       if (!dateStr) {
-        console.log(`case idx=${idx}, لا يوجد تاريخ للتصفية`, c);
+        console.log(`[فلترة] idx=${idx} رفضت: لا يوجد delivery_date ولا created_at`, c);
+        countRejected++;
         return false;
       }
 
@@ -41,11 +58,13 @@ export function useDoctorAccountPDFExport() {
         caseDateObj = typeof dateStr === "string" ? new Date(dateStr) : dateStr;
         if (isNaN(caseDateObj.getTime())) {
           // تاريخ غير صالح!
-          console.log(`case idx=${idx}, تاريخ غير قابل للتحويل`, { dateStr, case: c });
+          console.log(`[فلترة] idx=${idx} رفضت: تاريخ غير قابل للتحويل`, { dateStr, case: c });
+          countRejected++;
           return false;
         }
       } catch (err) {
-        console.log(`case idx=${idx}, خطأ في تحويل التاريخ`, { dateStr, err, case: c });
+        console.log(`[فلترة] idx=${idx} رفضت: خطأ في تحويل التاريخ`, { dateStr, err, case: c });
+        countRejected++;
         return false;
       }
 
@@ -53,6 +72,8 @@ export function useDoctorAccountPDFExport() {
         const startOfDay = new Date(fromDate);
         startOfDay.setHours(0, 0, 0, 0);
         if (caseDateObj < startOfDay) {
+          console.log(`[فلترة] idx=${idx} رفضت: قبل fromDate`, { caseDateObj, fromDate });
+          countRejected++;
           return false;
         }
       }
@@ -60,13 +81,15 @@ export function useDoctorAccountPDFExport() {
         const endOfDay = new Date(toDate);
         endOfDay.setHours(23, 59, 59, 999);
         if (caseDateObj > endOfDay) {
+          console.log(`[فلترة] idx=${idx} رفضت: بعد toDate`, { caseDateObj, toDate });
+          countRejected++;
           return false;
         }
       }
       return true;
     });
 
-    console.log("عدد الحالات بعد الفلترة:", filteredCases.length);
+    console.log("🟢 عدد الحالات (بعد الفلترة):", filteredCases.length, "✓ - تم استبعاد", countRejected, "حالة");
     if (filteredCases.length === 0) {
       toast({
         title: "لا يوجد بيانات ضمن المدة المحددة!",
@@ -74,14 +97,15 @@ export function useDoctorAccountPDFExport() {
           "يرجى تعديل الفترة أو إضافة حالات للطبيب ضمن تلك الفترة، أو التأكد من أن الطبيب المحدد لديه حالات.\nتأكد من توفر (delivery_date) أو (created_at) في كل حالة وصحتها.",
         variant: "destructive",
       });
-      // لن throw لأننا سنطبع كل الحالات الغير صالحة
-      const allDates = (doctorCases || []).map((c) => ({
+      // أطبع كل الحالات الخام مع تواريخها للمتابعة
+      console.log("🔴 جميع تواريخ الحالات الخام:", (doctorCases || []).map((c, i) => ({
+        i,
         patient_name: c?.patient_name,
         delivery_date: c?.delivery_date,
         created_at: c?.created_at,
         price: c?.price,
-      }));
-      console.log("🔴 جميع تواريخ الحالات:", allDates);
+        status: c?.status,
+      })));
       throw new Error("لا يوجد بيانات صالحة للتصدير.");
     }
 
