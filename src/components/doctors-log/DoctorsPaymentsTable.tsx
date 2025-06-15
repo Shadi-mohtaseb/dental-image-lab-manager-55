@@ -1,4 +1,3 @@
-
 import { useDoctors } from "@/hooks/useDoctors";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,6 +13,8 @@ import {
   TableBody,
   TableCell,
 } from "@/components/ui/table";
+import { MessageCircle } from "lucide-react";
+import { buildWhatsappLink } from "@/utils/whatsapp";
 
 interface DoctorsPaymentsTableProps {}
 
@@ -65,6 +66,11 @@ export default function DoctorsPaymentsTable({ }: DoctorsPaymentsTableProps) {
     };
   }
 
+  // رسالة واتساب للدفعة
+  function getPaymentMsg(doc: any, remaining: number) {
+    return `مرحبًا د.${doc?.name} 👋\nنود تذكيركم بأن مبلغ المستحق المتبقي لكم هو: ${remaining.toFixed(2)} ₪. إذا كان لديكم أي استفسار يرجى التواصل معنا. شكرًا لتعاونكم!`;
+  }
+
   return (
     <div className="bg-white rounded-lg shadow p-4 mt-6">
       <h2 className="text-lg font-bold mb-3">دفعات الأطباء</h2>
@@ -76,6 +82,7 @@ export default function DoctorsPaymentsTable({ }: DoctorsPaymentsTableProps) {
             <TableHead className="text-right w-[140px]">المدفوع</TableHead>
             <TableHead className="text-center w-[170px]">الدين/المتبقي</TableHead>
             <TableHead className="text-center w-[130px]">إضافة دفعة</TableHead>
+            <TableHead className="text-center w-[88px]">واتساب</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -103,6 +110,27 @@ export default function DoctorsPaymentsTable({ }: DoctorsPaymentsTableProps) {
                     إضافة دفعة
                   </Button>
                 </TableCell>
+                <TableCell className="text-center w-[88px]">
+                  {doc.phone ? (
+                    <a
+                      href={buildWhatsappLink(doc.phone, getPaymentMsg(doc, remaining))}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title="إرسال عبر واتساب"
+                    >
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        className="text-green-600 border-green-300 hover:bg-green-50"
+                        type="button"
+                      >
+                        <MessageCircle />
+                      </Button>
+                    </a>
+                  ) : (
+                    <span className="text-gray-300">—</span>
+                  )}
+                </TableCell>
               </TableRow>
             );
           })}
@@ -117,4 +145,3 @@ export default function DoctorsPaymentsTable({ }: DoctorsPaymentsTableProps) {
     </div>
   );
 }
-
