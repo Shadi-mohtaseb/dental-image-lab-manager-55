@@ -1,128 +1,59 @@
-
 import React, { useMemo, useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
-import * as XLSX from "xlsx";
-import { format } from "date-fns";
+import { DoctorAccountPDFButton } from "@/components/doctors-log/DoctorAccountPDFButton";
+import { EditDoctorDialog } from "@/components/EditDoctorDialog";
+import type { Doctor } from "@/hooks/useDoctors";
+import { useDeleteDoctor } from "@/hooks/useDoctors";
+import { useDoctorFinancialSummary } from "@/hooks/useDoctorFinancialSummary";
 
-// نموذج لحوار اختيار التاريخ
-function ExportDialog({ isOpen, onClose, onExport, doctorName }) {
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
-  return isOpen ? (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/20 z-50">
-      <div className="bg-white rounded-lg shadow-lg p-6 w-[350px] space-y-3">
-        <h3 className="text-lg font-bold mb-2">تصدير كشف حساب: <span className="text-primary">{doctorName}</span></h3>
-        <div className="flex gap-2 items-center">
-          <label className="text-sm min-w-[52px]">من</label>
-          <Input type="date" value={from} onChange={e => setFrom(e.target.value)} />
-        </div>
-        <div className="flex gap-2 items-center">
-          <label className="text-sm min-w-[52px]">إلى</label>
-          <Input type="date" value={to} onChange={e => setTo(e.target.value)} />
-        </div>
-        <div className="flex gap-2 justify-end mt-4">
-          <Button variant="secondary" onClick={onClose}>إلغاء</Button>
-          <Button disabled={!from || !to} onClick={() => onExport(from, to)}>تأكيد وتصدير</Button>
-        </div>
-      </div>
-    </div>
-  ) : null;
+interface Props {
+  doctors: Doctor[];
+  cases: any[];
 }
 
-// استلام البيانات من الصفحة الرئيسية
-interface DoctorAccountTableProps {
-  doctors: {
-    id: string;
-    name: string;
-    zircon_price: number;
-    temp_price: number;
-  }[];
-  cases: {
-    id: string;
-    doctor_id: string;
-    price: number;
-    status: string;
-    delivery_date?: string;
-    created_at: string;
-    work_type?: string;
-    patient_name?: string;
-  }[];
-}
-
-export function DoctorAccountTable({ doctors, cases }: DoctorAccountTableProps) {
+export default function DoctorAccountTable({ doctors, cases }: Props) {
   const [search, setSearch] = useState("");
-  
-  // إدارة التصدير
-  const [exportDoctorId, setExportDoctorId] = useState<string | null>(null);
-  const [isExportOpen, setIsExportOpen] = useState(false);
 
-  // تجهيز بيانات الأطباء مجمعة
-  const doctorsSummary = useMemo(() => {
-    return doctors.map((doc) => {
-      const docCases = cases.filter((c) => c.doctor_id === doc.id);
-      const totalAmount = docCases.reduce((sum, c) => sum + (Number(c.price) || 0), 0);
-      const completedCount = docCases.filter((c) => c.status && c.status.includes("تم")).length;
-      const currentBalance = totalAmount; // مستقبلًا يمكن ربطه مع رصيد الطبيب الحقيقي
-      const lastWorkDate = docCases.length > 0 ? docCases.sort((a, b) =>
-        new Date(b.delivery_date || b.created_at).getTime() - new Date(a.delivery_date || a.created_at).getTime()
-      )[0].delivery_date || docCases[0].created_at : null;
+  const deleteDoctor = useDeleteDoctor();
 
-      return {
-        id: doc.id,
-        name: doc.name,
-        totalCases: docCases.length,
-        completedCount,
-        totalAmount,
-        currentBalance,
-        lastWorkDate,
-      };
+  // دالة لحساب إجمالي الأسنان لطبيب معيّن بناءً على كل حالاته
+  const calcTotalTeeth = (doctor_id: string) => {
+    const doctorCases = cases.filter((c) => c.doctor_id === doctor_id);
+    let total = 0;
+    doctorCases.forEach(c => {
+      if (c?.number_of_teeth && Number(c.number_of_teeth) > 0) {
+        total += Number(c.number_of_teeth);
+      } else if (c?.tooth_number) {
+        total += c.tooth_number.split(" ").filter(Boolean).length;
+      }
     });
-  }, [doctors, cases]);
-
-  const filteredDoctors = doctorsSummary.filter((d) =>
-    d.name.toLowerCase().includes(search.toLowerCase())
-  );
-
-  // تصدير كشف الدكتور (Excel)
-  const handleExport = (doctorId: string, doctorName: string, from: string, to: string) => {
-    // 1- البحث عن كل الحالات الخاصة بهذا الطبيب ضمن الفترة
-    const filtered = cases.filter(
-      (c) =>
-        c.doctor_id === doctorId &&
-        (from ? (c.delivery_date || c.created_at) >= from : true) &&
-        (to ? (c.delivery_date || c.created_at) <= to : true)
-    );
-    // 2- تجهيز بيانات الجدول للتصدير
-    const data = filtered.map(c => ({
-      "رقم الحالة": c.id,
-      "تاريخ التسليم": c.delivery_date ? format(new Date(c.delivery_date), "yyyy-MM-dd") : "-",
-      "نوع العمل": c.work_type || "",
-      "اسم المريض": c.patient_name || "",
-      "المبلغ": c.price ?? "",
-      "الحالة": c.status,
-    }));
-    if (data.length === 0) {
-      alert("لا توجد بيانات ضمن الفترة المختارة.");
-      return;
-    }
-    // تجهيز ملف الإكسل
-    const ws = XLSX.utils.json_to_sheet(data);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "كشف الحساب");
-    XLSX.writeFile(wb, `كشف_حساب_${doctorName}_${from}_الى_${to}.xlsx`);
-    setIsExportOpen(false);
-    setExportDoctorId(null);
+    return total;
   };
 
-  // اسم الطبيب المحدد للتصدير
-  const exportDoctorName = exportDoctorId
-    ? (doctors.find(d => d.id === exportDoctorId)?.name ?? "")
-    : "";
+  const handleDelete = (id: string) => {
+    if (window.confirm("هل أنت متأكد من حذف الطبيب؟")) {
+      deleteDoctor.mutate(id);
+    }
+  };
+
+  if (doctors.length === 0) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>قائمة الأطباء (0)</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center py-8 text-gray-500">
+            لا يوجد أطباء مسجلين حتى الآن
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="animate-fade-in">
@@ -135,9 +66,6 @@ export function DoctorAccountTable({ doctors, cases }: DoctorAccountTableProps) 
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
-          <Button variant="outline" disabled>
-            <Download className="ml-1" /> تصدير الكل
-          </Button>
         </div>
       </CardHeader>
       <CardContent>
@@ -151,61 +79,61 @@ export function DoctorAccountTable({ doctors, cases }: DoctorAccountTableProps) 
                 <TableHead>إجمالي المبالغ (د.ع)</TableHead>
                 <TableHead>الرصيد الحالي</TableHead>
                 <TableHead>آخر تسليم</TableHead>
-                <TableHead>تصدير</TableHead>
+                <TableHead>PDF</TableHead>
+                <TableHead>إجراءات</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredDoctors.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center text-muted-foreground">
+                  <TableCell colSpan={8} className="text-center text-muted-foreground">
                     لا يوجد أطباء بهذه المواصفات
                   </TableCell>
                 </TableRow>
               )}
-              {filteredDoctors.map((doc) => (
-                <TableRow key={doc.id}>
-                  <TableCell className="font-semibold text-primary">{doc.name}</TableCell>
-                  <TableCell>{doc.totalCases}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{doc.completedCount}</Badge>
-                  </TableCell>
-                  <TableCell>{Number(doc.totalAmount).toLocaleString()}</TableCell>
-                  <TableCell>
-                    <span className="font-bold text-green-700">{Number(doc.currentBalance).toLocaleString()}</span>
-                  </TableCell>
-                  <TableCell>
-                    {doc.lastWorkDate ? new Date(doc.lastWorkDate).toLocaleDateString("ar-EG") : "-"}
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => {
-                        setExportDoctorId(doc.id);
-                        setIsExportOpen(true);
-                      }}
-                    >
-                      <Download className="ml-1" />
-                      كشف حساب
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {filteredDoctors.map((doc) => {
+                // جلب ملخص الحساب المالي لكل طبيب
+                const { totalDue, totalPaid, remaining, doctorCases, isLoading } = useDoctorFinancialSummary(doc.id);
+
+                return (
+                  <TableRow key={doc.id} className="hover:bg-gray-50">
+                    <TableCell className="font-semibold text-primary text-right w-[200px]">
+                      {doc.name}
+                    </TableCell>
+                    <TableCell className="text-center w-[140px]">
+                      <span className="text-sm font-bold">{calcTotalTeeth(doc.id)}</span>
+                    </TableCell>
+                    <TableCell className="text-center w-[120px]">
+                      {isLoading ? (
+                        <span className="text-xs text-gray-400">تحميل...</span>
+                      ) : (
+                        <DoctorAccountPDFButton
+                          doctorName={doc.name}
+                          summary={{ totalDue, totalPaid, remaining }}
+                          doctorCases={doctorCases}
+                        />
+                      )}
+                    </TableCell>
+                    <TableCell className="text-center w-[195px]">
+                      <div className="flex gap-2 justify-center">
+                        <EditDoctorDialog doctor={doctor} />
+                        <Button size="sm" variant="outline" className="text-blue-600 hover:bg-blue-50 border-blue-200"
+                          title="تفاصيل"
+                          onClick={() => window.location.href = `/doctor/${doctor.id}`}>
+                          تفاصيل
+                        </Button>
+                        <Button size="sm" variant="outline" className="text-red-600 hover:bg-red-50" title="حذف"
+                          onClick={() => handleDelete(doctor.id)}>
+                          حذف
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )
+              })}
             </TableBody>
           </Table>
         </div>
-
-        <ExportDialog
-          isOpen={isExportOpen}
-          onClose={() => {
-            setIsExportOpen(false);
-            setExportDoctorId(null);
-          }}
-          onExport={(from, to) =>
-            handleExport(exportDoctorId!, exportDoctorName, from, to)
-          }
-          doctorName={exportDoctorName}
-        />
       </CardContent>
     </Card>
   );
