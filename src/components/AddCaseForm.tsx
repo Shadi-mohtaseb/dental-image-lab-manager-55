@@ -1,3 +1,4 @@
+
 import {
   Form,
   FormControl,
@@ -15,6 +16,13 @@ import { Button } from "@/components/ui/button";
 import { useDoctors } from "@/hooks/useDoctors";
 import { useEffect } from "react";
 import { format } from "date-fns";
+// إعادة استيراد المكونات المساعدة بشكل صحيح
+import { PatientInfoFields } from "@/components/form/add-case/PatientInfoFields";
+import { TeethDetailsFields } from "@/components/form/add-case/TeethDetailsFields";
+import { ToothNumberField } from "@/components/form/add-case/ToothNumberField";
+import { NotesField } from "@/components/form/add-case/NotesField";
+import { PriceField } from "@/components/form/add-case/PriceField";
+
 import { CalendarIcon } from "lucide-react";
 import {
   Popover,
@@ -84,8 +92,8 @@ export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
       price: 0,
       shade: "",
       zircon_block_type: "",
-      delivery_date: "", // قيمة فارغة (اختياري)
-      submission_date: todayStr, // إجباري - مملوء افتراضيًا
+      delivery_date: "",
+      submission_date: todayStr,
     },
   });
 
@@ -127,7 +135,7 @@ export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
         shade: data.shade || null,
         zircon_block_type: data.zircon_block_type || null,
         delivery_date: data.delivery_date || null,
-        submission_date: data.submission_date, // دائماً إجباري
+        submission_date: data.submission_date,
       };
 
       await addCase.mutateAsync({
@@ -145,7 +153,6 @@ export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
         submission_date: sanitizedData.submission_date,
       });
       form.reset();
-      // أعد تعيين submission_date للقيمة الافتراضية
       form.setValue("submission_date", todayStr);
       onSuccess();
     } catch (error) {
@@ -159,7 +166,6 @@ export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
         <PatientInfoFields form={form} />
         <TeethDetailsFields form={form} />
         <ToothNumberField form={form} />
-        {/* تم حذف DatesFields */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           {/* تاريخ التسليم (اختياري) */}
           <FormField
