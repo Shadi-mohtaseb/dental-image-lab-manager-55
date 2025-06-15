@@ -68,19 +68,25 @@ export function AppSidebar() {
       className="border-r border-sidebar-border relative overflow-hidden"
       side="right"
       style={{
-        backgroundImage: `url('${sidebarBg}')`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
         minHeight: "100vh",
         height: "100svh",
         width: "100%",
       }}
     >
-      {/* تغطية بلون أزرق شفاف حسب الهوية */}
-      <div className="absolute inset-0 bg-blue-900/80 z-0" />
-      {/* محتوى الشريط الجانبي فوق الخلفية بدون أي لون أبيض */}
-      <div className="relative z-10 h-full flex flex-col bg-transparent">
+      {/* طبقة صورة الخلفية absolute */}
+      <div
+        className="absolute inset-0 z-0"
+        style={{
+          backgroundImage: `url('${sidebarBg}')`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+        }}
+      />
+      {/* طبقة overlay أزرق شفاف absolute*/}
+      <div className="absolute inset-0 bg-blue-900/80 z-10" />
+      {/* محتوى السايدبار فوق الخلفيات */}
+      <div className="relative z-20 h-full flex flex-col bg-transparent">
         <SidebarHeader className="p-6 bg-transparent">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-sidebar-primary rounded-lg flex items-center justify-center">
