@@ -69,6 +69,7 @@ export default function DoctorsPaymentsLogTable() {
             <TableHead className="text-center w-[130px]">طريقة الدفع</TableHead>
             <TableHead className="text-center w-[130px]">التاريخ</TableHead>
             <TableHead className="text-center w-[160px]">ملاحظات</TableHead>
+            <TableHead className="text-center w-[120px]">واتساب</TableHead>
             <TableHead className="text-center w-[180px]">إجراءات</TableHead>
           </TableRow>
         </TableHeader>
@@ -100,6 +101,28 @@ export default function DoctorsPaymentsLogTable() {
                 </TableCell>
                 <TableCell className="text-center w-[130px]">{payment.transaction_date}</TableCell>
                 <TableCell className="text-center w-[160px]">{payment.notes || "-"}</TableCell>
+                {/* عمود واتساب */}
+                <TableCell className="text-center w-[120px]">
+                  {hasPhone && waLink ? (
+                    <a
+                      href={waLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title={`إرسال عبر واتساب للطبيب ${doctor?.name}`}
+                    >
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        className="text-green-600 border-green-300 hover:bg-green-50"
+                        type="button"
+                      >
+                        <Youtube />
+                      </Button>
+                    </a>
+                  ) : (
+                    <span className="text-gray-300">—</span>
+                  )}
+                </TableCell>
                 <TableCell className="text-center w-[180px]">
                   <div className="flex gap-2 justify-center">
                     <Button size="sm" variant="outline"
@@ -110,25 +133,6 @@ export default function DoctorsPaymentsLogTable() {
                       onClick={() => handleDelete(payment.id)}>
                       <Trash2 />
                     </Button>
-                    {hasPhone && waLink && (
-                      <a
-                        href={waLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        title={`إرسال رسالة للطبيب ${doctor?.name}`}
-                      >
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="text-green-600"
-                          type="button"
-                          tabIndex={-1}
-                          asChild
-                        >
-                          <Youtube />
-                        </Button>
-                      </a>
-                    )}
                   </div>
                 </TableCell>
               </TableRow>
