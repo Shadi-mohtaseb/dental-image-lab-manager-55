@@ -24,14 +24,14 @@ export function usePrintDoctorAccountHTML() {
     fromDate,
     toDate,
   }: PrintArgs) => {
-    // فلترة الحالات بحيث تعتمد بشكل حصري على delivery_date فقط
-    let filteredCases = (doctorCases || []).filter((c: any) => !!c?.delivery_date);
+    // فلترة الحالات بحيث تعتمد بشكل حصري الآن على submission_date فقط
+    let filteredCases = (doctorCases || []).filter((c: any) => !!c?.submission_date);
 
     if (fromDate || toDate) {
       filteredCases = filteredCases.filter((c: any) => {
-        const deliveryDate = new Date(c.delivery_date);
-        if (fromDate && deliveryDate < new Date(fromDate.setHours(0, 0, 0, 0))) return false;
-        if (toDate && deliveryDate > new Date(toDate.setHours(23, 59, 59, 999))) return false;
+        const submissionDate = new Date(c.submission_date);
+        if (fromDate && submissionDate < new Date(fromDate.setHours(0, 0, 0, 0))) return false;
+        if (toDate && submissionDate > new Date(toDate.setHours(23, 59, 59, 999))) return false;
         return true;
       });
     }
@@ -50,14 +50,14 @@ export function usePrintDoctorAccountHTML() {
     // بيانات الحالات مع الأعمدة المطلوبة
     const tableRows = filteredCases.map(
       (c: any) => {
-        // عرض حقل تاريخ الاستلام فقط بصيغة yyyy-mm-dd
-        let deliveryDateField = "";
-        if (c?.delivery_date) {
+        // عرض حقل تاريخ الاستلام بصيغة yyyy-mm-dd
+        let submissionDateField = "";
+        if (c?.submission_date) {
           try {
-            const dt = new Date(c.delivery_date);
-            deliveryDateField = dt.toLocaleDateString("ar-EG");
+            const dt = new Date(c.submission_date);
+            submissionDateField = dt.toLocaleDateString("ar-EG");
           } catch (e) {
-            deliveryDateField = String(c.delivery_date).slice(0, 10);
+            submissionDateField = String(c.submission_date).slice(0, 10);
           }
         }
         return `
@@ -69,7 +69,7 @@ export function usePrintDoctorAccountHTML() {
         <td>${c?.number_of_teeth ?? ""}</td>
         <td>${c?.tooth_number ?? ""}</td>
         <td>${c?.status ?? ""}</td>
-        <td>${deliveryDateField}</td>
+        <td>${submissionDateField}</td>
       </tr>
     `
       }
