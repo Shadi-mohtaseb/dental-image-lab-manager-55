@@ -9,6 +9,29 @@ import { toast } from "@/hooks/use-toast";
 import { Edit, Trash2, Youtube } from "lucide-react";
 import { buildWhatsappLink } from "@/utils/whatsapp";
 
+// SVG خاص بأيقونة واتساب (مأخوذ من أيقونات المصادر الحرة)
+const WhatsappIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    {...props}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={props.className ?? "w-4 h-4"}
+  >
+    <path
+      d="M16.7 13.24a4 4 0 0 1-2.11-.57l-.36-.21a9.51 9.51 0 0 1-3.61-3.61l-.19-.35A4 4 0 0 1 7 7.31V7.3a1 1 0 0 1 1-1h1a1 1 0 0 1 1 1c.1.77.34 1.53.67 2.22.12.22.2.46.39.56l.23.13A7.45 7.45 0 0 0 14.13 13l.14.21a.94.94 0 0 1-.14 1.1 1 1 0 0 1-.67.26Zm-4.6 5.08a9 9 0 1 1 5.62-16A9 9 0 0 1 12.1 18.32ZM21 12.07A9 9 0 1 1 12.09 3a9 9 0 0 1 8.91 9.07ZM12 2v1m0 18v1m10-10h-1m-18 0H2"
+    />
+    <circle cx="12" cy="12" r="9" />
+    <path
+      d="M16.7 13.24a4 4 0 0 1-2.11-.57l-.36-.21a9.51 9.51 0 0 1-3.61-3.61l-.19-.35A4 4 0 0 1 7 7.31V7.3a1 1 0 0 1 1-1h1a1 1 0 0 1 1 1c.1.77.34 1.53.67 2.22.12.22.2.46.39.56l.23.13A7.45 7.45 0 0 0 14.13 13l.14.21a.94.94 0 0 1-.14 1.1 1 1 0 0 1-.67.26Z"
+      fill="currentColor"
+    />
+  </svg>
+);
+
 export default function DoctorsPaymentsLogTable() {
   const queryClient = useQueryClient();
   const [editOpen, setEditOpen] = useState(false);
@@ -116,7 +139,7 @@ export default function DoctorsPaymentsLogTable() {
                         className="text-green-600 border-green-300 hover:bg-green-50"
                         type="button"
                       >
-                        <Youtube />
+                        <WhatsappIcon />
                       </Button>
                     </a>
                   ) : (
