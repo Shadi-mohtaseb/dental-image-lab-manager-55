@@ -9,6 +9,7 @@ export type Doctor = {
   name: string;
   zircon_price: number;
   temp_price: number;
+  phone?: string | null;
   created_at?: string;
   updated_at?: string;
 };
@@ -17,6 +18,7 @@ export type DoctorInsert = {
   name: string;
   zircon_price: number;
   temp_price: number;
+  phone?: string | null; // تمت الإضافة هنا
 };
 
 // جلب الأطباء
@@ -26,7 +28,7 @@ export const useDoctors = () => {
     queryFn: async (): Promise<Doctor[]> => {
       const { data, error } = await supabase
         .from("doctors")
-        .select("id, name, zircon_price, temp_price, created_at, updated_at")
+        .select("id, name, zircon_price, temp_price, phone, created_at, updated_at") // أضفنا phone
         .order("created_at", { ascending: false });
       if (error) throw error;
       // التأكد من إرجاع بيانات صحيحة بذات الحقول المطلوبة
@@ -35,6 +37,7 @@ export const useDoctors = () => {
         name: row.name,
         zircon_price: Number(row.zircon_price) || 0,
         temp_price: Number(row.temp_price) || 0,
+        phone: row.phone ?? "",
         created_at: row.created_at,
         updated_at: row.updated_at,
       }));
@@ -51,7 +54,7 @@ export const useAddDoctor = () => {
       const { data, error } = await supabase
         .from("doctors")
         .insert(doctor)
-        .select("id, name, zircon_price, temp_price, created_at, updated_at")
+        .select("id, name, zircon_price, temp_price, phone, created_at, updated_at") // أضفنا phone
         .single();
       if (error) throw error;
       return data as Doctor;
@@ -84,12 +87,13 @@ export const useUpdateDoctor = () => {
       name,
       zircon_price,
       temp_price,
-    }: { id: string; name: string; zircon_price: number; temp_price: number }) => {
+      phone,
+    }: { id: string; name: string; zircon_price: number; temp_price: number; phone?: string | null }) => {
       const { data, error } = await supabase
         .from("doctors")
-        .update({ name, zircon_price, temp_price })
+        .update({ name, zircon_price, temp_price, phone }) // مررنا phone
         .eq("id", id)
-        .select("id, name, zircon_price, temp_price, created_at, updated_at")
+        .select("id, name, zircon_price, temp_price, phone, created_at, updated_at") // أضفنا phone
         .single();
       if (error) throw error;
       return data as Doctor;
