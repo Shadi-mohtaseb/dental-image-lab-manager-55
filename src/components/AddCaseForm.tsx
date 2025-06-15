@@ -43,8 +43,8 @@ const formSchema = z.object({
   number_of_teeth: z
     .preprocess(val => (val === "" ? undefined : Number(val)), z.number({ invalid_type_error: "يرجى إدخال عدد الأسنان" }).min(1, "يرجى إدخال عدد الأسنان").optional()),
   tooth_number: z.string().optional(),
-  submission_date: z.string({ required_error: "تاريخ التسليم مطلوب" }), // الآن التسليم إجباري
-  delivery_date: z.string().optional(), // الاستلام اختياري
+  delivery_date: z.string({ required_error: "تاريخ الاستلام مطلوب" }), // الآن الاستلام إجباري
+  submission_date: z.string().optional(), // التسليم اختياري
   status: z.enum(caseStatuses).default("قيد التنفيذ"),
   notes: z.string().optional(),
   price: z.preprocess(
@@ -77,8 +77,8 @@ export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
       work_type: "زيركون",
       tooth_number: "",
       number_of_teeth: undefined,
-      submission_date: new Date().toISOString().split('T')[0], // اليوم افتراضيا ومطلوب (تاريخ التسليم)
-      delivery_date: "", // الاستلام اختياري ولا قيمة افتراضية
+      delivery_date: new Date().toISOString().split('T')[0], // الاستلام افتراضياً اليوم (الحقل الإجباري الجديد)
+      submission_date: "", // التسليم اختياري وفارغ افتراضياً
       status: "قيد التنفيذ",
       notes: "",
       price: 0,
@@ -145,7 +145,7 @@ export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
       // تحويل '' إلى null لجميع الحقول التي قد تكون فارغة ويجب أن ترسل null (حسب الحقول الجديدة)
       const sanitizedData = {
         ...data,
-        delivery_date: data.delivery_date ? data.delivery_date : null,
+        submission_date: data.submission_date ? data.submission_date : null,
         tooth_number: data.tooth_number || null,
         number_of_teeth: data.number_of_teeth || null,
         notes: data.notes || null,
@@ -159,8 +159,8 @@ export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
         work_type: sanitizedData.work_type,
         tooth_number: sanitizedData.tooth_number,
         number_of_teeth: sanitizedData.number_of_teeth,
-        submission_date: sanitizedData.submission_date,      // المطلوب
-        delivery_date: sanitizedData.delivery_date,          // الاختياري
+        delivery_date: sanitizedData.delivery_date,        // حقل الاستلام الإجباري
+        submission_date: sanitizedData.submission_date,    // حقل التسليم الاختياري
         status: sanitizedData.status,
         notes: sanitizedData.notes,
         price: sanitizedData.price,
