@@ -6,8 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import EditDoctorPaymentDialog from "./EditDoctorPaymentDialog";
 import { toast } from "@/hooks/use-toast";
-import { Edit, Trash2 } from "lucide-react";
-import { WhatsApp } from "lucide-react";
+import { Edit, Trash2, Youtube } from "lucide-react";
 import { buildWhatsappLink } from "@/utils/whatsapp";
 
 export default function DoctorsPaymentsLogTable() {
@@ -116,7 +115,7 @@ export default function DoctorsPaymentsLogTable() {
                         href={waLink}
                         target="_blank"
                         rel="noopener noreferrer"
-                        title={`إرسال رسالة واتساب للطبيب ${doctor?.name}`}
+                        title={`إرسال رسالة للطبيب ${doctor?.name}`}
                       >
                         <Button
                           size="sm"
@@ -126,7 +125,7 @@ export default function DoctorsPaymentsLogTable() {
                           tabIndex={-1}
                           asChild
                         >
-                          <WhatsApp />
+                          <Youtube />
                         </Button>
                       </a>
                     )}
