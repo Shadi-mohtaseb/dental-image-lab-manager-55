@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -26,6 +25,7 @@ import { UserPlus } from "lucide-react";
 
 const formSchema = z.object({
   name: z.string().min(2, "اسم الطبيب مطلوب"),
+  phone: z.string().min(7, "رقم الهاتف مطلوب").max(20, "رقم الهاتف طويل جداً").optional(),
   zircon_price: z.preprocess(
     (val) => (val === "" ? undefined : Number(val)),
     z.number({ invalid_type_error: "يرجى إدخال سعر الزيركون" }).min(0, "يرجى إدخال السعر")
@@ -46,6 +46,7 @@ export function AddDoctorDialog() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
+      phone: "",
       zircon_price: 0,
       temp_price: 0,
     },
@@ -55,6 +56,7 @@ export function AddDoctorDialog() {
     try {
       await addDoctor.mutateAsync({
         name: data.name,
+        phone: data.phone ?? "",
         zircon_price: data.zircon_price,
         temp_price: data.temp_price,
       });
@@ -77,7 +79,7 @@ export function AddDoctorDialog() {
         <DialogHeader>
           <DialogTitle>إضافة طبيب جديد</DialogTitle>
           <DialogDescription>
-            أدخل اسم الطبيب و أسعار العمل بالشيكل لكل نوع
+            أدخل اسم الطبيب، رقم الهاتف، وأسعار العمل بالشيكل لكل نوع
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -90,6 +92,23 @@ export function AddDoctorDialog() {
                   <FormLabel>اسم الطبيب *</FormLabel>
                   <FormControl>
                     <Input placeholder="د. أحمد محمد" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="phone"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>رقم الهاتف</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="tel"
+                      placeholder="05XXXXXXXX"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

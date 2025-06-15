@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -26,6 +25,7 @@ import { Edit } from "lucide-react";
 
 const formSchema = z.object({
   name: z.string().min(2, "اسم الطبيب مطلوب"),
+  phone: z.string().min(7, "رقم الهاتف مطلوب").max(20, "رقم الهاتف طويل جداً").optional(),
   zircon_price: z.preprocess(
     (val) => (val === "" ? undefined : Number(val)),
     z.number({ invalid_type_error: "يرجى إدخال سعر الزيركون" }).min(0, "يرجى إدخال السعر")
@@ -38,7 +38,11 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-export function EditDoctorDialog({ doctor }: { doctor: { id: string; name: string; zircon_price: number; temp_price: number } }) {
+export function EditDoctorDialog({
+  doctor,
+}: {
+  doctor: { id: string; name: string; phone?: string; zircon_price: number; temp_price: number };
+}) {
   const [open, setOpen] = useState(false);
   const updateDoctor = useUpdateDoctor();
 
@@ -46,6 +50,7 @@ export function EditDoctorDialog({ doctor }: { doctor: { id: string; name: strin
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: doctor.name,
+      phone: doctor.phone ?? "",
       zircon_price: doctor.zircon_price,
       temp_price: doctor.temp_price,
     },
@@ -56,6 +61,7 @@ export function EditDoctorDialog({ doctor }: { doctor: { id: string; name: strin
       await updateDoctor.mutateAsync({
         id: doctor.id,
         name: data.name,
+        phone: data.phone ?? "",
         zircon_price: data.zircon_price,
         temp_price: data.temp_price,
       });
@@ -76,7 +82,7 @@ export function EditDoctorDialog({ doctor }: { doctor: { id: string; name: strin
         <DialogHeader>
           <DialogTitle>تعديل بيانات الطبيب</DialogTitle>
           <DialogDescription>
-            تعديل اسم الطبيب وأسعار الأنواع
+            تعديل اسم الطبيب، رقم الهاتف، وأسعار الأنواع
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -89,6 +95,23 @@ export function EditDoctorDialog({ doctor }: { doctor: { id: string; name: strin
                   <FormLabel>اسم الطبيب *</FormLabel>
                   <FormControl>
                     <Input placeholder="د. أحمد محمد" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="phone"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>رقم الهاتف</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="tel"
+                      placeholder="05XXXXXXXX"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
