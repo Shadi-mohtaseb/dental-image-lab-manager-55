@@ -64,20 +64,24 @@ export function AppSidebar() {
   const navigate = useNavigate();
 
   return (
+    // نضع الخلفية والصورة هنا على الـ Sidebar نفسه، ونجعل جميع عناصر الشريط داخل Overlay شفاف
     <Sidebar
       className="border-r border-sidebar-border relative overflow-hidden"
       side="right"
-      // إضافة الخلفية مباشرة هنا لتكون تحت كل العناصر!
       style={{
         backgroundImage: `url('${sidebarBg}')`,
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
+        // للتأكد أن الصورة تغطي كامل الفراغ
+        minHeight: "100vh",
+        height: "100svh",
+        width: "100%"
       }}
     >
-      {/* تراكب مظلل فقط */}
-      <div className="absolute inset-0 bg-black/40 z-0" />
-      {/* محتوى الشريط الجانبي فوق الخلفية */}
+      {/* تغطية بلون أزرق شفاف حسب الهوية (مثلاً shade 900 بعتامة 80%) */}
+      <div className="absolute inset-0 bg-blue-900/80 z-0" />
+      {/* محتوى الشريط الجانبي */}
       <div className="relative z-10 h-full flex flex-col">
         <SidebarHeader className="p-6">
           <div className="flex items-center gap-3">
@@ -136,3 +140,4 @@ export function AppSidebar() {
     </Sidebar>
   );
 }
+
