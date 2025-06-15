@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -69,6 +70,9 @@ export default function DoctorsAccountsTable({ doctors, cases }: Props) {
             {doctors.map((doctor) => {
               // جلب ملخص الحساب المالي لكل طبيب
               const { totalDue, totalPaid, remaining, doctorCases, isLoading } = useDoctorFinancialSummary(doctor.id);
+              
+              // إضافة لوج لعرض الحالات المفلترة للطبيب
+              console.log("doctorCases for table (PDF button):", doctor.name, doctor.id, doctorCases);
 
               return (
                 <TableRow key={doctor.id} className="hover:bg-gray-50">
