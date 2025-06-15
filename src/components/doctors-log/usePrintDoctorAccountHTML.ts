@@ -23,18 +23,14 @@ export function usePrintDoctorAccountHTML() {
     fromDate,
     toDate,
   }: PrintArgs) => {
-    // فلترة الحالات بحيث تعتمد أولوية على delivery_date وإن لم يوجد تعتمد على created_at
-    let filteredCases = doctorCases || [];
+    // فلترة الحالات بحيث تعتمد بشكل حصري على delivery_date فقط
+    let filteredCases = (doctorCases || []).filter((c: any) => !!c?.delivery_date);
+
     if (fromDate || toDate) {
       filteredCases = filteredCases.filter((c: any) => {
-        // استخدام delivery_date وإن لم يوجد created_at
-        const baseDateStr = c?.delivery_date || c?.created_at;
-        if (!baseDateStr) return false;
-        const baseDate = new Date(baseDateStr);
-
-        // فلترة الفترة الزمنية
-        if (fromDate && baseDate < new Date(fromDate.setHours(0, 0, 0, 0))) return false;
-        if (toDate && baseDate > new Date(toDate.setHours(23, 59, 59, 999))) return false;
+        const deliveryDate = new Date(c.delivery_date);
+        if (fromDate && deliveryDate < new Date(fromDate.setHours(0, 0, 0, 0))) return false;
+        if (toDate && deliveryDate > new Date(toDate.setHours(23, 59, 59, 999))) return false;
         return true;
       });
     }
@@ -53,8 +49,8 @@ export function usePrintDoctorAccountHTML() {
     // بيانات الحالات مع الأعمدة المطلوبة
     const tableRows = filteredCases.map(
       (c: any) => {
-        // اختيار التاريخ الأنسب للعرض
-        const dateField = c?.delivery_date || (c?.created_at ? String(c.created_at).slice(0,10) : "");
+        // عرض حقل وقت الاستلام فقط
+        const deliveryDateField = c?.delivery_date ? String(c.delivery_date) : "";
         return `
       <tr>
         <td>${c?.patient_name ?? ""}</td>
@@ -64,7 +60,7 @@ export function usePrintDoctorAccountHTML() {
         <td>${c?.number_of_teeth ?? ""}</td>
         <td>${c?.tooth_number ?? ""}</td>
         <td>${c?.status ?? ""}</td>
-        <td>${dateField}</td>
+        <td>${deliveryDateField}</td>
       </tr>
     `
       }
@@ -100,7 +96,7 @@ export function usePrintDoctorAccountHTML() {
     let dateRange = "";
     if (fromDate || toDate) {
       dateRange = `<div style="text-align:center;color:#2c4069;font-size:1rem;">
-        الفترة: 
+        الفترة بناءً على وقت الاستلام: 
         ${fromDate ? fromDate.toLocaleDateString("ar-EG") : "..."} 
         - 
         ${toDate ? toDate.toLocaleDateString("ar-EG") : "..."}
@@ -135,7 +131,7 @@ export function usePrintDoctorAccountHTML() {
                 <th>عدد الأسنان</th>
                 <th>رقم/أرقام الأسنان</th>
                 <th>الحالة</th>
-                <th>تاريخ التسليم</th>
+                <th>وقت الاستلام</th>
               </tr>
             </thead>
             <tbody>
