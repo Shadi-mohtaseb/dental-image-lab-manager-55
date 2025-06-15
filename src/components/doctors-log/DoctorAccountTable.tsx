@@ -117,6 +117,7 @@ export default function DoctorAccountTable({ doctors, cases }: Props) {
                         <DoctorAccountPDFButton
                           doctorName={doc.name}
                           summary={{ totalDue, totalPaid, remaining }}
+                          doctorCases={doctorCases}
                           doctorId={doc.id}
                         />
                       )}
@@ -152,6 +153,7 @@ export default function DoctorAccountTable({ doctors, cases }: Props) {
                       <DoctorAccountPDFButton
                         doctorName={doc.name}
                         summary={{ totalDue, totalPaid, remaining }}
+                        doctorCases={doctorCases}
                         doctorId={doc.id}
                       />
                     </TableCell>

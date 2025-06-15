@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -87,6 +86,7 @@ export default function DoctorsAccountsTable({ doctors, cases }: Props) {
                         doctorName={doctor.name}
                         summary={{ totalDue, totalPaid, remaining }}
                         doctorCases={doctorCases}
+                        doctorId={doctor.id}
                       />
                     )}
                   </TableCell>

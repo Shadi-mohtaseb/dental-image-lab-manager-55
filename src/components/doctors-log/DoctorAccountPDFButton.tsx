@@ -6,8 +6,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { toast } from "@/hooks/use-toast";
 import { DoctorPDFDateRangePicker } from "./DoctorPDFDateRangePicker";
 import { usePrintDoctorAccountHTML } from "./usePrintDoctorAccountHTML";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 
 interface Props {
   doctorName: string;
@@ -16,8 +14,8 @@ interface Props {
     totalPaid: number;
     remaining: number;
   };
-  doctorCases?: any[];
-  doctorId?: string;
+  doctorCases: any[]; // الآن هذا الحقل إجباري لضمان سلامة البيانات للطبيب
+  doctorId: string;
 }
 
 export const DoctorAccountPDFButton: React.FC<Props> = ({
@@ -31,35 +29,22 @@ export const DoctorAccountPDFButton: React.FC<Props> = ({
   const [toDate, setToDate] = useState<Date | undefined>(undefined);
   const [popoverOpen, setPopoverOpen] = useState(false);
 
-  // جلب كل الحالات الخاصة بهذا الطبيب إذا لم يتم تمرير حالات
-  const { data: fetchedDoctorCases = [], isFetching } = useQuery({
-    queryKey: ["export-cases", doctorId],
-    queryFn: async () => {
-      if (!doctorId) return [];
-      const { data, error } = await supabase
-        .from("cases")
-        .select("*")
-        .eq("doctor_id", doctorId);
-
-      if (error) {
-        throw error;
-      }
-      return data ?? [];
-    },
-    enabled: !!doctorId && !doctorCases, // فقط إذا لم يتم تمرير doctorCases مباشرةً
-  });
-
   const { printHTML } = usePrintDoctorAccountHTML();
-
-  // تحديد مصدر الحالات: من props إذا موجودة، وإلا من Supabase
-  const casesToPrint = doctorCases ?? fetchedDoctorCases;
 
   const handlePrint = () => {
     setPopoverOpen(false);
+    if (!doctorCases || doctorCases.length === 0) {
+      toast({
+        title: "لا توجد حالات للعرض",
+        description: "لا يوجد أي حالة مرتبطة بهذا الطبيب للطباعة.",
+        variant: "destructive"
+      });
+      return;
+    }
     printHTML({
       doctorName,
       summary,
-      doctorCases: casesToPrint,
+      doctorCases,
       fromDate,
       toDate,
     });
@@ -78,13 +63,13 @@ export const DoctorAccountPDFButton: React.FC<Props> = ({
           toDate={toDate}
           onFromDateChange={setFromDate}
           onToDateChange={setToDate}
-          disabled={loading || isFetching}
+          disabled={loading}
         />
         <div className="flex gap-2 mt-4">
           <Button
             type="button"
             variant="secondary"
-            disabled={loading || isFetching}
+            disabled={loading}
             onClick={handlePrint}
             className="w-full"
             title="طباعة HTML"
