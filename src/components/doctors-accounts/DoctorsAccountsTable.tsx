@@ -6,14 +6,34 @@ import { DoctorAccountPDFButton } from "@/components/doctors-log/DoctorAccountPD
 import { EditDoctorDialog } from "@/components/EditDoctorDialog";
 import type { Doctor } from "@/hooks/useDoctors";
 import { useDeleteDoctor } from "@/hooks/useDoctors";
-import { useDoctorFinancialSummary } from "@/hooks/useDoctorFinancialSummary";
 
+// doctorPayments is new!
 interface Props {
   doctors: Doctor[];
   cases: any[];
+  doctorPayments: any[];
 }
 
-export default function DoctorsAccountsTable({ doctors, cases }: Props) {
+// حساب ملخص الطبيب المالي بناءً على جميع الحالات والمدفوعات
+function getDoctorFinancialSummaryForTable(doctorId: string, cases: any[], doctorPayments: any[]) {
+  const doctorCases = cases.filter((c: any) => c.doctor_id === doctorId);
+  const totalDue = doctorCases.reduce((sum: number, c: any) => sum + (Number(c.price) || 0), 0);
+  const totalPaid = doctorPayments
+    .filter((t: any) => t.doctor_id === doctorId && t.transaction_type === "دفعة")
+    .reduce((sum: number, t: any) => sum + (Number(t.amount) || 0), 0);
+
+  const remaining = totalDue - totalPaid;
+
+  return {
+    totalDue,
+    totalPaid,
+    remaining,
+    doctorCases,
+    isLoading: false, // no longer any per-row loading
+  };
+}
+
+export default function DoctorsAccountsTable({ doctors, cases, doctorPayments }: Props) {
   const deleteDoctor = useDeleteDoctor();
 
   // دالة لحساب إجمالي الأسنان لطبيب معيّن بناءً على كل حالاته
@@ -68,11 +88,12 @@ export default function DoctorsAccountsTable({ doctors, cases }: Props) {
           </TableHeader>
           <TableBody>
             {doctors.map((doctor) => {
-              // جلب ملخص الحساب المالي لكل طبيب
-              const { totalDue, totalPaid, remaining, doctorCases, isLoading } = useDoctorFinancialSummary(doctor.id);
-              
+              // حساب الملخص المالي لكل طبيب الآن في فانكشن عادية
+              const { totalDue, totalPaid, remaining, doctorCases, isLoading } =
+                getDoctorFinancialSummaryForTable(doctor.id, cases, doctorPayments);
+
               // إضافة لوج لعرض الحالات المفلترة للطبيب
-              console.log("doctorCases for table (PDF button):", doctor.name, doctor.id, doctorCases);
+              // console.log("doctorCases for table (PDF button):", doctor.name, doctor.id, doctorCases);
 
               return (
                 <TableRow key={doctor.id} className="hover:bg-gray-50">
@@ -83,16 +104,12 @@ export default function DoctorsAccountsTable({ doctors, cases }: Props) {
                     <span className="text-sm font-bold">{calcTotalTeeth(doctor.id)}</span>
                   </TableCell>
                   <TableCell className="text-center w-[120px]">
-                    {isLoading ? (
-                      <span className="text-xs text-gray-400">تحميل...</span>
-                    ) : (
-                      <DoctorAccountPDFButton
-                        doctorName={doctor.name}
-                        summary={{ totalDue, totalPaid, remaining }}
-                        doctorCases={doctorCases}
-                        doctorId={doctor.id}
-                      />
-                    )}
+                    <DoctorAccountPDFButton
+                      doctorName={doctor.name}
+                      summary={{ totalDue, totalPaid, remaining }}
+                      doctorCases={doctorCases}
+                      doctorId={doctor.id}
+                    />
                   </TableCell>
                   <TableCell className="text-center w-[195px]">
                     <div className="flex gap-2 justify-center">

@@ -24,6 +24,18 @@ const DoctorsAccounts = () => {
     },
   });
 
+  // جلب جميع الدفعات (الحوالات) للطبيب
+  const { data: doctorPayments = [] } = useQuery({
+    queryKey: ["doctor_transactions"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("doctor_transactions")
+        .select("*");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
   if (isLoading) {
     return (
       <div className="space-y-6 animate-fade-in">
@@ -67,7 +79,7 @@ const DoctorsAccounts = () => {
       </div>
 
       {/* جدول الأطباء */}
-      <DoctorsAccountsTable doctors={validDoctors} cases={cases} />
+      <DoctorsAccountsTable doctors={validDoctors} cases={cases} doctorPayments={doctorPayments} />
 
       {/* تبويب دفعات الأطباء */}
       <DoctorsPaymentsTableSection />
@@ -79,3 +91,4 @@ const DoctorsAccounts = () => {
 };
 
 export default DoctorsAccounts;
+
