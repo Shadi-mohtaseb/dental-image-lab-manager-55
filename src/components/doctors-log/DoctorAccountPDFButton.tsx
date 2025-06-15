@@ -1,11 +1,11 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
+import { Download, Printer } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "@/components/ui/use-toast";
 import { DoctorPDFDateRangePicker } from "./DoctorPDFDateRangePicker";
 import { useDoctorAccountPDFExport } from "./useDoctorAccountPDFExport";
+import { usePrintDoctorAccountHTML } from "./usePrintDoctorAccountHTML";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -50,6 +50,7 @@ export const DoctorAccountPDFButton: React.FC<Props> = ({
   });
 
   const { exportPDF } = useDoctorAccountPDFExport();
+  const { printHTML } = usePrintDoctorAccountHTML();
 
   const handleExport = async () => {
     setLoading(true);
@@ -73,11 +74,22 @@ export const DoctorAccountPDFButton: React.FC<Props> = ({
     }
   };
 
+  const handlePrint = () => {
+    setPopoverOpen(false);
+    printHTML({
+      doctorName,
+      summary,
+      doctorCases: fetchedDoctorCases,
+      fromDate,
+      toDate,
+    });
+  };
+
   return (
     <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" disabled={loading} title="تصدير PDF (اختر الفترة)">
-          <Download className="ml-1" /> PDF
+        <Button variant="outline" size="sm" disabled={loading} title="تصدير أو طباعة الكشف">
+          <Download className="ml-1" /> PDF / طباعة
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[330px] pointer-events-auto" align="end" sideOffset={6}>
@@ -88,17 +100,29 @@ export const DoctorAccountPDFButton: React.FC<Props> = ({
           onToDateChange={setToDate}
           disabled={loading || isFetching}
         />
-        <Button
-          type="button"
-          disabled={loading || isFetching}
-          onClick={() => {
-            setPopoverOpen(false);
-            handleExport();
-          }}
-          className="w-full mt-4"
-        >
-          <Download className="ml-1" /> تصدير PDF
-        </Button>
+        <div className="flex gap-2 mt-4">
+          <Button
+            type="button"
+            disabled={loading || isFetching}
+            onClick={() => {
+              setPopoverOpen(false);
+              handleExport();
+            }}
+            className="w-1/2"
+          >
+            <Download className="ml-1" /> تصدير PDF
+          </Button>
+          <Button
+            type="button"
+            variant="secondary"
+            disabled={loading || isFetching}
+            onClick={handlePrint}
+            className="w-1/2"
+            title="طباعة HTML"
+          >
+            <Printer className="ml-1" /> طباعة
+          </Button>
+        </div>
       </PopoverContent>
     </Popover>
   );
