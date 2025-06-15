@@ -141,19 +141,31 @@ export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
   const onSubmit = async (data: FormData) => {
     try {
       console.log("إرسال بيانات الحالة الجديدة:", data);
-      await addCase.mutateAsync({
-        patient_name: data.patient_name,
-        doctor_id: data.doctor_id,
-        work_type: data.work_type,
+
+      // تحويل '' إلى null لجميع الحقول التي قد تكون فارغة ويجب أن ترسل null
+      const sanitizedData = {
+        ...data,
+        submission_date: data.submission_date ? data.submission_date : null,
         tooth_number: data.tooth_number || null,
         number_of_teeth: data.number_of_teeth || null,
-        submission_date: data.submission_date,
-        delivery_date: data.delivery_date || null,
-        status: data.status,
         notes: data.notes || null,
-        price: data.price,
         shade: data.shade || null,
         zircon_block_type: data.zircon_block_type || null,
+      };
+
+      await addCase.mutateAsync({
+        patient_name: sanitizedData.patient_name,
+        doctor_id: sanitizedData.doctor_id,
+        work_type: sanitizedData.work_type,
+        tooth_number: sanitizedData.tooth_number,
+        number_of_teeth: sanitizedData.number_of_teeth,
+        submission_date: sanitizedData.submission_date,
+        delivery_date: sanitizedData.delivery_date || null,
+        status: sanitizedData.status,
+        notes: sanitizedData.notes,
+        price: sanitizedData.price,
+        shade: sanitizedData.shade,
+        zircon_block_type: sanitizedData.zircon_block_type,
       });
       form.reset();
       onSuccess();
