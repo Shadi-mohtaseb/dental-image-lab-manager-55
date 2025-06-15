@@ -24,6 +24,19 @@ export function usePrintDoctorAccountHTML() {
     fromDate,
     toDate,
   }: PrintArgs) => {
+    // تصفية الحالات حسب delivery_date فقط
+    let filteredCases = doctorCases || [];
+    if (fromDate || toDate) {
+      filteredCases = filteredCases.filter((c: any) => {
+        // يجب وجود delivery_date للحالة
+        if (!c?.delivery_date) return false;
+        const date = new Date(c.delivery_date);
+        if (fromDate && date < new Date(fromDate.setHours(0, 0, 0, 0))) return false;
+        if (toDate && date > new Date(toDate.setHours(23, 59, 59, 999))) return false;
+        return true;
+      });
+    }
+
     // فتح نافذة جديدة
     const printWindow = window.open("", "_blank", "width=900,height=900,scrollbars=yes") as Window;
     if (!printWindow) {
@@ -36,7 +49,7 @@ export function usePrintDoctorAccountHTML() {
     }
 
     // بيانات الحالات
-    const tableRows = doctorCases.map(
+    const tableRows = filteredCases.map(
       (c: any) => `
       <tr>
         <td>${c?.patient_name ?? ""}</td>
@@ -137,3 +150,4 @@ export function usePrintDoctorAccountHTML() {
   };
   return { printHTML };
 }
+
