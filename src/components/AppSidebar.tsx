@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 
-// هنا صورة الخلفية:
+// صورة الخلفية المرفوعة:
 const sidebarBg = "/lovable-uploads/d177bd6f-d2eb-4db8-996a-e2a94b42a9da.png";
 
 const menuItems = [
@@ -64,18 +64,18 @@ export function AppSidebar() {
   const navigate = useNavigate();
 
   return (
-    <Sidebar className="border-r border-sidebar-border relative overflow-hidden" side="right">
-      {/* خلفية وتراكب داكن لقراءة أوضح */}
-      <div
-        aria-hidden
-        className="absolute inset-0 z-0"
-        style={{
-          backgroundImage: `url('${sidebarBg}')`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          filter: "brightness(0.5)", // تظليم مناسب للنصوص
-        }}
-      />
+    <Sidebar
+      className="border-r border-sidebar-border relative overflow-hidden"
+      side="right"
+      // إضافة الخلفية مباشرة هنا لتكون تحت كل العناصر!
+      style={{
+        backgroundImage: `url('${sidebarBg}')`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+      }}
+    >
+      {/* تراكب مظلل فقط */}
       <div className="absolute inset-0 bg-black/40 z-0" />
       {/* محتوى الشريط الجانبي فوق الخلفية */}
       <div className="relative z-10 h-full flex flex-col">
@@ -136,5 +136,3 @@ export function AppSidebar() {
     </Sidebar>
   );
 }
-
-// انتهى التعديل
