@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Users, Plus, Edit, Trash2, DollarSign, Calculator, Wallet } from "lucide-react";
+import { Users, Plus, Edit, Trash2, DollarSign, Calculator, Wallet, ArrowUp, ArrowDown } from "lucide-react";
 import { useState } from "react";
 import { usePartners } from "@/hooks/usePartners";
 import { toast } from "@/hooks/use-toast";
@@ -82,6 +82,12 @@ const PartnershipAccounts = () => {
 
   const totalDoctorsDebt = computeDoctorsDebt();
 
+  const { data: summary, isLoading: loadingSummary } = useFinancialSummary();
+  const totalRevenue = summary?.totalRevenue ?? 0;
+  const totalExpenses = summary?.totalExpenses ?? 0;
+  const netProfit = summary?.netProfit ?? 0;
+  const partnersCount = partners.length;
+
   const handleDeletePartner = async (partnerId: string) => {
     if (window.confirm("هل أنت متأكد من حذف هذا الشريك؟")) {
       const { error } = await import("@/integrations/supabase/client").then(({ supabase }) =>
@@ -151,13 +157,6 @@ const PartnershipAccounts = () => {
     setWithdrawShareOpen(true);
   };
 
-  const { data: summary, isLoading: loadingSummary } = useFinancialSummary();
-
-  // استخدم 0 إذا لم تكن القيم متوفرة
-  const totalRevenue = summary?.totalRevenue ?? 0;
-  const totalExpenses = summary?.totalExpenses ?? 0;
-  const netProfit = summary?.netProfit ?? 0;
-
   // حساب معاملات السحب لكل شريك
   function getPartnerStats(partner) {
     const partnerTxs = transactions.filter(
@@ -173,6 +172,60 @@ const PartnershipAccounts = () => {
 
   return (
     <div className="space-y-8 animate-fade-in">
+      {/* بطاقات الملخص المالي الرئيسية */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+        <Card className="text-center">
+          <CardContent className="flex flex-col items-center justify-center p-6">
+            <span className="flex items-center justify-center bg-blue-50 text-blue-500 rounded-full w-10 h-10 mb-2">
+              <ArrowUp className="w-6 h-6" />
+            </span>
+            <span className="text-gray-500 text-sm">إجمالي الإيرادات</span>
+            <span className="text-2xl font-bold text-gray-900 mt-1">{totalRevenue.toFixed(0)} ₪</span>
+            <span className="text-xs text-blue-600 mt-1">من {cases.length} حالة</span>
+          </CardContent>
+        </Card>
+        <Card className="text-center">
+          <CardContent className="flex flex-col items-center justify-center p-6">
+            <span className="flex items-center justify-center bg-red-50 text-red-500 rounded-full w-10 h-10 mb-2">
+              <ArrowDown className="w-6 h-6" />
+            </span>
+            <span className="text-gray-500 text-sm">إجمالي المصاريف</span>
+            <span className="text-2xl font-bold text-gray-900 mt-1">{totalExpenses.toFixed(0)} ₪</span>
+            <span className="text-xs text-red-600 mt-1">{expenses?.length ?? 0} مصروف</span>
+          </CardContent>
+        </Card>
+        <Card className="text-center">
+          <CardContent className="flex flex-col items-center justify-center p-6">
+            <span className="flex items-center justify-center bg-orange-50 text-orange-500 rounded-full w-10 h-10 mb-2">
+              <Wallet className="w-6 h-6" />
+            </span>
+            <span className="text-gray-500 text-sm">إجمالي ديون الأطباء</span>
+            <span className="text-2xl font-bold text-gray-900 mt-1">{totalDoctorsDebt.toFixed(0)} ₪</span>
+            <span className="text-xs text-orange-600 mt-1">{totalDoctorsDebt > 0 ? "يجب تحصيلها" : "لا توجد ديون"}</span>
+          </CardContent>
+        </Card>
+        <Card className="text-center">
+          <CardContent className="flex flex-col items-center justify-center p-6">
+            <span className="flex items-center justify-center bg-green-50 text-green-600 rounded-full w-10 h-10 mb-2">
+              <DollarSign className="w-6 h-6" />
+            </span>
+            <span className="text-gray-500 text-sm">صافي الربح (رأس المال)</span>
+            <span className="text-2xl font-bold text-gray-900 mt-1">{netProfit.toFixed(0)} ₪</span>
+            <span className="text-xs text-green-600 mt-1">{netProfit > 0 ? "ربح صافي" : "لا يوجد ربح"}</span>
+          </CardContent>
+        </Card>
+        <Card className="text-center">
+          <CardContent className="flex flex-col items-center justify-center p-6">
+            <span className="flex items-center justify-center bg-purple-50 text-purple-600 rounded-full w-10 h-10 mb-2">
+              <Users className="w-6 h-6" />
+            </span>
+            <span className="text-gray-500 text-sm">عدد الشركاء</span>
+            <span className="text-2xl font-bold text-gray-900 mt-1">{partnersCount}</span>
+            <span className="text-xs text-purple-600 mt-1">{partnersCount} شريك نشط</span>
+          </CardContent>
+        </Card>
+      </div>
+
       {/* 2- إدارة الشركاء */}
       <section>
         <div className="flex items-center justify-between mt-6 mb-2">
