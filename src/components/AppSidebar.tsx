@@ -34,7 +34,6 @@ const menuItems = [
     url: "/partnership-accounts",
     icon: Users,
   },
-  // حذف قائمة حسابات الأطباء السابقة إن وجدت، وإبقاء فقط "حسابات الأطباء" لرابط "/doctors-accounts"
   {
     title: "حسابات الأطباء",
     url: "/doctors-accounts",
@@ -74,13 +73,23 @@ export function AppSidebar() {
           </div>
         </div>
       </SidebarHeader>
-      
+
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-sidebar-foreground/80 font-semibold">
+        <SidebarGroup className="relative overflow-hidden rounded-xl">
+          {/* خلفية الصورة خلف القوائم فقط */}
+          <div
+            className="absolute inset-0 z-0 bg-cover bg-center"
+            style={{
+              backgroundImage:
+                "linear-gradient(to top,rgba(30,41,59,0.81) 65%,rgba(30,41,59,0.92) 95%), url('/lovable-uploads/f7d722cd-4885-43ff-a409-cbcf695fc64f.png')",
+            }}
+            aria-hidden="true"
+          ></div>
+          {/* محتوى القوائم فوق الخلفية */}
+          <SidebarGroupLabel className="text-sidebar-foreground/80 font-semibold z-10 relative">
             القوائم الرئيسية
           </SidebarGroupLabel>
-          <SidebarGroupContent>
+          <SidebarGroupContent className="z-10 relative">
             <SidebarMenu>
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
