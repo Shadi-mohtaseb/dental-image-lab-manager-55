@@ -1,3 +1,4 @@
+
 import React, { useMemo, useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
@@ -19,6 +20,13 @@ export default function DoctorAccountTable({ doctors, cases }: Props) {
   const [search, setSearch] = useState("");
 
   const deleteDoctor = useDeleteDoctor();
+
+  // تصفية الأطباء بناءً على النص المدخل في البحث
+  const filteredDoctors = useMemo(() => {
+    return doctors.filter((d) =>
+      d.name?.toLowerCase()?.includes(search.trim().toLowerCase())
+    );
+  }, [doctors, search]);
 
   // دالة لحساب إجمالي الأسنان لطبيب معيّن بناءً على كل حالاته
   const calcTotalTeeth = (doctor_id: string) => {
@@ -115,15 +123,49 @@ export default function DoctorAccountTable({ doctors, cases }: Props) {
                       )}
                     </TableCell>
                     <TableCell className="text-center w-[195px]">
+                      {isLoading ? (
+                        <span className="text-xs text-gray-400">تحميل...</span>
+                      ) : (
+                        <span className="whitespace-nowrap font-bold">
+                          {totalDue.toLocaleString()}
+                        </span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-center w-[120px]">
+                      {isLoading ? (
+                        <span className="text-xs text-gray-400">تحميل...</span>
+                      ) : (
+                        <span className="whitespace-nowrap font-bold">
+                          {remaining.toLocaleString()}
+                        </span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-center w-[150px]">
+                      {isLoading ? (
+                        <span className="text-xs text-gray-400">تحميل...</span>
+                      ) : (
+                        doctorCases.length > 0 && doctorCases[0].delivery_date ?
+                          doctorCases[0].delivery_date
+                          : "—"
+                      )}
+                    </TableCell>
+                    <TableCell className="text-center w-[120px]">
+                      <DoctorAccountPDFButton
+                        doctorName={doc.name}
+                        summary={{ totalDue, totalPaid, remaining }}
+                        doctorCases={doctorCases}
+                      />
+                    </TableCell>
+                    <TableCell className="text-center w-[240px]">
                       <div className="flex gap-2 justify-center">
-                        <EditDoctorDialog doctor={doctor} />
+                        <EditDoctorDialog doctor={doc} />
                         <Button size="sm" variant="outline" className="text-blue-600 hover:bg-blue-50 border-blue-200"
                           title="تفاصيل"
-                          onClick={() => window.location.href = `/doctor/${doctor.id}`}>
+                          onClick={() => window.location.href = `/doctor/${doc.id}`}>
                           تفاصيل
                         </Button>
                         <Button size="sm" variant="outline" className="text-red-600 hover:bg-red-50" title="حذف"
-                          onClick={() => handleDelete(doctor.id)}>
+                          onClick={() => handleDelete(doc.id)}>
                           حذف
                         </Button>
                       </div>

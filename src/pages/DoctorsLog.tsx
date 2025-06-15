@@ -1,7 +1,6 @@
-
 import React from "react";
 import { DoctorStatsCard } from "@/components/doctors-log/DoctorStatsCard";
-import { DoctorAccountTable } from "@/components/doctors-log/DoctorAccountTable";
+import DoctorAccountTable from "@/components/doctors-log/DoctorAccountTable";
 import { MostActiveDoctors } from "@/components/doctors-log/MostActiveDoctors";
 import { RecentSubmissions } from "@/components/doctors-log/RecentSubmissions";
 import { useDoctors } from "@/hooks/useDoctors";
