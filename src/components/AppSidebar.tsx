@@ -88,7 +88,7 @@ export function AppSidebar() {
         }}
       />
       {/* طبقة overlay أسود شفاف absolute */}
-      <div className="absolute inset-0 bg-black/50 z-10" />
+      <div className="absolute inset-0 bg-black/30 z-10" />
       {/* محتوى السايدبار فوق الخلفية */}
       <div className="relative z-20 h-full flex flex-col bg-transparent">
         <SidebarHeader className="p-6 bg-transparent">
