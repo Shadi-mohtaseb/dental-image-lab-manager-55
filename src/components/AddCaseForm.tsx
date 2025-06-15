@@ -43,18 +43,18 @@ const formSchema = z.object({
   number_of_teeth: z
     .preprocess(val => (val === "" ? undefined : Number(val)), z.number({ invalid_type_error: "يرجى إدخال عدد الأسنان" }).min(1, "يرجى إدخال عدد الأسنان").optional()),
   tooth_number: z.string().optional(),
-  // تاريخ التسليم: إجباري ويمتلئ افتراضياً بتاريخ اليوم
+  // "تاريخ التسليم" (submission_date): اختياري ولا يُملأ تلقائيًا
   submission_date: z.preprocess(
+    (val) => (typeof val === "string" && val.trim() === "" ? undefined : val),
+    z.string().optional()
+  ),
+  // "تاريخ الاستلام" (delivery_date): إجباري ويُملأ افتراضيًا اليوم
+  delivery_date: z.preprocess(
     (val) =>
       typeof val === "string" && val !== ""
         ? val
         : new Date().toISOString().split('T')[0],
-    z.string({ required_error: "تاريخ التسليم مطلوب" })
-  ),
-  // تاريخ الاستلام: اختياري ولا يتم تعبئته تلقائياً
-  delivery_date: z.preprocess(
-    (val) => (typeof val === "string" && val.trim() === "" ? undefined : val),
-    z.string().optional()
+    z.string({ required_error: "تاريخ الاستلام مطلوب" })
   ),
   status: z.enum(caseStatuses).default("قيد التنفيذ"),
   notes: z.string().optional(),
@@ -88,10 +88,10 @@ export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
       work_type: "زيركون",
       tooth_number: "",
       number_of_teeth: undefined,
-      // submission_date = تاريخ اليوم كقيمة افتراضية
-      submission_date: new Date().toISOString().split('T')[0],
-      // delivery_date = فارغ افتراضيًا
-      delivery_date: "",
+      // "تاريخ التسليم": اختياري، افتراضي فارغ
+      submission_date: "",
+      // "تاريخ الاستلام": افتراضي اليوم
+      delivery_date: new Date().toISOString().split('T')[0],
       status: "قيد التنفيذ",
       notes: "",
       price: 0,
@@ -153,19 +153,18 @@ export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
 
   const onSubmit = async (data: FormData) => {
     try {
-      // تحويل القيم النهائية بما يتوافق مع قاعدة البيانات
       const sanitizedData = {
         ...data,
-        // تحويل submission_date إلى null إذا فارغ أو غير صالح
+        // submission_date: تبقى كما هي (قد تكون فارغة/null)
         submission_date:
           typeof data.submission_date === "string" && data.submission_date.trim() !== ""
             ? data.submission_date
-            : new Date().toISOString().split('T')[0], // تأكيد القيمة دوماً حتى في حالات غريبة
-        // delivery_date تبقى كما هي حتى لو كانت فارغة
+            : null,
+        // delivery_date: دائماً تحوي قيمة صالحة (اليوم الحالي افتراضيًا)
         delivery_date:
           typeof data.delivery_date === "string" && data.delivery_date.trim() !== ""
             ? data.delivery_date
-            : null,
+            : new Date().toISOString().split('T')[0],
         tooth_number: data.tooth_number || null,
         number_of_teeth: data.number_of_teeth || null,
         notes: data.notes || null,
@@ -182,8 +181,8 @@ export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
         work_type: sanitizedData.work_type,
         tooth_number: sanitizedData.tooth_number,
         number_of_teeth: sanitizedData.number_of_teeth,
-        delivery_date: sanitizedData.delivery_date,        // هنا اختياري
-        submission_date: sanitizedData.submission_date,    // إجباري
+        delivery_date: sanitizedData.delivery_date,        // إجباري
+        submission_date: sanitizedData.submission_date,    // اختياري
         status: sanitizedData.status,
         notes: sanitizedData.notes,
         price: sanitizedData.price,
