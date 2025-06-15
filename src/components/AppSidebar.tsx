@@ -64,7 +64,6 @@ export function AppSidebar() {
   const navigate = useNavigate();
 
   return (
-    // نضع الخلفية والصورة هنا على الـ Sidebar نفسه، ونجعل جميع عناصر الشريط داخل Overlay شفاف
     <Sidebar
       className="border-r border-sidebar-border relative overflow-hidden"
       side="right"
@@ -73,17 +72,16 @@ export function AppSidebar() {
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
-        // للتأكد أن الصورة تغطي كامل الفراغ
         minHeight: "100vh",
         height: "100svh",
-        width: "100%"
+        width: "100%",
       }}
     >
-      {/* تغطية بلون أزرق شفاف حسب الهوية (مثلاً shade 900 بعتامة 80%) */}
+      {/* تغطية بلون أزرق شفاف حسب الهوية */}
       <div className="absolute inset-0 bg-blue-900/80 z-0" />
-      {/* محتوى الشريط الجانبي */}
-      <div className="relative z-10 h-full flex flex-col">
-        <SidebarHeader className="p-6">
+      {/* محتوى الشريط الجانبي فوق الخلفية بدون أي لون أبيض */}
+      <div className="relative z-10 h-full flex flex-col bg-transparent">
+        <SidebarHeader className="p-6 bg-transparent">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-sidebar-primary rounded-lg flex items-center justify-center">
               <PlusCircle className="w-6 h-6 text-sidebar-primary-foreground" />
@@ -95,7 +93,7 @@ export function AppSidebar() {
           </div>
         </SidebarHeader>
         
-        <SidebarContent>
+        <SidebarContent className="bg-transparent">
           <SidebarGroup>
             <SidebarGroupLabel className="text-sidebar-foreground/80 font-semibold">
               القوائم الرئيسية
@@ -124,7 +122,7 @@ export function AppSidebar() {
           </SidebarGroup>
         </SidebarContent>
 
-        <SidebarFooter className="p-4 mt-auto">
+        <SidebarFooter className="p-4 mt-auto bg-transparent">
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton asChild>
@@ -140,4 +138,3 @@ export function AppSidebar() {
     </Sidebar>
   );
 }
-
