@@ -171,24 +171,6 @@ const Index = () => {
         </p>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-        {stats.map((stat, index) => (
-          <Card key={index} className="animate-slide-up">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <stat.icon className="w-5 h-5" />
-                {stat.title}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stat.value}</div>
-              <p className={`text-sm ${stat.color}`}>{stat.change}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
       {/* Quick Actions */}
       <Card className="animate-slide-up">
         <CardHeader>
