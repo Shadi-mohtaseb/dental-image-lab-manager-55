@@ -82,7 +82,8 @@ export function AppSidebar() {
           backgroundRepeat: "no-repeat",
         }}
       />
-      {/* تمت إزالة طبقة overlay الأزرق الشفاف */}
+      {/* طبقة overlay أزرق شفاف absolute */}
+      <div className="absolute inset-0 bg-blue-900/50 z-10" />
       {/* محتوى السايدبار فوق الخلفية */}
       <div className="relative z-20 h-full flex flex-col bg-transparent">
         <SidebarHeader className="p-6 bg-transparent">
