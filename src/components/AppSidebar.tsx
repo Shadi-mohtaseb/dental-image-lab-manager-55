@@ -23,9 +23,6 @@ import {
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 
-// هنا صورة الخلفية:
-const sidebarBg = "/lovable-uploads/d177bd6f-d2eb-4db8-996a-e2a94b42a9da.png";
-
 const menuItems = [
   {
     title: "لوحة التحكم",
@@ -65,20 +62,20 @@ export function AppSidebar() {
 
   return (
     <Sidebar className="border-r border-sidebar-border relative overflow-hidden" side="right">
-      {/* خلفية وتراكب داكن لقراءة أوضح */}
+      {/* صورة الغلاف مع طبقة تعتيم وتغطية كاملة*/}
       <div
-        aria-hidden
         className="absolute inset-0 z-0"
         style={{
-          backgroundImage: `url('${sidebarBg}')`,
+          backgroundImage: "url('/lovable-uploads/5c301c59-c488-4176-9745-a6d4ff4f3c83.png')",
+          backgroundRepeat: "no-repeat",
           backgroundSize: "cover",
           backgroundPosition: "center",
-          filter: "brightness(0.5)", // تظليم مناسب للنصوص
         }}
-      />
-      <div className="absolute inset-0 bg-black/40 z-0" />
-      {/* محتوى الشريط الجانبي فوق الخلفية */}
-      <div className="relative z-10 h-full flex flex-col">
+        aria-hidden="true"
+      >
+        <div className="absolute inset-0 bg-black/60" />
+      </div>
+      <div className="relative z-10 flex flex-col h-full">
         <SidebarHeader className="p-6">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-sidebar-primary rounded-lg flex items-center justify-center">
@@ -90,7 +87,7 @@ export function AppSidebar() {
             </div>
           </div>
         </SidebarHeader>
-        
+
         <SidebarContent>
           <SidebarGroup>
             <SidebarGroupLabel className="text-sidebar-foreground/80 font-semibold">
@@ -136,5 +133,3 @@ export function AppSidebar() {
     </Sidebar>
   );
 }
-
-// انتهى التعديل

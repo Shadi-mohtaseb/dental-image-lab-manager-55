@@ -74,18 +74,35 @@ const Cases = () => {
 
   if (isLoading) {
     return (
-      <div className="space-y-6 animate-fade-in">
-        <div className="flex items-center justify-center p-8">
-          <div className="text-lg">جاري تحميل الحالات...</div>
+      <div className="relative min-h-[60vh] flex items-center justify-center animate-fade-in">
+        {/* خلفية الصورة أثناء التحميل */}
+        <div
+          className="absolute inset-0 -z-10 bg-cover bg-center opacity-80"
+          style={{
+            backgroundImage:
+              "linear-gradient(to top,rgba(255,255,255,.94) 60%,rgba(230,244,255,.82) 100%),url('https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=900&q=80')",
+          }}
+        />
+        <div className="text-lg bg-white bg-opacity-70 p-6 rounded-lg shadow-md">
+          جاري تحميل الحالات...
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
+    <div className="relative animate-fade-in min-h-screen">
+      {/* خلفية صورة - ثابتة أسفل كل الصفحة */}
+      <div
+        className="absolute inset-0 -z-10 bg-cover bg-center opacity-80"
+        style={{
+          backgroundImage:
+            "linear-gradient(to top,rgba(255,255,255,.92) 70%,rgba(230,244,255,.76) 100%),url('https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80')",
+        }}
+        aria-hidden="true"
+      />
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
           {/* Icon and Title */}
           <svg className="w-8 h-8 text-primary" viewBox="0 0 24 24" fill="none"><path d="M2 12h20M12 2v20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
           <div>
@@ -94,9 +111,7 @@ const Cases = () => {
           </div>
         </div>
         <AddCaseDialog />
-      </div>
-
-      {/* Search and Filters */}
+        {/* Search and Filters */}
         <Card>
           <CardContent className="p-0">
             <CasesFilterBar
@@ -111,41 +126,41 @@ const Cases = () => {
           </CardContent>
         </Card>
 
-      {/* Cases Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>جميع الحالات ({filteredCases.length})</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {filteredCases.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              {"لا توجد نتائج مطابقة للبحث"}
-            </div>
-          ) : (
-            <CasesTable
-              cases={filteredCases}
-              onView={handleViewCase}
-              onEdit={(ci) => {
-                setSelectedCase(ci);
-                setEditOpen(true);
-              }}
-              onDelete={handleDeleteCase}
-              onStatusChange={handleStatusChange}
-            />
-          )}
-        </CardContent>
-      </Card>
-
-      {/* نافذة التعديل */}
-      <EditCaseDialog
-        caseData={selectedCase}
-        open={editOpen}
-        onOpenChange={(open) => {
-          setEditOpen(open);
-          if (!open) setSelectedCase(null);
-        }}
-        onUpdate={handleUpdateCase}
-      />
+        {/* Cases Table */}
+        <Card>
+          <CardHeader>
+            <CardTitle>جميع الحالات ({filteredCases.length})</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {filteredCases.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                {"لا توجد نتائج مطابقة للبحث"}
+              </div>
+            ) : (
+              <CasesTable
+                cases={filteredCases}
+                onView={handleViewCase}
+                onEdit={(ci) => {
+                  setSelectedCase(ci);
+                  setEditOpen(true);
+                }}
+                onDelete={handleDeleteCase}
+                onStatusChange={handleStatusChange}
+              />
+            )}
+          </CardContent>
+        </Card>
+        {/* نافذة التعديل */}
+        <EditCaseDialog
+          caseData={selectedCase}
+          open={editOpen}
+          onOpenChange={(open) => {
+            setEditOpen(open);
+            if (!open) setSelectedCase(null);
+          }}
+          onUpdate={handleUpdateCase}
+        />
+      </div>
     </div>
   );
 };
