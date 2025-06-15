@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Printer } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 import { DoctorPDFDateRangePicker } from "./DoctorPDFDateRangePicker";
 import { usePrintDoctorAccountHTML } from "./usePrintDoctorAccountHTML";
 import { useQuery } from "@tanstack/react-query";
@@ -31,7 +31,7 @@ export const DoctorAccountPDFButton: React.FC<Props> = ({
   const [toDate, setToDate] = useState<Date | undefined>(undefined);
   const [popoverOpen, setPopoverOpen] = useState(false);
 
-  // جلب كل الحالات الخاصة بهذا الطبيب
+  // جلب كل الحالات الخاصة بهذا الطبيب إذا لم يتم تمرير حالات
   const { data: fetchedDoctorCases = [], isFetching } = useQuery({
     queryKey: ["export-cases", doctorId],
     queryFn: async () => {
@@ -46,17 +46,20 @@ export const DoctorAccountPDFButton: React.FC<Props> = ({
       }
       return data ?? [];
     },
-    enabled: !!doctorId,
+    enabled: !!doctorId && !doctorCases, // فقط إذا لم يتم تمرير doctorCases مباشرةً
   });
 
   const { printHTML } = usePrintDoctorAccountHTML();
+
+  // تحديد مصدر الحالات: من props إذا موجودة، وإلا من Supabase
+  const casesToPrint = doctorCases ?? fetchedDoctorCases;
 
   const handlePrint = () => {
     setPopoverOpen(false);
     printHTML({
       doctorName,
       summary,
-      doctorCases: fetchedDoctorCases,
+      doctorCases: casesToPrint,
       fromDate,
       toDate,
     });
@@ -92,5 +95,4 @@ export const DoctorAccountPDFButton: React.FC<Props> = ({
       </PopoverContent>
     </Popover>
   );
-};
-
+}
