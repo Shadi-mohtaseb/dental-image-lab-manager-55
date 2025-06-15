@@ -15,16 +15,14 @@ import { Button } from "@/components/ui/button";
 import { useDoctors } from "@/hooks/useDoctors";
 import { useEffect } from "react";
 import { format } from "date-fns";
-// مكونات الحقول الجديدة
-import { PatientInfoFields } from "@/components/form/add-case/PatientInfoFields";
-import { TeethDetailsFields } from "@/components/form/add-case/TeethDetailsFields";
-import { ToothNumberField } from "@/components/form/add-case/ToothNumberField";
-// تم حذف DatesFields
-import { NotesField } from "@/components/form/add-case/NotesField";
-import { PriceField } from "@/components/form/add-case/PriceField";
-import { TeethCountField } from "@/components/form/add-case/TeethCountField";
-import { ShadeSelectField } from "@/components/form/add-case/ShadeSelectField";
-import { ZirconBlockTypeField } from "@/components/form/add-case/ZirconBlockTypeField";
+import { CalendarIcon } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
 
 const workTypes = ["زيركون", "مؤقت"] as const;
 const caseStatuses = [
@@ -181,21 +179,43 @@ export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
               </FormItem>
             )}
           />
-          {/* تاريخ الاستلام (إجباري، مقروء فقط) */}
+          {/* تاريخ الاستلام (قابل للتعديل) */}
           <FormField
             control={form.control}
             name="submission_date"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>تاريخ الاستلام</FormLabel>
-                <FormControl>
-                  <input
-                    type="date"
-                    readOnly
-                    className="input input-bordered w-full p-2 border rounded bg-gray-100"
-                    {...field}
-                  />
-                </FormControl>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full flex justify-between items-center",
+                          !field.value && "text-muted-foreground"
+                        )}
+                        type="button"
+                      >
+                        {field.value
+                          ? format(new Date(field.value), "yyyy-MM-dd")
+                          : <span>اختر التاريخ</span>}
+                        <CalendarIcon className="ml-2 h-4 w-4 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={field.value ? new Date(field.value) : undefined}
+                      onSelect={(date) => {
+                        field.onChange(date ? format(date, "yyyy-MM-dd") : "");
+                      }}
+                      initialFocus
+                      className={cn("p-3 pointer-events-auto")}
+                    />
+                  </PopoverContent>
+                </Popover>
                 <FormMessage />
               </FormItem>
             )}
