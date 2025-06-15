@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 export function DatesFields({ form }: { form: any }) {
   return (
     <div className="grid grid-cols-2 gap-4">
-      {/* حقل تاريخ التسليم (المطلوب الآن) */}
+      {/* حقل تاريخ التسليم (مطلوب) */}
       <FormField
         control={form.control}
         name="submission_date"
