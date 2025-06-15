@@ -23,6 +23,8 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useDoctors } from "@/hooks/useDoctors";
 import { useCases } from "@/hooks/useCases";
+import PartnershipFinancialSummaryCards from "@/components/PartnershipFinancialSummaryCards";
+import { useExpenses } from "@/hooks/useExpenses";
 
 const PartnershipAccounts = () => {
   const [showAddTransaction, setShowAddTransaction] = useState(false);
@@ -42,6 +44,7 @@ const PartnershipAccounts = () => {
 
   const { data: doctors = [] } = useDoctors();
   const { data: cases = [] } = useCases();
+  const { data: expenses = [] } = useExpenses();
 
   const { data: doctorTransactions = [] } = useQuery({
     queryKey: ['doctor_transactions'],
@@ -172,59 +175,16 @@ const PartnershipAccounts = () => {
 
   return (
     <div className="space-y-8 animate-fade-in">
-      {/* بطاقات الملخص المالي الرئيسية */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-        <Card className="text-center">
-          <CardContent className="flex flex-col items-center justify-center p-6">
-            <span className="flex items-center justify-center bg-blue-50 text-blue-500 rounded-full w-10 h-10 mb-2">
-              <ArrowUp className="w-6 h-6" />
-            </span>
-            <span className="text-gray-500 text-sm">إجمالي الإيرادات</span>
-            <span className="text-2xl font-bold text-gray-900 mt-1">{totalRevenue.toFixed(0)} ₪</span>
-            <span className="text-xs text-blue-600 mt-1">من {cases.length} حالة</span>
-          </CardContent>
-        </Card>
-        <Card className="text-center">
-          <CardContent className="flex flex-col items-center justify-center p-6">
-            <span className="flex items-center justify-center bg-red-50 text-red-500 rounded-full w-10 h-10 mb-2">
-              <ArrowDown className="w-6 h-6" />
-            </span>
-            <span className="text-gray-500 text-sm">إجمالي المصاريف</span>
-            <span className="text-2xl font-bold text-gray-900 mt-1">{totalExpenses.toFixed(0)} ₪</span>
-            <span className="text-xs text-red-600 mt-1">{expenses?.length ?? 0} مصروف</span>
-          </CardContent>
-        </Card>
-        <Card className="text-center">
-          <CardContent className="flex flex-col items-center justify-center p-6">
-            <span className="flex items-center justify-center bg-orange-50 text-orange-500 rounded-full w-10 h-10 mb-2">
-              <Wallet className="w-6 h-6" />
-            </span>
-            <span className="text-gray-500 text-sm">إجمالي ديون الأطباء</span>
-            <span className="text-2xl font-bold text-gray-900 mt-1">{totalDoctorsDebt.toFixed(0)} ₪</span>
-            <span className="text-xs text-orange-600 mt-1">{totalDoctorsDebt > 0 ? "يجب تحصيلها" : "لا توجد ديون"}</span>
-          </CardContent>
-        </Card>
-        <Card className="text-center">
-          <CardContent className="flex flex-col items-center justify-center p-6">
-            <span className="flex items-center justify-center bg-green-50 text-green-600 rounded-full w-10 h-10 mb-2">
-              <DollarSign className="w-6 h-6" />
-            </span>
-            <span className="text-gray-500 text-sm">صافي الربح (رأس المال)</span>
-            <span className="text-2xl font-bold text-gray-900 mt-1">{netProfit.toFixed(0)} ₪</span>
-            <span className="text-xs text-green-600 mt-1">{netProfit > 0 ? "ربح صافي" : "لا يوجد ربح"}</span>
-          </CardContent>
-        </Card>
-        <Card className="text-center">
-          <CardContent className="flex flex-col items-center justify-center p-6">
-            <span className="flex items-center justify-center bg-purple-50 text-purple-600 rounded-full w-10 h-10 mb-2">
-              <Users className="w-6 h-6" />
-            </span>
-            <span className="text-gray-500 text-sm">عدد الشركاء</span>
-            <span className="text-2xl font-bold text-gray-900 mt-1">{partnersCount}</span>
-            <span className="text-xs text-purple-600 mt-1">{partnersCount} شريك نشط</span>
-          </CardContent>
-        </Card>
-      </div>
+      {/* بطاقات الملخص المالي الرئيسية: أصبحت مكون منفصل */}
+      <PartnershipFinancialSummaryCards
+        totalRevenue={totalRevenue}
+        totalExpenses={totalExpenses}
+        netProfit={netProfit}
+        totalDoctorsDebt={totalDoctorsDebt}
+        partnersCount={partnersCount}
+        casesCount={cases.length}
+        expensesCount={expenses?.length ?? 0}
+      />
 
       {/* 2- إدارة الشركاء */}
       <section>
