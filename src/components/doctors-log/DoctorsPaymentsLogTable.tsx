@@ -1,3 +1,4 @@
+
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -58,6 +59,18 @@ export default function DoctorsPaymentsLogTable() {
     },
   });
 
+  // جلب الحالات لحساب المتبقي للطبيب
+  const { data: cases = [] } = useQuery({
+    queryKey: ["cases"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("cases")
+        .select("*");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
   const handleDelete = async (id: string) => {
     if (window.confirm("هل أنت متأكد من حذف هذه الدفعة؟")) {
       const { error } = await supabase
@@ -77,6 +90,17 @@ export default function DoctorsPaymentsLogTable() {
   const getDoctor = (doctor_id: string) => {
     return doctors.find((d: any) => d.id === doctor_id);
   };
+
+  // حساب المتبقي للطبيب
+  function getDoctorRemaining(doctor_id: string) {
+    const doctorCases = cases.filter((c: any) => c.doctor_id === doctor_id);
+    const totalCases = doctorCases.reduce((sum: number, c: any) => sum + (Number(c.price) || 0), 0);
+
+    const doctorTxs = payments.filter((tx: any) => tx.doctor_id === doctor_id && tx.transaction_type === "دفعة");
+    const totalPayments = doctorTxs.reduce((sum: number, tx: any) => sum + (Number(tx.amount) || 0), 0);
+
+    return (totalCases - totalPayments);
+  }
 
   return (
     <div>
@@ -100,9 +124,12 @@ export default function DoctorsPaymentsLogTable() {
               typeof doctor.phone === "string" &&
               doctor.phone.trim() !== "";
 
-            // إعداد رسالة افتراضية للواتساب
+            // حساب المتبقي للطبيب
+            const remaining = getDoctorRemaining(payment.doctor_id);
+
+            // إعداد رسالة واتساب حسب طلبك
             const waMessage = doctor
-              ? `تم تسجيل دفعة بمبلغ ${Number(payment.amount).toFixed(2)}₪ بتاريخ ${payment.transaction_date} للطبيب ${doctor.name}.`
+              ? `مرحبا ${doctor.name} تم استلام دفعة ${payment.payment_method ?? "نقدي"} بمبلغ ${Number(payment.amount).toFixed(2)}₪ بتاريخ ${payment.transaction_date} المبلغ المتبقي في حسابك: ${remaining.toFixed(2)}₪`
               : "";
 
             // تجهيز رابط الواتساب إذا توفر
