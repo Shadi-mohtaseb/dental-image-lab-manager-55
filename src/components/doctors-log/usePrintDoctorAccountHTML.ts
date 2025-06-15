@@ -1,4 +1,3 @@
-
 import { toast } from "@/hooks/use-toast";
 
 // استدع هذا الهوك لطباعة كشف حساب الطبيب كصفحة HTML منسقة للطباعة
@@ -24,20 +23,23 @@ export function usePrintDoctorAccountHTML() {
     fromDate,
     toDate,
   }: PrintArgs) => {
-    // تصفية الحالات حسب delivery_date فقط
+    // فلترة الحالات بحيث تعتمد أولوية على delivery_date وإن لم يوجد تعتمد على created_at
     let filteredCases = doctorCases || [];
     if (fromDate || toDate) {
       filteredCases = filteredCases.filter((c: any) => {
-        // يجب وجود delivery_date للحالة
-        if (!c?.delivery_date) return false;
-        const date = new Date(c.delivery_date);
-        if (fromDate && date < new Date(fromDate.setHours(0, 0, 0, 0))) return false;
-        if (toDate && date > new Date(toDate.setHours(23, 59, 59, 999))) return false;
+        // استخدام delivery_date وإن لم يوجد created_at
+        const baseDateStr = c?.delivery_date || c?.created_at;
+        if (!baseDateStr) return false;
+        const baseDate = new Date(baseDateStr);
+
+        // فلترة الفترة الزمنية
+        if (fromDate && baseDate < new Date(fromDate.setHours(0, 0, 0, 0))) return false;
+        if (toDate && baseDate > new Date(toDate.setHours(23, 59, 59, 999))) return false;
         return true;
       });
     }
 
-    // فتح نافذة جديدة
+    // فتح نافذة جديدة للطباعة
     const printWindow = window.open("", "_blank", "width=900,height=900,scrollbars=yes") as Window;
     if (!printWindow) {
       toast({
@@ -50,7 +52,10 @@ export function usePrintDoctorAccountHTML() {
 
     // بيانات الحالات مع الأعمدة المطلوبة
     const tableRows = filteredCases.map(
-      (c: any) => `
+      (c: any) => {
+        // اختيار التاريخ الأنسب للعرض
+        const dateField = c?.delivery_date || (c?.created_at ? String(c.created_at).slice(0,10) : "");
+        return `
       <tr>
         <td>${c?.patient_name ?? ""}</td>
         <td>${c?.work_type ?? ""}</td>
@@ -59,9 +64,10 @@ export function usePrintDoctorAccountHTML() {
         <td>${c?.number_of_teeth ?? ""}</td>
         <td>${c?.tooth_number ?? ""}</td>
         <td>${c?.status ?? ""}</td>
-        <td>${c?.delivery_date ?? (c?.created_at ? String(c.created_at).slice(0,10) : "")}</td>
+        <td>${dateField}</td>
       </tr>
     `
+      }
     ).join("");
 
     const style = `
