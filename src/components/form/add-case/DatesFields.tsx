@@ -7,10 +7,10 @@ export function DatesFields({ form }: { form: any }) {
     <div className="grid grid-cols-2 gap-4">
       <FormField
         control={form.control}
-        name="submission_date"
+        name="delivery_date"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>تاريخ التسليم *</FormLabel>
+            <FormLabel>تاريخ الاستلام *</FormLabel>
             <FormControl>
               <Input type="date" {...field} />
             </FormControl>
@@ -20,10 +20,10 @@ export function DatesFields({ form }: { form: any }) {
       />
       <FormField
         control={form.control}
-        name="delivery_date"
+        name="submission_date"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>تاريخ الاستلام</FormLabel>
+            <FormLabel>تاريخ التسليم</FormLabel>
             <FormControl>
               <Input type="date" {...field} />
             </FormControl>

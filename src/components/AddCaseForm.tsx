@@ -1,4 +1,3 @@
-
 import {
   Form,
   FormControl,
@@ -44,8 +43,8 @@ const formSchema = z.object({
   number_of_teeth: z
     .preprocess(val => (val === "" ? undefined : Number(val)), z.number({ invalid_type_error: "يرجى إدخال عدد الأسنان" }).min(1, "يرجى إدخال عدد الأسنان").optional()),
   tooth_number: z.string().optional(),
-  submission_date: z.string(),
-  delivery_date: z.string().optional(),
+  submission_date: z.string().optional(), // أصبح اختياريًا
+  delivery_date: z.string({ required_error: "تاريخ الاستلام مطلوب" }), // أصبح إلزاميًا
   status: z.enum(caseStatuses).default("قيد التنفيذ"),
   notes: z.string().optional(),
   price: z.preprocess(
@@ -78,8 +77,8 @@ export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
       work_type: "زيركون",
       tooth_number: "",
       number_of_teeth: undefined,
-      submission_date: new Date().toISOString().split('T')[0],
-      delivery_date: "",
+      submission_date: "", // لم يعد افتراضيًا اليوم ولا مطلوب
+      delivery_date: new Date().toISOString().split('T')[0], // افتراضيًا اليوم ومطلوب
       status: "قيد التنفيذ",
       notes: "",
       price: 0,
