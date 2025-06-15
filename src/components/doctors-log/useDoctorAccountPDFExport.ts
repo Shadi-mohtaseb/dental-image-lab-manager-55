@@ -25,35 +25,63 @@ export function useDoctorAccountPDFExport() {
     fromDate,
     toDate,
   }: ExportArgs) => {
-    console.log("بداية تصدير PDF");
-    // تصفية الحالات بحسب التاريخ المختار
-    const filteredCases = (doctorCases || []).filter((c) => {
-      const dateStr = c.delivery_date ?? c.created_at?.slice(0, 10);
-      if (!dateStr) return false;
-      const caseDate = new Date(dateStr);
+    console.log("🟢 بدأت عملية تصدير PDF");
+    console.log("بيانات doctorCases الخام:", doctorCases);
+
+    // تصفية الحالات بحسب التاريخ المختار (مع الحرص على التعامل مع صيغ التاريخ)
+    const filteredCases = (doctorCases || []).filter((c, idx) => {
+      let dateStr = c.delivery_date ?? c.created_at?.slice(0, 10);
+      if (!dateStr) {
+        console.log(`case idx=${idx}, لا يوجد تاريخ للتصفية`, c);
+        return false;
+      }
+
+      let caseDateObj: Date | undefined;
+      try {
+        caseDateObj = typeof dateStr === "string" ? new Date(dateStr) : dateStr;
+        if (isNaN(caseDateObj.getTime())) {
+          // تاريخ غير صالح!
+          console.log(`case idx=${idx}, تاريخ غير قابل للتحويل`, { dateStr, case: c });
+          return false;
+        }
+      } catch (err) {
+        console.log(`case idx=${idx}, خطأ في تحويل التاريخ`, { dateStr, err, case: c });
+        return false;
+      }
 
       if (fromDate) {
         const startOfDay = new Date(fromDate);
         startOfDay.setHours(0, 0, 0, 0);
-        if (caseDate < startOfDay) return false;
+        if (caseDateObj < startOfDay) {
+          return false;
+        }
       }
       if (toDate) {
         const endOfDay = new Date(toDate);
         endOfDay.setHours(23, 59, 59, 999);
-        if (caseDate > endOfDay) return false;
+        if (caseDateObj > endOfDay) {
+          return false;
+        }
       }
       return true;
     });
 
     console.log("عدد الحالات بعد الفلترة:", filteredCases.length);
-
-    if (!filteredCases.length) {
+    if (filteredCases.length === 0) {
       toast({
         title: "لا يوجد بيانات ضمن المدة المحددة!",
         description:
-          "يرجى تعديل الفترة أو إضافة حالات للطبيب ضمن تلك الفترة، أو التأكد من أن الطبيب المحدد لديه حالات.",
+          "يرجى تعديل الفترة أو إضافة حالات للطبيب ضمن تلك الفترة، أو التأكد من أن الطبيب المحدد لديه حالات.\nتأكد من توفر (delivery_date) أو (created_at) في كل حالة وصحتها.",
         variant: "destructive",
       });
+      // لن throw لأننا سنطبع كل الحالات الغير صالحة
+      const allDates = (doctorCases || []).map((c) => ({
+        patient_name: c?.patient_name,
+        delivery_date: c?.delivery_date,
+        created_at: c?.created_at,
+        price: c?.price,
+      }));
+      console.log("🔴 جميع تواريخ الحالات:", allDates);
       throw new Error("لا يوجد بيانات صالحة للتصدير.");
     }
 
@@ -65,7 +93,6 @@ export function useDoctorAccountPDFExport() {
         format: "a4",
       });
 
-      // التأكد من ربط autoTable
       if (!(doc as any).autoTable) {
         (doc as any).autoTable = autoTable;
       }
@@ -93,10 +120,8 @@ export function useDoctorAccountPDFExport() {
       doc.setFillColor(235, 237, 249);
       doc.text("إجمالي المستحق:", 175, 48, { align: "right" });
       doc.text(`${(summary.totalDue ?? 0).toLocaleString()} ₪`, 158, 48, { align: "right" });
-
       doc.text("المدفوع:", 112, 48, { align: "right" });
       doc.text(`${(summary.totalPaid ?? 0).toLocaleString()} ₪`, 88, 48, { align: "right" });
-
       doc.text("المتبقي (دين):", 60, 48, { align: "right" });
       doc.setTextColor(200, 34, 51);
       doc.text(`${(summary.remaining ?? 0).toLocaleString()} ₪`, 40, 48, { align: "right" });
@@ -180,4 +205,3 @@ export function useDoctorAccountPDFExport() {
 
   return { exportPDF };
 }
-
