@@ -172,7 +172,22 @@ const Index = () => {
       </div>
 
       {/* Stats Grid */}
-      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+        {stats.map((stat, index) => (
+          <Card key={index} className="animate-slide-up">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <stat.icon className="w-5 h-5" />
+                {stat.title}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stat.value}</div>
+              <p className={`text-sm ${stat.color}`}>{stat.change}</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
 
       {/* Quick Actions */}
       <Card className="animate-slide-up">
@@ -228,54 +243,6 @@ const Index = () => {
                 ))
               ) : (
                 <p className="text-gray-500 text-center py-4">لا توجد حالات حديثة</p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="animate-slide-up">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="w-5 h-5" />
-              ملخص الأداء المالي
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex justify-between items-center border-b pb-2">
-                <span className="text-sm text-gray-600">صافي الربح (رأس المال)</span>
-                <span className={`text-lg font-bold ${netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {netProfit.toFixed(2)} ₪
-                </span>
-              </div>
-              
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">إجمالي الإيرادات</span>
-                <span className="text-lg font-bold text-blue-600">{totalRevenue.toFixed(2)} ₪</span>
-              </div>
-
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">إجمالي المصاريف</span>
-                <span className="text-lg font-bold text-red-600">{monthlyExpenses.toFixed(2)} ₪</span>
-              </div>
-
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">عدد الشركاء</span>
-                <span className="text-lg font-bold text-purple-600">{activePartners}</span>
-              </div>
-
-              {partners.length > 0 && (
-                <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-                  <p className="text-xs text-gray-500 mb-2">توزيع الأرباح:</p>
-                  {partners.map((partner, index) => (
-                    <div key={partner.id} className="flex justify-between text-sm">
-                      <span>{partner.name}</span>
-                      <span className="font-semibold">
-                        {partner.partnership_percentage?.toFixed(1)}% = {Number(partner.total_amount).toFixed(2)} ₪
-                      </span>
-                    </div>
-                  ))}
-                </div>
               )}
             </div>
           </CardContent>
