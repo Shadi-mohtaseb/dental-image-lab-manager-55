@@ -62,17 +62,19 @@ export function AppSidebar() {
 
   return (
     <Sidebar className="border-r border-sidebar-border relative overflow-hidden" side="right">
-      {/* خلفية الصورة مع تعتيم خفيف، وتغطية كاملة */}
+      {/* صورة الغلاف مع طبقة تعتيم وتغطية كاملة*/}
       <div
-        className="absolute inset-0 z-0 bg-black/50"
+        className="absolute inset-0 z-0"
         style={{
-          backgroundImage: "url('/lovable-uploads/1edcae13-e89d-4a66-bda4-57367db9f777.png')",
+          backgroundImage: "url('/lovable-uploads/5c301c59-c488-4176-9745-a6d4ff4f3c83.png')",
           backgroundRepeat: "no-repeat",
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
         aria-hidden="true"
-      />
+      >
+        <div className="absolute inset-0 bg-black/60" />
+      </div>
       <div className="relative z-10 flex flex-col h-full">
         <SidebarHeader className="p-6">
           <div className="flex items-center gap-3">
