@@ -1,4 +1,3 @@
-
 import {
   Form,
   FormControl,
@@ -15,6 +14,7 @@ import { StatusSelect } from "./form/StatusSelect";
 import { Button } from "@/components/ui/button";
 import { useDoctors } from "@/hooks/useDoctors";
 import { useEffect } from "react";
+import { format } from "date-fns";
 // مكونات الحقول الجديدة
 import { PatientInfoFields } from "@/components/form/add-case/PatientInfoFields";
 import { TeethDetailsFields } from "@/components/form/add-case/TeethDetailsFields";
@@ -44,7 +44,6 @@ const formSchema = z.object({
   number_of_teeth: z
     .preprocess(val => (val === "" ? undefined : Number(val)), z.number({ invalid_type_error: "يرجى إدخال عدد الأسنان" }).min(1, "يرجى إدخال عدد الأسنان").optional()),
   tooth_number: z.string().optional(),
-  // تم حذف حقلي التاريخين نهائياً
   status: z.enum(caseStatuses).default("قيد التنفيذ"),
   notes: z.string().optional(),
   price: z.preprocess(
@@ -53,6 +52,8 @@ const formSchema = z.object({
   ),
   shade: z.string().optional(),
   zircon_block_type: z.string().optional(),
+  delivery_date: z.string().optional(),
+  submission_date: z.string().min(1, "تاريخ الاستلام مطلوب"),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -69,6 +70,9 @@ export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
     return 0;
   };
 
+  // إعداد تاريخ اليوم كنص (YYYY-MM-DD)
+  const todayStr = format(new Date(), "yyyy-MM-dd");
+
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -77,12 +81,13 @@ export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
       work_type: "زيركون",
       tooth_number: "",
       number_of_teeth: undefined,
-      // تم حذف حقلي التاريخ من القيم الافتراضية
       status: "قيد التنفيذ",
       notes: "",
       price: 0,
       shade: "",
       zircon_block_type: "",
+      delivery_date: "", // قيمة فارغة (اختياري)
+      submission_date: todayStr, // إجباري - مملوء افتراضيًا
     },
   });
 
@@ -123,7 +128,8 @@ export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
         notes: data.notes || null,
         shade: data.shade || null,
         zircon_block_type: data.zircon_block_type || null,
-        // حذف قيم التاريخ من البيانات المرسلة
+        delivery_date: data.delivery_date || null,
+        submission_date: data.submission_date, // دائماً إجباري
       };
 
       await addCase.mutateAsync({
@@ -132,14 +138,17 @@ export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
         work_type: sanitizedData.work_type,
         tooth_number: sanitizedData.tooth_number,
         number_of_teeth: sanitizedData.number_of_teeth,
-        // لا إرسال delivery_date أو submission_date 
         status: sanitizedData.status,
         notes: sanitizedData.notes,
         price: sanitizedData.price,
         shade: sanitizedData.shade,
         zircon_block_type: sanitizedData.zircon_block_type,
+        delivery_date: sanitizedData.delivery_date,
+        submission_date: sanitizedData.submission_date,
       });
       form.reset();
+      // أعد تعيين submission_date للقيمة الافتراضية
+      form.setValue("submission_date", todayStr);
       onSuccess();
     } catch (error) {
       console.error("Error adding case:", error);
@@ -153,6 +162,45 @@ export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
         <TeethDetailsFields form={form} />
         <ToothNumberField form={form} />
         {/* تم حذف DatesFields */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+          {/* تاريخ التسليم (اختياري) */}
+          <FormField
+            control={form.control}
+            name="delivery_date"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>تاريخ التسليم</FormLabel>
+                <FormControl>
+                  <input
+                    type="date"
+                    className="input input-bordered w-full p-2 border rounded"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {/* تاريخ الاستلام (إجباري، مقروء فقط) */}
+          <FormField
+            control={form.control}
+            name="submission_date"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>تاريخ الاستلام</FormLabel>
+                <FormControl>
+                  <input
+                    type="date"
+                    readOnly
+                    className="input input-bordered w-full p-2 border rounded bg-gray-100"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
         <StatusSelect form={form} name="status" />
         <NotesField form={form} />
         <PriceField form={form} />
@@ -160,7 +208,10 @@ export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
           <Button
             type="button"
             variant="outline"
-            onClick={() => form.reset()}
+            onClick={() => {
+              form.reset();
+              form.setValue("submission_date", todayStr);
+            }}
           >
             إلغاء
           </Button>
