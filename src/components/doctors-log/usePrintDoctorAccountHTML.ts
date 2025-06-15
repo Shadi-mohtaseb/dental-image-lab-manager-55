@@ -48,16 +48,18 @@ export function usePrintDoctorAccountHTML() {
       return;
     }
 
-    // بيانات الحالات
+    // بيانات الحالات مع الأعمدة المطلوبة
     const tableRows = filteredCases.map(
       (c: any) => `
       <tr>
         <td>${c?.patient_name ?? ""}</td>
         <td>${c?.work_type ?? ""}</td>
+        <td>${c?.shade ?? ""}</td>
         <td>${(c?.price != null && c?.price !== undefined && !isNaN(Number(c.price))) ? Number(c.price).toLocaleString() : ""}</td>
+        <td>${c?.number_of_teeth ?? ""}</td>
+        <td>${c?.tooth_number ?? ""}</td>
         <td>${c?.status ?? ""}</td>
         <td>${c?.delivery_date ?? (c?.created_at ? String(c.created_at).slice(0,10) : "")}</td>
-        <td>${c?.id?.slice(0, 6) ? c.id.slice(0, 6) + "..." : ""}</td>
       </tr>
     `
     ).join("");
@@ -76,7 +78,7 @@ export function usePrintDoctorAccountHTML() {
         .summary-label { color: #314295; margin-left: 7px;}
         .summary-value { font-weight: bold;}
         .red { color: #e73737 }
-        .table-container { width: 94%; margin: 1rem auto 2rem; }
+        .table-container { width: 98%; margin: 1rem auto 2rem; }
         table { border-collapse: collapse; width: 100%; background: white;}
         th, td { border: 1px solid #bbbde6; padding: 7px 3px; text-align: right;}
         th { background: #283366; color: white; }
@@ -122,14 +124,16 @@ export function usePrintDoctorAccountHTML() {
               <tr>
                 <th>اسم المريض</th>
                 <th>نوع العمل</th>
+                <th>اللون</th>
                 <th>المبلغ</th>
+                <th>عدد الأسنان</th>
+                <th>رقم/أرقام الأسنان</th>
                 <th>الحالة</th>
                 <th>تاريخ التسليم</th>
-                <th>رقم الحالة</th>
               </tr>
             </thead>
             <tbody>
-              ${tableRows || "<tr><td colspan='6' style='text-align:center;color:#aaa'>لا توجد حالات لعرضها</td></tr>"}
+              ${tableRows || "<tr><td colspan='8' style='text-align:center;color:#aaa'>لا توجد حالات لعرضها</td></tr>"}
             </tbody>
           </table>
         </div>
@@ -150,4 +154,3 @@ export function usePrintDoctorAccountHTML() {
   };
   return { printHTML };
 }
-
