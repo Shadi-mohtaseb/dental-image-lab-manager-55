@@ -23,6 +23,9 @@ import {
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 
+// هنا صورة الخلفية:
+const sidebarBg = "/lovable-uploads/d177bd6f-d2eb-4db8-996a-e2a94b42a9da.png";
+
 const menuItems = [
   {
     title: "لوحة التحكم",
@@ -34,7 +37,6 @@ const menuItems = [
     url: "/partnership-accounts",
     icon: Users,
   },
-  // حذف قائمة حسابات الأطباء السابقة إن وجدت، وإبقاء فقط "حسابات الأطباء" لرابط "/doctors-accounts"
   {
     title: "حسابات الأطباء",
     url: "/doctors-accounts",
@@ -62,61 +64,77 @@ export function AppSidebar() {
   const navigate = useNavigate();
 
   return (
-    <Sidebar className="border-r border-sidebar-border" side="right">
-      <SidebarHeader className="p-6">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-sidebar-primary rounded-lg flex items-center justify-center">
-            <PlusCircle className="w-6 h-6 text-sidebar-primary-foreground" />
+    <Sidebar className="border-r border-sidebar-border relative overflow-hidden" side="right">
+      {/* خلفية وتراكب داكن لقراءة أوضح */}
+      <div
+        aria-hidden
+        className="absolute inset-0 z-0"
+        style={{
+          backgroundImage: `url('${sidebarBg}')`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          filter: "brightness(0.5)", // تظليم مناسب للنصوص
+        }}
+      />
+      <div className="absolute inset-0 bg-black/40 z-0" />
+      {/* محتوى الشريط الجانبي فوق الخلفية */}
+      <div className="relative z-10 h-full flex flex-col">
+        <SidebarHeader className="p-6">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-sidebar-primary rounded-lg flex items-center justify-center">
+              <PlusCircle className="w-6 h-6 text-sidebar-primary-foreground" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-sidebar-foreground">مختبر الأسنان</h2>
+              <p className="text-sm text-sidebar-foreground/70">نظام الإدارة</p>
+            </div>
           </div>
-          <div>
-            <h2 className="text-lg font-bold text-sidebar-foreground">مختبر الأسنان</h2>
-            <p className="text-sm text-sidebar-foreground/70">نظام الإدارة</p>
-          </div>
-        </div>
-      </SidebarHeader>
-      
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-sidebar-foreground/80 font-semibold">
-            القوائم الرئيسية
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {menuItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={location.pathname === item.url}
-                    className="transition-all duration-200 hover:bg-sidebar-accent"
-                  >
-                    <button
-                      onClick={() => navigate(item.url)}
-                      className="flex items-center gap-3 w-full"
+        </SidebarHeader>
+        
+        <SidebarContent>
+          <SidebarGroup>
+            <SidebarGroupLabel className="text-sidebar-foreground/80 font-semibold">
+              القوائم الرئيسية
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {menuItems.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={location.pathname === item.url}
+                      className="transition-all duration-200 hover:bg-sidebar-accent"
                     >
-                      <item.icon className="w-5 h-5" />
-                      <span>{item.title}</span>
-                    </button>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
+                      <button
+                        onClick={() => navigate(item.url)}
+                        className="flex items-center gap-3 w-full"
+                      >
+                        <item.icon className="w-5 h-5" />
+                        <span>{item.title}</span>
+                      </button>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarContent>
 
-      <SidebarFooter className="p-4">
-        <SidebarMenu>
-          {/* زر تسجيل الخروج فقط */}
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild>
-              <button className="flex items-center gap-3 w-full text-sidebar-foreground/70 hover:text-sidebar-foreground">
-                <LogOut className="w-5 h-5" />
-                <span>تسجيل الخروج</span>
-              </button>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarFooter>
+        <SidebarFooter className="p-4 mt-auto">
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild>
+                <button className="flex items-center gap-3 w-full text-sidebar-foreground/70 hover:text-sidebar-foreground">
+                  <LogOut className="w-5 h-5" />
+                  <span>تسجيل الخروج</span>
+                </button>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarFooter>
+      </div>
     </Sidebar>
   );
 }
+
+// انتهى التعديل
