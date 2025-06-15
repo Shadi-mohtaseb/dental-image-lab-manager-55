@@ -7,9 +7,9 @@ import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import EditDoctorPaymentDialog from "./EditDoctorPaymentDialog";
 import { toast } from "@/hooks/use-toast";
-import { Edit, Trash2 } from "lucide-react";
+import { Edit, Trash2, Whatsapp } from "lucide-react";
+import { buildWhatsappLink } from "@/utils/whatsapp";
 
-// حل المشكلة: جلب جميع الأطباء وربط كل دفعة بالاسم الخاص بها يدويًا.
 export default function DoctorsPaymentsLogTable() {
   const queryClient = useQueryClient();
   const [editOpen, setEditOpen] = useState(false);
@@ -28,13 +28,13 @@ export default function DoctorsPaymentsLogTable() {
     },
   });
 
-  // جلب جميع الأطباء لربط الدفعة بالاسم يدويًا
+  // جلب جميع الأطباء لربط الدفعة بالاسم ورقم الهاتف يدويًا
   const { data: doctors = [] } = useQuery({
     queryKey: ["doctors"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("doctors")
-        .select("id, name");
+        .select("id, name, phone");
       if (error) throw error;
       return data ?? [];
     },
@@ -55,10 +55,9 @@ export default function DoctorsPaymentsLogTable() {
     }
   };
 
-  // دالة مساعد للبحث عن اسم الطبيب بحسب doctor_id
-  const getDoctorName = (doctor_id: string) => {
-    const doc = doctors.find((d: any) => d.id === doctor_id);
-    return doc?.name ?? "-";
+  // دوال مساعدة
+  const getDoctor = (doctor_id: string) => {
+    return doctors.find((d: any) => d.id === doctor_id);
   };
 
   return (
@@ -71,33 +70,71 @@ export default function DoctorsPaymentsLogTable() {
             <TableHead className="text-center w-[130px]">طريقة الدفع</TableHead>
             <TableHead className="text-center w-[130px]">التاريخ</TableHead>
             <TableHead className="text-center w-[160px]">ملاحظات</TableHead>
-            <TableHead className="text-center w-[130px]">إجراءات</TableHead>
+            <TableHead className="text-center w-[180px]">إجراءات</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {payments.map((payment: any) => (
-            <TableRow key={payment.id}>
-              <TableCell className="text-right w-[180px]">{getDoctorName(payment.doctor_id)}</TableCell>
-              <TableCell className="text-center w-[110px]">{Number(payment.amount).toFixed(2)} ₪</TableCell>
-              <TableCell className="text-center w-[130px]">
-                <Badge>{payment.payment_method ?? "بدون"}</Badge>
-              </TableCell>
-              <TableCell className="text-center w-[130px]">{payment.transaction_date}</TableCell>
-              <TableCell className="text-center w-[160px]">{payment.notes || "-"}</TableCell>
-              <TableCell className="text-center w-[130px]">
-                <div className="flex gap-2 justify-center">
-                  <Button size="sm" variant="outline"
-                    onClick={() => { setSelectedPayment(payment); setEditOpen(true); }}>
-                    <Edit />
-                  </Button>
-                  <Button size="sm" variant="outline" className="text-red-600"
-                    onClick={() => handleDelete(payment.id)}>
-                    <Trash2 />
-                  </Button>
-                </div>
-              </TableCell>
-            </TableRow>
-          ))}
+          {payments.map((payment: any) => {
+            const doctor = getDoctor(payment.doctor_id);
+            const hasPhone =
+              doctor?.phone &&
+              typeof doctor.phone === "string" &&
+              doctor.phone.trim() !== "";
+
+            // إعداد رسالة افتراضية للواتساب
+            const waMessage = doctor
+              ? `تم تسجيل دفعة بمبلغ ${Number(payment.amount).toFixed(2)}₪ بتاريخ ${payment.transaction_date} للطبيب ${doctor.name}.`
+              : "";
+
+            // تجهيز رابط الواتساب إذا توفر
+            const waLink =
+              hasPhone && waMessage
+                ? buildWhatsappLink(doctor.phone, waMessage)
+                : "";
+
+            return (
+              <TableRow key={payment.id}>
+                <TableCell className="text-right w-[180px]">{doctor?.name ?? "-"}</TableCell>
+                <TableCell className="text-center w-[110px]">{Number(payment.amount).toFixed(2)} ₪</TableCell>
+                <TableCell className="text-center w-[130px]">
+                  <Badge>{payment.payment_method ?? "بدون"}</Badge>
+                </TableCell>
+                <TableCell className="text-center w-[130px]">{payment.transaction_date}</TableCell>
+                <TableCell className="text-center w-[160px]">{payment.notes || "-"}</TableCell>
+                <TableCell className="text-center w-[180px]">
+                  <div className="flex gap-2 justify-center">
+                    <Button size="sm" variant="outline"
+                      onClick={() => { setSelectedPayment(payment); setEditOpen(true); }}>
+                      <Edit />
+                    </Button>
+                    <Button size="sm" variant="outline" className="text-red-600"
+                      onClick={() => handleDelete(payment.id)}>
+                      <Trash2 />
+                    </Button>
+                    {hasPhone && waLink && (
+                      <a
+                        href={waLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title={`إرسال رسالة واتساب للطبيب ${doctor?.name}`}
+                      >
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-green-600"
+                          type="button"
+                          tabIndex={-1}
+                          asChild
+                        >
+                          <Whatsapp />
+                        </Button>
+                      </a>
+                    )}
+                  </div>
+                </TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
       <EditDoctorPaymentDialog
