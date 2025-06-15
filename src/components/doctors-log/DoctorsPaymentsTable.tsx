@@ -1,3 +1,4 @@
+
 import { useDoctors } from "@/hooks/useDoctors";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,8 +14,26 @@ import {
   TableBody,
   TableCell,
 } from "@/components/ui/table";
-import { MessageCircle } from "lucide-react";
 import { buildWhatsappLink } from "@/utils/whatsapp";
+
+// أيقونة واتساب أصلية موحدة
+const WhatsappOutlineIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    {...props}
+    width={24}
+    height={24}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="#22c55e"
+    strokeWidth={2}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={props.className ?? "w-6 h-6"}
+  >
+    <rect x="2.5" y="2.5" width="19" height="19" rx="6" stroke="#5ee187" fill="none" />
+    <path d="M7 11.8C7 9.61177 8.78993 7.8 11 7.8C12.0417 7.8 13.0137 8.24376 13.7141 9.00336L13.8889 8.8M17 16.2C17 18.3882 15.2101 20.2 13 20.2C11.9583 20.2 10.9863 19.7562 10.2859 18.9966L10.1111 19.2M9 15.8C9 15.3582 9.33579 15 9.75 15H14.25C14.6642 15 15 15.3582 15 15.8V16.2C15 16.6418 14.6642 17 14.25 17H9.75C9.33579 17 9 16.6418 9 16.2V15.8Z" stroke="#22c55e" />
+  </svg>
+);
 
 interface DoctorsPaymentsTableProps {}
 
@@ -121,10 +140,10 @@ export default function DoctorsPaymentsTable({ }: DoctorsPaymentsTableProps) {
                       <Button
                         size="icon"
                         variant="outline"
-                        className="text-green-600 border-green-300 hover:bg-green-50"
+                        className="border-2 border-green-300 hover:bg-green-50"
                         type="button"
                       >
-                        <MessageCircle />
+                        <WhatsappOutlineIcon />
                       </Button>
                     </a>
                   ) : (
@@ -145,3 +164,4 @@ export default function DoctorsPaymentsTable({ }: DoctorsPaymentsTableProps) {
     </div>
   );
 }
+
