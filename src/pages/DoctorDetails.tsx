@@ -1,3 +1,4 @@
+
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,7 +10,6 @@ import { Badge } from "@/components/ui/badge";
 import { DoctorInfoCard } from "@/components/doctors-details/DoctorInfoCard";
 import { DoctorCasesTable } from "@/components/doctors-details/DoctorCasesTable";
 import { DoctorTransactionsTable } from "@/components/doctors-details/DoctorTransactionsTable";
-import { WhatsAppAccountExportButton } from "@/components/doctors-details/WhatsAppAccountExportButton";
 
 const DoctorDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -102,24 +102,10 @@ const DoctorDetails = () => {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex items-center justify-between">
-        <Button variant="outline" className="gap-2" onClick={() => navigate(-1)}>
-          <ArrowRight className="w-4 h-4" />
-          العودة لحسابات الأطباء
-        </Button>
-        
-        {/* زر تصدير كشف الحساب إلى واتساب */}
-        <WhatsAppAccountExportButton
-          doctor={doctor}
-          summary={{
-            totalDue,
-            totalPaid,
-            remaining,
-          }}
-          casesCount={cases.length}
-          totalTeeth={totalTeeth}
-        />
-      </div>
+      <Button variant="outline" className="gap-2" onClick={() => navigate(-1)}>
+        <ArrowRight className="w-4 h-4" />
+        العودة لحسابات الأطباء
+      </Button>
 
       {/* بيانات الطبيب */}
       <DoctorInfoCard doctor={{
