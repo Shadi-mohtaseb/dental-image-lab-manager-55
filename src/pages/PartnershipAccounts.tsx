@@ -173,21 +173,6 @@ const PartnershipAccounts = () => {
 
   return (
     <div className="space-y-8 animate-fade-in">
-      {/* 1- قسم الملخص المالي */}
-      <FinancialSummary
-        totalRevenue={totalRevenue}
-        totalExpenses={totalExpenses}
-        netProfit={netProfit}
-      />
-
-      {/* عرض مجموع ديون الأطباء */}
-      <div className="bg-orange-50 p-4 rounded-lg flex items-center gap-3 border border-orange-200">
-        <Wallet className="text-orange-600" />
-        <span className="font-bold text-orange-800 text-lg">
-          مجموع ديون الأطباء الحالية: {totalDoctorsDebt.toFixed(2)} ₪
-        </span>
-      </div>
-
       {/* 2- إدارة الشركاء */}
       <section>
         <div className="flex items-center justify-between mt-6 mb-2">
