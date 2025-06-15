@@ -7,7 +7,9 @@ import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import EditDoctorPaymentDialog from "./EditDoctorPaymentDialog";
 import { toast } from "@/hooks/use-toast";
-import { Edit, Trash2, Whatsapp } from "lucide-react";
+import { Edit, Trash2 } from "lucide-react";
+// استخدم الأيقونة بالاستيراد الصحيح من lucide-react (حروف صغيرة)
+import { Whatsapp as WhatsappIcon } from "lucide-react";
 import { buildWhatsappLink } from "@/utils/whatsapp";
 
 export default function DoctorsPaymentsLogTable() {
@@ -126,7 +128,8 @@ export default function DoctorsPaymentsLogTable() {
                           tabIndex={-1}
                           asChild
                         >
-                          <Whatsapp />
+                          {/* استخدم WhatsappIcon بدل Whatsapp */}
+                          <WhatsappIcon />
                         </Button>
                       </a>
                     )}
