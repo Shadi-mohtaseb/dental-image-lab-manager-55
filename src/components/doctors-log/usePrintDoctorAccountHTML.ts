@@ -1,3 +1,4 @@
+
 import { toast } from "@/hooks/use-toast";
 
 // استدع هذا الهوك لطباعة كشف حساب الطبيب كصفحة HTML منسقة للطباعة
@@ -49,8 +50,16 @@ export function usePrintDoctorAccountHTML() {
     // بيانات الحالات مع الأعمدة المطلوبة
     const tableRows = filteredCases.map(
       (c: any) => {
-        // عرض حقل وقت الاستلام فقط
-        const deliveryDateField = c?.delivery_date ? String(c.delivery_date) : "";
+        // عرض حقل تاريخ الاستلام فقط بصيغة yyyy-mm-dd
+        let deliveryDateField = "";
+        if (c?.delivery_date) {
+          try {
+            const dt = new Date(c.delivery_date);
+            deliveryDateField = dt.toLocaleDateString("ar-EG");
+          } catch (e) {
+            deliveryDateField = String(c.delivery_date).slice(0, 10);
+          }
+        }
         return `
       <tr>
         <td>${c?.patient_name ?? ""}</td>
@@ -96,7 +105,7 @@ export function usePrintDoctorAccountHTML() {
     let dateRange = "";
     if (fromDate || toDate) {
       dateRange = `<div style="text-align:center;color:#2c4069;font-size:1rem;">
-        الفترة بناءً على وقت الاستلام: 
+        الفترة بناءً على <b>تاريخ الاستلام</b>: 
         ${fromDate ? fromDate.toLocaleDateString("ar-EG") : "..."} 
         - 
         ${toDate ? toDate.toLocaleDateString("ar-EG") : "..."}
@@ -131,7 +140,7 @@ export function usePrintDoctorAccountHTML() {
                 <th>عدد الأسنان</th>
                 <th>رقم/أرقام الأسنان</th>
                 <th>الحالة</th>
-                <th>وقت الاستلام</th>
+                <th>تاريخ الاستلام</th>
               </tr>
             </thead>
             <tbody>
