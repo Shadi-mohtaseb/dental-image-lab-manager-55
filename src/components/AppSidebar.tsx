@@ -65,15 +65,15 @@ export function AppSidebar() {
 
   return (
     <Sidebar
-      className="border-r border-sidebar-border relative overflow-hidden"
+      className="!fixed !top-0 !right-0 !h-screen !w-64 z-40 border-l-0 border-r border-sidebar-border shadow-lg overflow-hidden"
       side="right"
       style={{
         minHeight: "100vh",
-        height: "100svh",
-        width: "100%",
+        height: "100vh",
+        width: "16rem",
       }}
     >
-      {/* طبقة صورة الخلفية absolute */}
+      {/* طبقة صورة الخلفية absolute - تغطي كامل الشريط العامودي */}
       <div
         className="absolute inset-0 z-0"
         style={{
@@ -83,9 +83,9 @@ export function AppSidebar() {
           backgroundRepeat: "no-repeat",
         }}
       />
-      {/* طبقة overlay أزرق شفاف absolute*/}
+      {/* طبقة overlay أزرق شفاف absolute */}
       <div className="absolute inset-0 bg-blue-900/80 z-10" />
-      {/* محتوى السايدبار فوق الخلفيات */}
+      {/* محتوى السايدبار فوق الخلفية */}
       <div className="relative z-20 h-full flex flex-col bg-transparent">
         <SidebarHeader className="p-6 bg-transparent">
           <div className="flex items-center gap-3">
@@ -98,7 +98,7 @@ export function AppSidebar() {
             </div>
           </div>
         </SidebarHeader>
-        
+
         <SidebarContent className="bg-transparent">
           <SidebarGroup>
             <SidebarGroupLabel className="text-sidebar-foreground/80 font-semibold">
