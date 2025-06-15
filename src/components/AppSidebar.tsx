@@ -1,3 +1,4 @@
+
 import {
   Sidebar,
   SidebarContent,
@@ -64,8 +65,13 @@ export function AppSidebar() {
   const navigate = useNavigate();
   const { open, isMobile } = useSidebar();
 
-  // عند الإغلاق في الديسكتوب (غـيـر الجوال)، نخفي تماما العنصر.
+  // إذا لم يكن موبايل والشريط مغلق، نخفيه تمامًا
   const sidebarVisibilityClass = !isMobile && !open ? "hidden md:block" : "";
+
+  // عند الإغلاق على الديسكتوب، لا ترسم الشريط نهائيًا
+  if (!isMobile && !open) {
+    return null;
+  }
 
   return (
     <Sidebar
@@ -87,7 +93,7 @@ export function AppSidebar() {
           backgroundRepeat: "no-repeat",
         }}
       />
-      {/* طبقة overlay أسود شفاف absolute */}
+      {/* طبقة overlay أسود شفاف absolute بنسبة 30% */}
       <div className="absolute inset-0 bg-black/30 z-10" />
       {/* محتوى السايدبار فوق الخلفية */}
       <div className="relative z-20 h-full flex flex-col bg-transparent">
