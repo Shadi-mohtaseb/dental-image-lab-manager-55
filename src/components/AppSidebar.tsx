@@ -62,7 +62,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar className="border-r border-sidebar-border relative overflow-hidden">
-      {/* خلفية الصورة تغطي كامل الشريط */}
+      {/* الصورة تغطي كامل الشريط فقط، مع طبقة تظليل لقراءة النص */}
       <div
         className="absolute inset-0 z-0 bg-cover bg-center"
         style={{
@@ -71,7 +71,7 @@ export function AppSidebar() {
         }}
         aria-hidden="true"
       ></div>
-      {/* محتويات الشريط تظهر فوق الخلفية */}
+      {/* كل المحتوى فوق الخلفية */}
       <div className="relative z-10 h-full flex flex-col">
         <SidebarHeader className="p-6">
           <div className="flex items-center gap-3">
