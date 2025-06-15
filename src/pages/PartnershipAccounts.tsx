@@ -25,6 +25,9 @@ import { useDoctors } from "@/hooks/useDoctors";
 import { useCases } from "@/hooks/useCases";
 import PartnershipFinancialSummaryCards from "@/components/PartnershipFinancialSummaryCards";
 import { useExpenses } from "@/hooks/useExpenses";
+import PartnerActionHeaderSection from "@/components/PartnerActionHeaderSection";
+import PartnerListSection from "@/components/PartnerListSection";
+import PartnerTransactionsTableSection from "@/components/PartnerTransactionsTableSection";
 
 const PartnershipAccounts = () => {
   const [showAddTransaction, setShowAddTransaction] = useState(false);
@@ -188,111 +191,26 @@ const PartnershipAccounts = () => {
 
       {/* 2- إدارة الشركاء */}
       <section>
-        <div className="flex items-center justify-between mt-6 mb-2">
-          <h1 className="text-2xl font-bold text-gray-900 flex gap-2 items-center">
-            <Users className="w-7 h-7 text-primary" /> الشركاء
-          </h1>
-          <AddPartnerDialog />
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {partners.map((partner) => {
-            const stats = getPartnerStats(partner);
-            return (
-              <PartnerCard
-                key={partner.id}
-                partner={{
-                  ...partner,
-                  withdrawals: stats.withdrawals,
-                  remaining_share: stats.remaining_share,
-                }}
-                onWithdraw={handleWithdraw}
-                onDelete={handleDeletePartner}
-                onWithdrawShare={handleWithdrawShare}
-              />
-            );
-          })}
-        </div>
+        <PartnerActionHeaderSection />
+        <PartnerListSection
+          partners={partners}
+          onWithdraw={handleWithdraw}
+          onDelete={handleDeletePartner}
+          onWithdrawShare={handleWithdrawShare}
+          getPartnerStats={getPartnerStats}
+        />
       </section>
 
       {/* 3- عمليات السحب و المعاملات */}
-      <section className="mt-10">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-gray-700 flex gap-1 items-center">سجل المعاملات</h2>
-          {/* نموذج إضافة المعاملة في مودال منفصل */}
-          <Button
-            onClick={() => setShowAddTransaction(true)}
-            className="bg-primary hover:bg-primary/90"
-          >
-            <Plus className="w-4 h-4 ml-1" />
-            إضافة معاملة
-          </Button>
-        </div>
-        {/* شريط بحث بسيط وفلاتر */}
-        <div className="flex flex-col md:flex-row gap-4 mt-2">
-          <Input
-            placeholder="بحث عن شريك/وصف"
-            className="w-full max-w-xs"
-          />
-        </div>
-        <Card className="mt-4">
-          <CardHeader>
-            <CardTitle>جدول المعاملات المالية</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>التاريخ</TableHead>
-                  <TableHead>الشريك</TableHead>
-                  <TableHead>نوع المعاملة</TableHead>
-                  <TableHead>المبلغ</TableHead>
-                  <TableHead>المصدر</TableHead>
-                  <TableHead>الوصف</TableHead>
-                  <TableHead>إجراءات</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {(transactions ?? []).map((transaction) => {
-                  const partner = partners.find((p) => p.id === transaction.partner_id);
-                  return (
-                    <TableRow key={transaction.id}>
-                      <TableCell>{transaction.transaction_date}</TableCell>
-                      <TableCell>{partner?.name || "-"}</TableCell>
-                      <TableCell>
-                        <Badge variant={transaction.transaction_type === "deposit" ? "default" : "destructive"}>
-                          {transaction.transaction_type === "deposit" ? "إيداع" : "سحب"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="font-semibold">
-                        {Number(transaction.amount).toFixed(2)} ₪
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline">
-                          {transaction.transaction_source === "personal_withdrawal" ? "سحب شخصي" : 
-                            transaction.transaction_source === "case_profit" ? "ربح حالة" : "يدوي"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{transaction.description}</TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                          <Button size="sm" variant="outline" onClick={() => handleEditTx(transaction)}>
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button size="sm" variant="outline" className="text-red-600"
-                            onClick={() => handleDeleteTransaction(transaction.id)}>
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-        <AddPartnerTransactionDialog open={showAddTransaction} onOpenChange={setShowAddTransaction} />
-      </section>
+      <PartnerTransactionsTableSection
+        transactions={transactions}
+        partners={partners}
+        showAddTransaction={showAddTransaction}
+        setShowAddTransaction={setShowAddTransaction}
+        handleEditTx={handleEditTx}
+        handleDeleteTransaction={handleDeleteTransaction}
+      />
+
       {/* 4- واجهات تعديل عمليات السحب الحالية */}
       <EditPartnerTransactionDialog
         open={editTxOpen}
@@ -319,7 +237,6 @@ const PartnershipAccounts = () => {
         }}
         partner={selectedPartnerShare}
       />
-      {/* يمكنك إضافة المزيد من إحصاءات المعاملات وأقسام ثانوية هنا لاحقاً */}
     </div>
   );
 };
