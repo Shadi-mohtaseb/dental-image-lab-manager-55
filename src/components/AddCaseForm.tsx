@@ -43,8 +43,12 @@ const formSchema = z.object({
   number_of_teeth: z
     .preprocess(val => (val === "" ? undefined : Number(val)), z.number({ invalid_type_error: "يرجى إدخال عدد الأسنان" }).min(1, "يرجى إدخال عدد الأسنان").optional()),
   tooth_number: z.string().optional(),
-  delivery_date: z.string({ required_error: "تاريخ الاستلام مطلوب" }), // الآن الاستلام إجباري
-  submission_date: z.string().optional(), // التسليم اختياري
+  delivery_date: z.preprocess((val) => (typeof val === "string" && val !== "" ? val : new Date().toISOString().split('T')[0]), z.string({ required_error: "تاريخ الاستلام مطلوب" })),
+  submission_date: z.preprocess((val) => {
+    // يحول القيم الفارغة إلى null! أي قيمة نصية فارغة أو قيمة null تصبح null
+    if (typeof val === "string" && val.trim() === "") return null;
+    return val;
+  }, z.string().nullable()), // نجعلها nullable فقط
   status: z.enum(caseStatuses).default("قيد التنفيذ"),
   notes: z.string().optional(),
   price: z.preprocess(
@@ -140,18 +144,28 @@ export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
 
   const onSubmit = async (data: FormData) => {
     try {
-      console.log("إرسال بيانات الحالة الجديدة:", data);
-
-      // تحويل '' إلى null لجميع الحقول التي قد تكون فارغة ويجب أن ترسل null (حسب الحقول الجديدة)
+      // تحويل القيم النهائية بما يتوافق مع قاعدة البيانات
       const sanitizedData = {
         ...data,
-        submission_date: data.submission_date ? data.submission_date : null,
+        // تحويل submission_date إلى null إذا فارغ أو غير صالح
+        submission_date:
+          data.submission_date && typeof data.submission_date === "string" && data.submission_date.trim() !== ""
+            ? data.submission_date
+            : null,
+        // يضمن دائماً صحة delivery_date
+        delivery_date:
+          typeof data.delivery_date === "string" && data.delivery_date.trim() !== ""
+            ? data.delivery_date
+            : new Date().toISOString().split('T')[0],
         tooth_number: data.tooth_number || null,
         number_of_teeth: data.number_of_teeth || null,
         notes: data.notes || null,
         shade: data.shade || null,
         zircon_block_type: data.zircon_block_type || null,
       };
+
+      // سجل ما سيتم حفظه فعلياً
+      console.log("تمرير البيانات الى API:", sanitizedData);
 
       await addCase.mutateAsync({
         patient_name: sanitizedData.patient_name,
@@ -160,7 +174,7 @@ export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
         tooth_number: sanitizedData.tooth_number,
         number_of_teeth: sanitizedData.number_of_teeth,
         delivery_date: sanitizedData.delivery_date,        // حقل الاستلام الإجباري
-        submission_date: sanitizedData.submission_date,    // حقل التسليم الاختياري
+        submission_date: sanitizedData.submission_date,    // حقل التسليم الاختياري (قد يكون null)
         status: sanitizedData.status,
         notes: sanitizedData.notes,
         price: sanitizedData.price,
