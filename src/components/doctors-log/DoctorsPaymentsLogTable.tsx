@@ -6,29 +6,25 @@ import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import EditDoctorPaymentDialog from "./EditDoctorPaymentDialog";
 import { toast } from "@/hooks/use-toast";
-import { Edit, Trash2, Youtube } from "lucide-react";
+import { Edit, Trash2 } from "lucide-react";
 import { buildWhatsappLink } from "@/utils/whatsapp";
 
-// SVG خاص بأيقونة واتساب (مأخوذ من أيقونات المصادر الحرة)
-const WhatsappIcon = (props: React.SVGProps<SVGSVGElement>) => (
+// أيقونة واتساب مطابقة للصورة (outline فقط وبخط أخضر)
+const WhatsappOutlineIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
     {...props}
+    width={24}
+    height={24}
     viewBox="0 0 24 24"
     fill="none"
-    stroke="currentColor"
+    stroke="#22c55e"
     strokeWidth={2}
     strokeLinecap="round"
     strokeLinejoin="round"
-    className={props.className ?? "w-4 h-4"}
+    className={props.className ?? "w-6 h-6"}
   >
-    <path
-      d="M16.7 13.24a4 4 0 0 1-2.11-.57l-.36-.21a9.51 9.51 0 0 1-3.61-3.61l-.19-.35A4 4 0 0 1 7 7.31V7.3a1 1 0 0 1 1-1h1a1 1 0 0 1 1 1c.1.77.34 1.53.67 2.22.12.22.2.46.39.56l.23.13A7.45 7.45 0 0 0 14.13 13l.14.21a.94.94 0 0 1-.14 1.1 1 1 0 0 1-.67.26Zm-4.6 5.08a9 9 0 1 1 5.62-16A9 9 0 0 1 12.1 18.32ZM21 12.07A9 9 0 1 1 12.09 3a9 9 0 0 1 8.91 9.07ZM12 2v1m0 18v1m10-10h-1m-18 0H2"
-    />
-    <circle cx="12" cy="12" r="9" />
-    <path
-      d="M16.7 13.24a4 4 0 0 1-2.11-.57l-.36-.21a9.51 9.51 0 0 1-3.61-3.61l-.19-.35A4 4 0 0 1 7 7.31V7.3a1 1 0 0 1 1-1h1a1 1 0 0 1 1 1c.1.77.34 1.53.67 2.22.12.22.2.46.39.56l.23.13A7.45 7.45 0 0 0 14.13 13l.14.21a.94.94 0 0 1-.14 1.1 1 1 0 0 1-.67.26Z"
-      fill="currentColor"
-    />
+    <rect x="2.5" y="2.5" width="19" height="19" rx="6" stroke="#a0edc1" fill="none" />
+    <path d="M7 11.8C7 9.61177 8.78993 7.8 11 7.8C12.0417 7.8 13.0137 8.24376 13.7141 9.00336L13.8889 8.8M17 16.2C17 18.3882 15.2101 20.2 13 20.2C11.9583 20.2 10.9863 19.7562 10.2859 18.9966L10.1111 19.2M9 15.8C9 15.3582 9.33579 15 9.75 15H14.25C14.6642 15 15 15.3582 15 15.8V16.2C15 16.6418 14.6642 17 14.25 17H9.75C9.33579 17 9 16.6418 9 16.2V15.8Z" stroke="#22c55e" />
   </svg>
 );
 
@@ -136,10 +132,10 @@ export default function DoctorsPaymentsLogTable() {
                       <Button
                         size="icon"
                         variant="outline"
-                        className="text-green-600 border-green-300 hover:bg-green-50"
+                        className="border-2 border-green-300 hover:bg-green-50"
                         type="button"
                       >
-                        <WhatsappIcon />
+                        <WhatsappOutlineIcon />
                       </Button>
                     </a>
                   ) : (
