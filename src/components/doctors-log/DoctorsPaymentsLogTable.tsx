@@ -1,4 +1,3 @@
-
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -8,8 +7,7 @@ import { useState } from "react";
 import EditDoctorPaymentDialog from "./EditDoctorPaymentDialog";
 import { toast } from "@/hooks/use-toast";
 import { Edit, Trash2 } from "lucide-react";
-// استخدم الأيقونة بالاستيراد الصحيح من lucide-react (حروف صغيرة)
-import { Whatsapp as WhatsappIcon } from "lucide-react";
+import { WhatsApp } from "lucide-react";
 import { buildWhatsappLink } from "@/utils/whatsapp";
 
 export default function DoctorsPaymentsLogTable() {
@@ -128,8 +126,7 @@ export default function DoctorsPaymentsLogTable() {
                           tabIndex={-1}
                           asChild
                         >
-                          {/* استخدم WhatsappIcon بدل Whatsapp */}
-                          <WhatsappIcon />
+                          <WhatsApp />
                         </Button>
                       </a>
                     )}
