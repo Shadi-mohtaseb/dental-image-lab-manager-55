@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import EditDoctorPaymentDialog from "./EditDoctorPaymentDialog";
 import { toast } from "@/hooks/use-toast";
-import { Edit, Trash2 } from "lucide-react";
+import { Edit, Trash2, MessageCircle } from "lucide-react";
 import { buildWhatsappLink } from "@/utils/whatsapp";
 
 // أيقونة واتساب مطابقة للصورة (outline فقط وبخط أخضر)
@@ -132,10 +132,10 @@ export default function DoctorsPaymentsLogTable() {
                       <Button
                         size="icon"
                         variant="outline"
-                        className="border-2 border-green-300 hover:bg-green-50"
+                        className="text-green-600 border-green-300 hover:bg-green-50"
                         type="button"
                       >
-                        <WhatsappOutlineIcon />
+                        <MessageCircle />
                       </Button>
                     </a>
                   ) : (
