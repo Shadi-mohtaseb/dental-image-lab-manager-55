@@ -23,6 +23,7 @@ import {
   LogOut,
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 
 // صورة الخلفية المرفوعة:
 const sidebarBg = "/lovable-uploads/d177bd6f-d2eb-4db8-996a-e2a94b42a9da.png";
@@ -34,14 +35,9 @@ const menuItems = [
     icon: BarChart3,
   },
   {
-    title: "حسابات الشراكة",
-    url: "/partnership-accounts",
-    icon: Users,
-  },
-  {
-    title: "حسابات الأطباء",
-    url: "/doctors-accounts",
-    icon: FileText,
+    title: "قائمة الحالات",
+    url: "/cases",
+    icon: Search,
   },
   {
     title: "إدارة المصاريف",
@@ -49,9 +45,14 @@ const menuItems = [
     icon: Receipt,
   },
   {
-    title: "قائمة الحالات",
-    url: "/cases",
-    icon: Search,
+    title: "حسابات الأطباء",
+    url: "/doctors-accounts",
+    icon: FileText,
+  },
+  {
+    title: "حسابات الشراكة",
+    url: "/partnership-accounts",
+    icon: Users,
   },
   {
     title: "الإعدادات",
@@ -64,6 +65,28 @@ export function AppSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const { open, isMobile } = useSidebar();
+  const [labName, setLabName] = useState("مختبر الأسنان");
+
+  // تحميل اسم المختبر من localStorage عند بدء التشغيل
+  useEffect(() => {
+    const savedLabName = localStorage.getItem("labName");
+    if (savedLabName) {
+      setLabName(savedLabName);
+    }
+  }, []);
+
+  // الاستماع لتغييرات اسم المختبر
+  useEffect(() => {
+    const handleLabNameChange = (event: CustomEvent) => {
+      setLabName(event.detail.labName);
+    };
+
+    window.addEventListener("labNameChanged", handleLabNameChange as EventListener);
+    
+    return () => {
+      window.removeEventListener("labNameChanged", handleLabNameChange as EventListener);
+    };
+  }, []);
 
   // إذا لم يكن موبايل والشريط مغلق، نخفيه تمامًا
   const sidebarVisibilityClass = !isMobile && !open ? "hidden md:block" : "";
@@ -93,8 +116,8 @@ export function AppSidebar() {
           backgroundRepeat: "no-repeat",
         }}
       />
-      {/* طبقة overlay أسود شفاف absolute بنسبة 30% */}
       <div className="absolute inset-0 bg-black/30 z-10" />
+      
       {/* محتوى السايدبار فوق الخلفية */}
       <div className="relative z-20 h-full flex flex-col bg-transparent">
         <SidebarHeader className="p-6 bg-transparent">
@@ -103,7 +126,7 @@ export function AppSidebar() {
               <PlusCircle className="w-6 h-6 text-sidebar-primary-foreground" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-sidebar-foreground">مختبر الأسنان</h2>
+              <h2 className="text-lg font-bold text-sidebar-foreground">{labName}</h2>
               <p className="text-sm text-sidebar-foreground/70">نظام الإدارة</p>
             </div>
           </div>
