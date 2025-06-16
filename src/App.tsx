@@ -19,6 +19,16 @@ import Settings from "./pages/Settings";
 // Lazy load DoctorDetails
 const DoctorDetails = lazy(() => import("./pages/DoctorDetails"));
 
+// Create QueryClient instance outside of component to prevent recreation on every render
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      retry: 1,
+    },
+  },
+});
+
 // مكون للمحتوى الرئيسي بدون الهامش — لأن الهيكل الجديد سيتعامل مع ترتيب السايدبار والمين تلقائياً
 function MainContent({ children }: { children: React.ReactNode }) {
   return (
@@ -33,7 +43,7 @@ function MainContent({ children }: { children: React.ReactNode }) {
 }
 
 const App = () => (
-  <QueryClientProvider client={new QueryClient()}>
+  <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
