@@ -81,25 +81,40 @@ export const DoctorAccountPDFButton: React.FC<Props> = ({
     }
 
     try {
-      // Generate PDF first
-      await exportPDF({
+      // توليد PDF وإنشاء رابط مؤقت
+      const pdfUrl = await exportPDF({
         doctorName,
         summary,
         doctorCases,
         fromDate,
         toDate,
+        downloadImmediately: false, // لا نريد تحميل الملف مباشرة
       });
 
-      // Then open WhatsApp with simple message
-      const message = "كشف حساب";
-      const whatsappLink = buildWhatsappLink(doctorPhone, message);
-      window.open(whatsappLink, '_blank');
+      if (pdfUrl) {
+        // إنشاء رسالة تحتوي على الرابط
+        const message = `كشف حساب الطبيب ${doctorName}
 
-      toast({
-        title: "تم فتح الواتساب",
-        description: "تم تصدير الملف وفتح الواتساب لإرسال كشف الحساب.",
-        variant: "default"
-      });
+إجمالي المستحق: ${summary.totalDue.toLocaleString()} ₪
+المدفوع: ${summary.totalPaid.toLocaleString()} ₪
+المتبقي: ${summary.remaining.toLocaleString()} ₪
+
+يمكنك تحميل كشف الحساب من الرابط التالي:
+${pdfUrl}
+
+تم إنشاء هذا الكشف عبر نظام إدارة المختبر`;
+
+        const whatsappLink = buildWhatsappLink(doctorPhone, message);
+        window.open(whatsappLink, '_blank');
+
+        toast({
+          title: "تم فتح الواتساب",
+          description: "تم إرسال كشف الحساب مع الرابط إلى الواتساب.",
+          variant: "default"
+        });
+      } else {
+        throw new Error("فشل في إنشاء ملف PDF");
+      }
     } catch (error) {
       toast({
         title: "حدث خطأ",

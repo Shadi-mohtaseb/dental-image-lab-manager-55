@@ -8,12 +8,14 @@ interface FinancialSummary {
   totalPaid: number;
   remaining: number;
 }
+
 interface ExportArgs {
   doctorName: string;
   summary: FinancialSummary;
   doctorCases: any[];
   fromDate?: Date;
   toDate?: Date;
+  downloadImmediately?: boolean;
 }
 
 // هوك مسؤول عن تصدير PDF
@@ -24,7 +26,8 @@ export function useDoctorAccountPDFExport() {
     doctorCases,
     fromDate,
     toDate,
-  }: ExportArgs) => {
+    downloadImmediately = true,
+  }: ExportArgs): Promise<string | null> => {
     console.log("🟢 بدأت عملية تصدير PDF");
     console.log("🔵 جميع بيانات doctorCases القادمة:", doctorCases);
 
@@ -34,17 +37,13 @@ export function useDoctorAccountPDFExport() {
         description: "لم يتم جلب أي حالة (cases) من قاعدة البيانات للطبيب المطلوب.",
         variant: "destructive",
       });
-      // لا ترمي خطأ، فقط أكمل بتصدير ملف فارغ بعنوان فقط
     }
 
-    // سجل قبل الفلترة
     console.log("🔸 عدد الحالات قبل الفلترة:", doctorCases?.length ?? 0);
 
-    // فلترة اختيارية للتواريخ فقط (لكن لا نمنع أي صف عن التصدير)
     let warningCount = 0;
     const filteredCases = (doctorCases || []).filter((c, idx) => {
       let include = true;
-      // إذا تم اختيار فترة تصفية حسب التاريخ
       if (fromDate || toDate) {
         const rawDelivery = c.delivery_date;
         const rawCreated = c.created_at;
@@ -59,7 +58,6 @@ export function useDoctorAccountPDFExport() {
             warningCount++;
           }
         } else {
-          // بدون تاريخ، لا يمكن الفلترة
           include = false;
           warningCount++;
         }
@@ -80,7 +78,6 @@ export function useDoctorAccountPDFExport() {
         }
         return include;
       }
-      // بدون تصفية زمنية، مرر كل الصفوف
       return true;
     });
 
@@ -90,10 +87,8 @@ export function useDoctorAccountPDFExport() {
         description: "يرجى تعديل الفترة الزمنية أو إزالة الفلترة لعرض جميع الحالات.",
         variant: "destructive",
       });
-      // ولكن سنكمل التصدير مع ترك الجدول فارغ
     }
 
-    // ملاحظة: نستخدم filteredCases (ملفترة بالفترة الزمنية فقط وليس بحسب اكتمال البيانات)
     const exportRows = filteredCases && filteredCases.length > 0 ? filteredCases : [];
 
     let doc: jsPDF;
@@ -110,11 +105,10 @@ export function useDoctorAccountPDFExport() {
       if (typeof (doc as any).autoTable !== "function") {
         toast({
           title: "خطأ في تصدير PDF",
-          description:
-            "لم يتم تحميل ميزة الجدول (autoTable) بشكل صحيح. أعد تحميل الصفحة أو تواصل مع الدعم.",
+          description: "لم يتم تحميل ميزة الجدول (autoTable) بشكل صحيح. أعد تحميل الصفحة أو تواصل مع الدعم.",
           variant: "destructive",
         });
-        return; // لا ترمي خطأ فقط أوقف العملية
+        return null;
       }
 
       doc.setTextColor(40, 51, 102);
@@ -150,7 +144,6 @@ export function useDoctorAccountPDFExport() {
       console.log("صفوف الجدول للحالة:", caseRows);
 
       if (caseRows.length === 0) {
-        // جدول بلا بيانات
         (doc as any).autoTable({
           head: [[
             "اسم المريض",
@@ -217,15 +210,25 @@ export function useDoctorAccountPDFExport() {
         285,
         { align: "center" }
       );
-      doc.save(`كشف_حساب_${doctorName}.pdf`);
+
+      // إنشاء blob من PDF
+      const pdfBlob = doc.output('blob');
+      const pdfUrl = URL.createObjectURL(pdfBlob);
+
+      if (downloadImmediately) {
+        // تحميل الملف مباشرة (السلوك القديم)
+        doc.save(`كشف_حساب_${doctorName}.pdf`);
+      }
 
       toast({
         title: "تم تصدير الملف بنجاح",
         description: (caseRows.length === 0
           ? "لم توجد بيانات حالات لهذا الطبيب في الفترة المحددة (تم التصدير ببيانات الحساب فقط)."
-          : "تم حفظ ملف PDF في جهازك."),
+          : "تم إنشاء ملف PDF بنجاح."),
         variant: "default",
       });
+
+      return pdfUrl;
     } catch (err: any) {
       toast({
         title: "حدث خطأ عند التصدير!",
@@ -233,6 +236,7 @@ export function useDoctorAccountPDFExport() {
         variant: "destructive",
       });
       console.error("خطأ أثناء تصدير PDF:", err);
+      return null;
     }
   };
 
