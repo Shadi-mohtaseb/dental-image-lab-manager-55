@@ -66,25 +66,36 @@ export function AppSidebar() {
   const navigate = useNavigate();
   const { open, isMobile } = useSidebar();
   const [labName, setLabName] = useState("مختبر الأسنان");
+  const [labLogo, setLabLogo] = useState("");
 
-  // تحميل اسم المختبر من localStorage عند بدء التشغيل
+  // تحميل اسم المختبر والشعار من localStorage عند بدء التشغيل
   useEffect(() => {
     const savedLabName = localStorage.getItem("labName");
+    const savedLabLogo = localStorage.getItem("labLogo");
     if (savedLabName) {
       setLabName(savedLabName);
     }
+    if (savedLabLogo) {
+      setLabLogo(savedLabLogo);
+    }
   }, []);
 
-  // الاستماع لتغييرات اسم المختبر
+  // الاستماع لتغييرات اسم المختبر والشعار
   useEffect(() => {
     const handleLabNameChange = (event: CustomEvent) => {
       setLabName(event.detail.labName);
     };
 
+    const handleLabLogoChange = (event: CustomEvent) => {
+      setLabLogo(event.detail.labLogo);
+    };
+
     window.addEventListener("labNameChanged", handleLabNameChange as EventListener);
+    window.addEventListener("labLogoChanged", handleLabLogoChange as EventListener);
     
     return () => {
       window.removeEventListener("labNameChanged", handleLabNameChange as EventListener);
+      window.removeEventListener("labLogoChanged", handleLabLogoChange as EventListener);
     };
   }, []);
 
@@ -122,8 +133,16 @@ export function AppSidebar() {
       <div className="relative z-20 h-full flex flex-col bg-transparent">
         <SidebarHeader className="p-6 bg-transparent">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-sidebar-primary rounded-lg flex items-center justify-center">
-              <PlusCircle className="w-6 h-6 text-sidebar-primary-foreground" />
+            <div className="w-10 h-10 bg-sidebar-primary rounded-lg flex items-center justify-center overflow-hidden">
+              {labLogo ? (
+                <img 
+                  src={labLogo} 
+                  alt="شعار المختبر" 
+                  className="w-full h-full object-cover rounded-lg"
+                />
+              ) : (
+                <PlusCircle className="w-6 h-6 text-sidebar-primary-foreground" />
+              )}
             </div>
             <div>
               <h2 className="text-lg font-bold text-sidebar-foreground">{labName}</h2>
