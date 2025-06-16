@@ -92,9 +92,6 @@ export default function DoctorsAccountsTable({ doctors, cases, doctorPayments }:
               const { totalDue, totalPaid, remaining, doctorCases, isLoading } =
                 getDoctorFinancialSummaryForTable(doctor.id, cases, doctorPayments);
 
-              // إضافة لوج لعرض الحالات المفلترة للطبيب
-              // console.log("doctorCases for table (PDF button):", doctor.name, doctor.id, doctorCases);
-
               return (
                 <TableRow key={doctor.id} className="hover:bg-gray-50">
                   <TableCell className="font-semibold text-primary text-right w-[200px]">
@@ -109,6 +106,7 @@ export default function DoctorsAccountsTable({ doctors, cases, doctorPayments }:
                       summary={{ totalDue, totalPaid, remaining }}
                       doctorCases={doctorCases}
                       doctorId={doctor.id}
+                      doctorPhone={doctor.phone}
                     />
                   </TableCell>
                   <TableCell className="text-center w-[195px]">

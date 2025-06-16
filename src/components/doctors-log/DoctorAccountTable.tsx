@@ -1,3 +1,4 @@
+
 import React, { useMemo, useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
@@ -119,6 +120,7 @@ export default function DoctorAccountTable({ doctors, cases }: Props) {
                           summary={{ totalDue, totalPaid, remaining }}
                           doctorCases={doctorCases}
                           doctorId={doc.id}
+                          doctorPhone={doc.phone}
                         />
                       )}
                     </TableCell>
@@ -155,6 +157,7 @@ export default function DoctorAccountTable({ doctors, cases }: Props) {
                         summary={{ totalDue, totalPaid, remaining }}
                         doctorCases={doctorCases}
                         doctorId={doc.id}
+                        doctorPhone={doc.phone}
                       />
                     </TableCell>
                     <TableCell className="text-center w-[240px]">

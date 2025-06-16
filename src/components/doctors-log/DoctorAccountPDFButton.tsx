@@ -1,11 +1,13 @@
 
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Printer } from "lucide-react";
+import { Printer, MessageCircle } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "@/hooks/use-toast";
 import { DoctorPDFDateRangePicker } from "./DoctorPDFDateRangePicker";
 import { usePrintDoctorAccountHTML } from "./usePrintDoctorAccountHTML";
+import { useDoctorAccountPDFExport } from "./useDoctorAccountPDFExport";
+import { buildWhatsappLink } from "@/utils/whatsapp";
 
 interface Props {
   doctorName: string;
@@ -14,8 +16,9 @@ interface Props {
     totalPaid: number;
     remaining: number;
   };
-  doctorCases: any[]; // الآن هذا الحقل إجباري لضمان سلامة البيانات للطبيب
+  doctorCases: any[];
   doctorId: string;
+  doctorPhone?: string;
 }
 
 export const DoctorAccountPDFButton: React.FC<Props> = ({
@@ -23,6 +26,7 @@ export const DoctorAccountPDFButton: React.FC<Props> = ({
   summary,
   doctorId,
   doctorCases,
+  doctorPhone,
 }) => {
   const [loading, setLoading] = useState(false);
   const [fromDate, setFromDate] = useState<Date | undefined>(undefined);
@@ -30,10 +34,10 @@ export const DoctorAccountPDFButton: React.FC<Props> = ({
   const [popoverOpen, setPopoverOpen] = useState(false);
 
   const { printHTML } = usePrintDoctorAccountHTML();
+  const { exportPDF } = useDoctorAccountPDFExport();
 
   const handlePrint = () => {
     setPopoverOpen(false);
-    // إضافة لوج لمراقبة الحالات للطبيب الحالي
     console.log('doctorCases to print for', doctorName, doctorId, doctorCases);
     if (!doctorCases || doctorCases.length === 0) {
       toast({
@@ -50,6 +54,61 @@ export const DoctorAccountPDFButton: React.FC<Props> = ({
       fromDate,
       toDate,
     });
+  };
+
+  const handleSendToWhatsApp = async () => {
+    setPopoverOpen(false);
+    setLoading(true);
+
+    if (!doctorPhone) {
+      toast({
+        title: "رقم الهاتف غير متوفر",
+        description: "لا يمكن إرسال الكشف عبر الواتساب بدون رقم هاتف الطبيب.",
+        variant: "destructive"
+      });
+      setLoading(false);
+      return;
+    }
+
+    if (!doctorCases || doctorCases.length === 0) {
+      toast({
+        title: "لا توجد حالات للعرض",
+        description: "لا يوجد أي حالة مرتبطة بهذا الطبيب لإرسالها.",
+        variant: "destructive"
+      });
+      setLoading(false);
+      return;
+    }
+
+    try {
+      // Generate PDF first
+      await exportPDF({
+        doctorName,
+        summary,
+        doctorCases,
+        fromDate,
+        toDate,
+      });
+
+      // Then open WhatsApp with simple message
+      const message = "كشف حساب";
+      const whatsappLink = buildWhatsappLink(doctorPhone, message);
+      window.open(whatsappLink, '_blank');
+
+      toast({
+        title: "تم فتح الواتساب",
+        description: "تم تصدير الملف وفتح الواتساب لإرسال كشف الحساب.",
+        variant: "default"
+      });
+    } catch (error) {
+      toast({
+        title: "حدث خطأ",
+        description: "لم يتم إرسال الكشف بنجاح. يرجى المحاولة مرة أخرى.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -73,10 +132,20 @@ export const DoctorAccountPDFButton: React.FC<Props> = ({
             variant="secondary"
             disabled={loading}
             onClick={handlePrint}
-            className="w-full"
+            className="flex-1"
             title="طباعة HTML"
           >
-            <Printer className="ml-1" /> طباعة الكشف
+            <Printer className="ml-1" /> طباعة
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={loading || !doctorPhone}
+            onClick={handleSendToWhatsApp}
+            className="flex-1 text-green-600 border-green-300 hover:bg-green-50"
+            title={doctorPhone ? "إرسال للواتساب" : "رقم الهاتف غير متوفر"}
+          >
+            <MessageCircle className="ml-1" /> واتساب
           </Button>
         </div>
       </PopoverContent>
