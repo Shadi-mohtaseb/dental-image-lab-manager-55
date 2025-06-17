@@ -1,7 +1,5 @@
-
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowUp, ArrowDown, Wallet, DollarSign, Users } from "lucide-react";
-
 interface PartnershipFinancialSummaryCardsProps {
   totalRevenue: number;
   totalExpenses: number;
@@ -11,7 +9,6 @@ interface PartnershipFinancialSummaryCardsProps {
   casesCount: number;
   expensesCount: number;
 }
-
 export default function PartnershipFinancialSummaryCards({
   totalRevenue,
   totalExpenses,
@@ -21,18 +18,14 @@ export default function PartnershipFinancialSummaryCards({
   casesCount,
   expensesCount
 }: PartnershipFinancialSummaryCardsProps) {
-  return (
-    <div 
-      className="relative grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6 p-6 rounded-lg overflow-hidden"
-      style={{
-        backgroundImage: `url('/lovable-uploads/50cdac73-73bd-464a-8a6d-061da335e727.png')`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat'
-      }}
-    >
+  return <div className="relative grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6 p-6 rounded-lg overflow-hidden" style={{
+    backgroundImage: `url('/lovable-uploads/50cdac73-73bd-464a-8a6d-061da335e727.png')`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat'
+  }}>
       {/* طبقة سوداء شفافة بنسبة 40% */}
-      <div className="absolute inset-0 bg-black/40 z-0"></div>
+      <div className="absolute inset-0 z-0 bg-white"></div>
       
       {/* محتوى البطاقات فوق الخلفية */}
       <div className="relative z-10 contents">
@@ -87,6 +80,5 @@ export default function PartnershipFinancialSummaryCards({
           </CardContent>
         </Card>
       </div>
-    </div>
-  );
+    </div>;
 }
