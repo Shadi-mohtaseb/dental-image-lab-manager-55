@@ -1,42 +1,70 @@
-import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
-import { Users, Receipt, FileText, Search, PlusCircle, BarChart3, Settings, LogOut } from "lucide-react";
+
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  useSidebar,
+} from "@/components/ui/sidebar";
+import {
+  Users,
+  Receipt,
+  FileText,
+  Search,
+  PlusCircle,
+  BarChart3,
+  Settings,
+  LogOut,
+} from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 
 // صورة الخلفية المرفوعة:
 const sidebarBg = "/lovable-uploads/d177bd6f-d2eb-4db8-996a-e2a94b42a9da.png";
-const menuItems = [{
-  title: "لوحة التحكم",
-  url: "/",
-  icon: BarChart3
-}, {
-  title: "قائمة الحالات",
-  url: "/cases",
-  icon: Search
-}, {
-  title: "إدارة المصاريف",
-  url: "/expenses",
-  icon: Receipt
-}, {
-  title: "حسابات الأطباء",
-  url: "/doctors-accounts",
-  icon: FileText
-}, {
-  title: "حسابات الشراكة",
-  url: "/partnership-accounts",
-  icon: Users
-}, {
-  title: "الإعدادات",
-  url: "/settings",
-  icon: Settings
-}];
+
+const menuItems = [
+  {
+    title: "لوحة التحكم",
+    url: "/",
+    icon: BarChart3,
+  },
+  {
+    title: "قائمة الحالات",
+    url: "/cases",
+    icon: Search,
+  },
+  {
+    title: "إدارة المصاريف",
+    url: "/expenses",
+    icon: Receipt,
+  },
+  {
+    title: "حسابات الأطباء",
+    url: "/doctors-accounts",
+    icon: FileText,
+  },
+  {
+    title: "حسابات الشراكة",
+    url: "/partnership-accounts",
+    icon: Users,
+  },
+  {
+    title: "الإعدادات",
+    url: "/settings",
+    icon: Settings,
+  },
+];
+
 export function AppSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
-  const {
-    open,
-    isMobile
-  } = useSidebar();
+  const { open, isMobile } = useSidebar();
   const [labName, setLabName] = useState("مختبر الأسنان");
   const [labLogo, setLabLogo] = useState("");
 
@@ -57,11 +85,14 @@ export function AppSidebar() {
     const handleLabNameChange = (event: CustomEvent) => {
       setLabName(event.detail.labName);
     };
+
     const handleLabLogoChange = (event: CustomEvent) => {
       setLabLogo(event.detail.labLogo);
     };
+
     window.addEventListener("labNameChanged", handleLabNameChange as EventListener);
     window.addEventListener("labLogoChanged", handleLabLogoChange as EventListener);
+    
     return () => {
       window.removeEventListener("labNameChanged", handleLabNameChange as EventListener);
       window.removeEventListener("labLogoChanged", handleLabLogoChange as EventListener);
@@ -75,18 +106,27 @@ export function AppSidebar() {
   if (!isMobile && !open) {
     return null;
   }
-  return <Sidebar className={`!fixed !top-0 !right-0 !h-screen !w-64 z-40 border-l-0 border-r border-sidebar-border shadow-lg overflow-hidden ${sidebarVisibilityClass}`} side="right" style={{
-    minHeight: "100vh",
-    height: "100vh",
-    width: "16rem"
-  }}>
+
+  return (
+    <Sidebar
+      className={`!fixed !top-0 !right-0 !h-screen !w-64 z-40 border-l-0 border-r border-sidebar-border shadow-lg overflow-hidden ${sidebarVisibilityClass}`}
+      side="right"
+      style={{
+        minHeight: "100vh",
+        height: "100vh",
+        width: "16rem",
+      }}
+    >
       {/* طبقة صورة الخلفية absolute - تغطي كامل الشريط العامودي */}
-      <div className="absolute inset-0 z-0" style={{
-      backgroundImage: `url('${sidebarBg}')`,
-      backgroundSize: "cover",
-      backgroundPosition: "center",
-      backgroundRepeat: "no-repeat"
-    }} />
+      <div
+        className="absolute inset-0 z-0"
+        style={{
+          backgroundImage: `url('${sidebarBg}')`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+        }}
+      />
       <div className="absolute inset-0 bg-black/30 z-10" />
       
       {/* محتوى السايدبار فوق الخلفية */}
@@ -94,11 +134,19 @@ export function AppSidebar() {
         <SidebarHeader className="p-6 bg-transparent">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-sidebar-primary rounded-lg flex items-center justify-center overflow-hidden">
-              {labLogo ? <img src={labLogo} alt="شعار المختبر" className="w-full h-full object-cover rounded-lg" /> : <PlusCircle className="w-6 h-6 text-sidebar-primary-foreground" />}
+              {labLogo ? (
+                <img 
+                  src={labLogo} 
+                  alt="شعار المختبر" 
+                  className="w-full h-full object-cover rounded-lg"
+                />
+              ) : (
+                <PlusCircle className="w-6 h-6 text-sidebar-primary-foreground" />
+              )}
             </div>
             <div>
               <h2 className="text-lg font-bold text-sidebar-foreground">{labName}</h2>
-              
+              <p className="text-sm text-sidebar-foreground/70">نظام الإدارة</p>
             </div>
           </div>
         </SidebarHeader>
@@ -110,14 +158,23 @@ export function AppSidebar() {
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {menuItems.map(item => <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild isActive={location.pathname === item.url} className="transition-all duration-200 hover:bg-sidebar-accent">
-                      <button onClick={() => navigate(item.url)} className="flex items-center gap-3 w-full">
+                {menuItems.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={location.pathname === item.url}
+                      className="transition-all duration-200 hover:bg-sidebar-accent"
+                    >
+                      <button
+                        onClick={() => navigate(item.url)}
+                        className="flex items-center gap-3 w-full"
+                      >
                         <item.icon className="w-5 h-5" />
                         <span>{item.title}</span>
                       </button>
                     </SidebarMenuButton>
-                  </SidebarMenuItem>)}
+                  </SidebarMenuItem>
+                ))}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
@@ -136,5 +193,6 @@ export function AppSidebar() {
           </SidebarMenu>
         </SidebarFooter>
       </div>
-    </Sidebar>;
+    </Sidebar>
+  );
 }
