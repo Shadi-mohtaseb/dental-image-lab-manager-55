@@ -8,43 +8,34 @@ import { Receipt, Edit, Trash2, Search } from "lucide-react";
 import { useExpenses, useDeleteExpense } from "@/hooks/useExpenses";
 import { AddExpenseDialog } from "@/components/AddExpenseDialog";
 import { EditExpenseDialog } from "@/components/EditExpenseDialog";
-
 const Expenses = () => {
-  const { data: expenses = [], isLoading } = useExpenses();
+  const {
+    data: expenses = [],
+    isLoading
+  } = useExpenses();
   const deleteExpense = useDeleteExpense();
   const [searchTerm, setSearchTerm] = useState("");
   const [editExpenseOpen, setEditExpenseOpen] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState(null);
-
   const totalExpenses = expenses.reduce((sum, expense) => sum + Number(expense.total_amount), 0);
-
   const handleDeleteExpense = async (expenseId: string) => {
     if (window.confirm("هل أنت متأكد من حذف هذا المصروف؟")) {
       await deleteExpense.mutateAsync(expenseId);
     }
   };
-
-  const handleEditExpense = (expense) => {
+  const handleEditExpense = expense => {
     setSelectedExpense(expense);
     setEditExpenseOpen(true);
   };
-
-  const filteredExpenses = expenses.filter(expense => 
-    expense.item_name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
+  const filteredExpenses = expenses.filter(expense => expense.item_name.toLowerCase().includes(searchTerm.toLowerCase()));
   if (isLoading) {
-    return (
-      <div className="space-y-6 animate-fade-in">
+    return <div className="space-y-6 animate-fade-in">
         <div className="flex items-center justify-center p-8">
           <div className="text-lg">جاري تحميل المصاريف...</div>
         </div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="space-y-6 animate-fade-in">
+  return <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Receipt className="w-8 h-8 text-primary" />
@@ -58,7 +49,7 @@ const Expenses = () => {
 
       {/* Total Expenses */}
       <Card className="bg-gradient-to-r from-purple-500 to-purple-600 text-white">
-        <CardContent className="p-6 text-center">
+        <CardContent className="p-6 text-center py-[46px]">
           <h3 className="text-lg font-semibold mb-2">إجمالي المصاريف</h3>
           <p className="text-3xl font-bold">{totalExpenses.toFixed(2)} ₪</p>
         </CardContent>
@@ -69,12 +60,7 @@ const Expenses = () => {
         <CardContent className="p-6">
           <div className="flex gap-4">
             <div className="flex-1">
-              <Input
-                placeholder="بحث في المصاريف..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full"
-              />
+              <Input placeholder="بحث في المصاريف..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="w-full" />
             </div>
             <Button variant="outline" className="gap-2">
               <Search className="w-4 h-4" />
@@ -90,12 +76,9 @@ const Expenses = () => {
           <CardTitle>قائمة المصاريف ({filteredExpenses.length})</CardTitle>
         </CardHeader>
         <CardContent>
-          {filteredExpenses.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
+          {filteredExpenses.length === 0 ? <div className="text-center py-8 text-gray-500">
               {searchTerm ? "لا توجد نتائج مطابقة للبحث" : "لا توجد مصاريف مسجلة حتى الآن"}
-            </div>
-          ) : (
-            <Table>
+            </div> : <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>اسم المادة</TableHead>
@@ -107,8 +90,7 @@ const Expenses = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredExpenses.map((expense) => (
-                  <TableRow key={expense.id}>
+                {filteredExpenses.map(expense => <TableRow key={expense.id}>
                     <TableCell className="font-semibold">{expense.item_name}</TableCell>
                     <TableCell>{Number(expense.unit_price).toFixed(2)} ₪</TableCell>
                     <TableCell>
@@ -120,39 +102,25 @@ const Expenses = () => {
                     <TableCell>{new Date(expense.purchase_date).toLocaleDateString('en-GB')}</TableCell>
                     <TableCell>
                       <div className="flex gap-2">
-                        <Button size="sm" variant="outline" className="text-green-600 hover:bg-green-50"
-                          onClick={() => handleEditExpense(expense)}>
+                        <Button size="sm" variant="outline" className="text-green-600 hover:bg-green-50" onClick={() => handleEditExpense(expense)}>
                           <Edit className="w-4 h-4" />
                         </Button>
-                        <Button 
-                          size="sm" 
-                          variant="outline" 
-                          className="text-red-600 hover:bg-red-50"
-                          onClick={() => handleDeleteExpense(expense.id)}
-                        >
+                        <Button size="sm" variant="outline" className="text-red-600 hover:bg-red-50" onClick={() => handleDeleteExpense(expense.id)}>
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
                     </TableCell>
-                  </TableRow>
-                ))}
+                  </TableRow>)}
               </TableBody>
-            </Table>
-          )}
+            </Table>}
         </CardContent>
       </Card>
 
       {/* نافذة التعديل */}
-      <EditExpenseDialog
-        open={editExpenseOpen}
-        onOpenChange={(open) => {
-          setEditExpenseOpen(open);
-          if (!open) setSelectedExpense(null);
-        }}
-        expenseData={selectedExpense}
-      />
-    </div>
-  );
+      <EditExpenseDialog open={editExpenseOpen} onOpenChange={open => {
+      setEditExpenseOpen(open);
+      if (!open) setSelectedExpense(null);
+    }} expenseData={selectedExpense} />
+    </div>;
 };
-
 export default Expenses;
