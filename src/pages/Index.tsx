@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -130,6 +131,7 @@ const Index = () => {
       icon: Users,
       action: () => navigate("/partnership-accounts"),
       color: "bg-green-500 hover:bg-green-600",
+      hasBackground: true,
     },
     {
       title: "تسجيل مصروف",
@@ -185,12 +187,23 @@ const Index = () => {
               <Button
                 key={index}
                 onClick={action.action}
-                className={`${action.color} text-white h-auto p-6 flex flex-col items-center gap-3 hover:scale-105 transition-transform`}
+                className={`${action.color} text-white h-auto p-6 flex flex-col items-center gap-3 hover:scale-105 transition-transform relative overflow-hidden`}
+                style={action.hasBackground ? {
+                  backgroundImage: `url('/lovable-uploads/50cdac73-73bd-464a-8a6d-061da335e727.png')`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  backgroundRepeat: 'no-repeat'
+                } : {}}
               >
-                <action.icon className="w-8 h-8" />
-                <div className="text-center">
-                  <div className="font-semibold">{action.title}</div>
-                  <div className="text-sm opacity-90">{action.description}</div>
+                {action.hasBackground && (
+                  <div className="absolute inset-0 bg-black/40 z-0"></div>
+                )}
+                <div className="relative z-10 flex flex-col items-center gap-3">
+                  <action.icon className="w-8 h-8" />
+                  <div className="text-center">
+                    <div className="font-semibold">{action.title}</div>
+                    <div className="text-sm opacity-90">{action.description}</div>
+                  </div>
                 </div>
               </Button>
             ))}
