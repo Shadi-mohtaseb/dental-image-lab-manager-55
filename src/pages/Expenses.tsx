@@ -49,7 +49,7 @@ const Expenses = () => {
 
       {/* Total Expenses */}
       <Card className="bg-gradient-to-r from-purple-500 to-purple-600 text-white">
-        <CardContent className="p-6 text-center py-[46px]">
+        <CardContent className="p-6 text-center py-[67px]">
           <h3 className="text-lg font-semibold mb-2">إجمالي المصاريف</h3>
           <p className="text-3xl font-bold">{totalExpenses.toFixed(2)} ₪</p>
         </CardContent>
