@@ -15,15 +15,20 @@ export function ExpenseTypesDialog() {
   const [editingName, setEditingName] = useState("");
   const queryClient = useQueryClient();
 
-  // جلب أنواع المصروفات
+  // جلب أنواع المصروفات باستخدام raw SQL query
   const { data: expenseTypes = [], isLoading } = useQuery({
     queryKey: ["expense_types"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("expense_types")
-        .select("*")
-        .order("name");
-      if (error) throw error;
+      const { data, error } = await supabase.rpc('get_expense_types');
+      if (error) {
+        // fallback to direct query if RPC doesn't exist
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from("expense_types" as any)
+          .select("*")
+          .order("name");
+        if (fallbackError) throw fallbackError;
+        return fallbackData || [];
+      }
       return data || [];
     },
   });
@@ -31,12 +36,17 @@ export function ExpenseTypesDialog() {
   // إضافة نوع مصروف جديد
   const addType = useMutation({
     mutationFn: async (name: string) => {
-      const { data, error } = await supabase
-        .from("expense_types")
-        .insert({ name })
-        .select()
-        .single();
-      if (error) throw error;
+      const { data, error } = await supabase.rpc('add_expense_type', { type_name: name });
+      if (error) {
+        // fallback
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from("expense_types" as any)
+          .insert({ name })
+          .select()
+          .single();
+        if (fallbackError) throw fallbackError;
+        return fallbackData;
+      }
       return data;
     },
     onSuccess: () => {
@@ -52,13 +62,21 @@ export function ExpenseTypesDialog() {
   // تعديل نوع مصروف
   const updateType = useMutation({
     mutationFn: async ({ id, name }: { id: string; name: string }) => {
-      const { data, error } = await supabase
-        .from("expense_types")
-        .update({ name })
-        .eq("id", id)
-        .select()
-        .single();
-      if (error) throw error;
+      const { data, error } = await supabase.rpc('update_expense_type', { 
+        type_id: id, 
+        new_name: name 
+      });
+      if (error) {
+        // fallback
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from("expense_types" as any)
+          .update({ name })
+          .eq("id", id)
+          .select()
+          .single();
+        if (fallbackError) throw fallbackError;
+        return fallbackData;
+      }
       return data;
     },
     onSuccess: () => {
@@ -75,11 +93,15 @@ export function ExpenseTypesDialog() {
   // حذف نوع مصروف
   const deleteType = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from("expense_types")
-        .delete()
-        .eq("id", id);
-      if (error) throw error;
+      const { error } = await supabase.rpc('delete_expense_type', { type_id: id });
+      if (error) {
+        // fallback
+        const { error: fallbackError } = await supabase
+          .from("expense_types" as any)
+          .delete()
+          .eq("id", id);
+        if (fallbackError) throw fallbackError;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["expense_types"] });
