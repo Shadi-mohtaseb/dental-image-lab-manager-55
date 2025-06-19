@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -7,7 +8,7 @@ export const useExpenseTypesData = () => {
     queryKey: ["expense_types"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("expense_types")
+        .from("expense_types" as any)
         .select("*")
         .order("name");
       if (error) throw error;
