@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Eye, Edit, Trash2, Check, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -26,10 +27,11 @@ export function CasesTable({
     return caseItem.price ? `${caseItem.price} ₪` : "-";
   };
 
-  // رسالة واتساب عند تغيير الحالة إلى "تم التسليم"
-  function getDeliveryMsg(caseItem: any) {
-    return `مرحبًا د.${caseItem.doctor_name || caseItem.doctor?.name || ""} 👋\nتم تسليم حالة المريض: ${caseItem.patient_name}\nبتاريخ: ${caseItem.submission_date ? new Date(caseItem.submission_date).toLocaleDateString("en-GB") : "—"}\nالسعر: ${caseItem.price ? `${caseItem.price} ₪` : "-"}\nالرجاء التواصل معنا لأي استفسار، وشكرًا لثقتكم بنا.`;
+  // رسالة واتساب عند تغيير الحالة إلى "تم التسليم" - محدثة
+  function getDeliveryMsg(caseItem: any, remaining: number) {
+    return `مرحبا ${caseItem.doctor_name || caseItem.doctor?.name || ""}\n\nتم تسليم حالة المريض: ${caseItem.patient_name}\n\nبتاريخ: ${new Date().toLocaleDateString("en-GB")}\n\nنود تذكيركم بأن المبلغ المتبقي عليك اصبح : ${remaining.toFixed(2)} ₪`;
   }
+
   const [loadingId, setLoadingId] = useState<string | null>(null);
 
   // دالة معالجة تغيير الحالة: تنقلب بين قيد التنفيذ وتم التسليم
@@ -41,6 +43,14 @@ export function CasesTable({
     await onStatusChange(caseItem, newStatus);
     setLoadingId(null);
   };
+
+  // حساب المتبقي للطبيب (للرسالة)
+  const getDoctorRemaining = (doctorId: string) => {
+    // هذا مؤقت - في الواقع نحتاج لجلب بيانات الدفعات
+    // لكن سنضع قيمة افتراضية للان
+    return 0;
+  };
+
   return <div className="overflow-x-auto bg-white rounded-lg shadow">
       <table className="min-w-full">
         <thead>
@@ -52,14 +62,16 @@ export function CasesTable({
             <th className="px-4 py-2">عدد الأسنان</th>
             <th className="px-4 py-2">نوع العمل</th>
             <th className="px-4 py-2">اللون</th>
-            <th className="px-4 py-2">البلوك\نوع المادة </th>
+            <th className="px-4 py-2">البلوك\نوع المادة </th>
             <th className="px-4 py-2">الحالة</th>
             <th className="px-4 py-2">الإجراءات</th>
             <th className="px-4 py-2">واتساب</th>
           </tr>
         </thead>
         <tbody>
-          {cases.map(caseItem => <tr key={caseItem.id}>
+          {cases.map(caseItem => {
+            const remaining = getDoctorRemaining(caseItem.doctor_id);
+            return <tr key={caseItem.id}>
               <td className="px-4 py-2">{caseItem.doctor_name || caseItem.doctor?.name || "-"}</td>
               <td className="px-4 py-2">{caseItem.patient_name}</td>
               <td className="px-4 py-2">
@@ -109,13 +121,14 @@ export function CasesTable({
                   </Button>}
               </td>
               <td className="px-4 py-2 text-center">
-                {caseItem.doctor?.phone || caseItem.doctor_phone ? <a href={buildWhatsappLink(caseItem.doctor?.phone || caseItem.doctor_phone, getDeliveryMsg(caseItem))} target="_blank" rel="noopener noreferrer" title="إرسال عبر واتساب">
+                {caseItem.doctor?.phone || caseItem.doctor_phone ? <a href={buildWhatsappLink(caseItem.doctor?.phone || caseItem.doctor_phone, getDeliveryMsg(caseItem, remaining))} target="_blank" rel="noopener noreferrer" title="إرسال عبر واتساب">
                     <Button size="icon" variant="outline" className="text-green-600 border-green-300 hover:bg-green-50" type="button">
                       <MessageCircle />
                     </Button>
                   </a> : <span className="text-gray-300">—</span>}
               </td>
-            </tr>)}
+            </tr>
+          })}
         </tbody>
       </table>
     </div>;

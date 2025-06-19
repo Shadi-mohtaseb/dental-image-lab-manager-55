@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -116,7 +115,7 @@ const Index = () => {
     },
   ];
 
-  // إجراءات سريعة
+  // إجراءات سريعة - تم إزالة الخلفية من بطاقة إدارة الحسابات
   const quickActions = [
     {
       title: "إضافة حالة جديدة",
@@ -131,7 +130,6 @@ const Index = () => {
       icon: Users,
       action: () => navigate("/partnership-accounts"),
       color: "bg-green-500 hover:bg-green-600",
-      hasBackground: true,
     },
     {
       title: "تسجيل مصروف",
@@ -139,6 +137,7 @@ const Index = () => {
       icon: Receipt,
       action: () => navigate("/expenses"),
       color: "bg-purple-500 hover:bg-purple-600",
+      backgroundImage: "/lovable-uploads/3421c3fe-329d-49e9-8ac1-db92d367c889.png",
     },
     {
       title: "سجل الأطباء",
@@ -146,6 +145,7 @@ const Index = () => {
       icon: UserPlus,
       action: () => navigate("/doctors-log"),
       color: "bg-orange-500 hover:bg-orange-600",
+      backgroundImage: "/lovable-uploads/ab6ebe21-8447-4660-94c0-b863597b6faf.png",
     },
   ];
 
@@ -188,14 +188,14 @@ const Index = () => {
                 key={index}
                 onClick={action.action}
                 className={`${action.color} text-white h-auto p-6 flex flex-col items-center gap-3 hover:scale-105 transition-transform relative overflow-hidden`}
-                style={action.hasBackground ? {
-                  backgroundImage: `url('/lovable-uploads/50cdac73-73bd-464a-8a6d-061da335e727.png')`,
+                style={action.backgroundImage ? {
+                  backgroundImage: `url('${action.backgroundImage}')`,
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                   backgroundRepeat: 'no-repeat'
                 } : {}}
               >
-                {action.hasBackground && (
+                {action.backgroundImage && (
                   <div className="absolute inset-0 bg-black/40 z-0"></div>
                 )}
                 <div className="relative z-10 flex flex-col items-center gap-3">

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,6 +9,7 @@ import { Receipt, Edit, Trash2, Search } from "lucide-react";
 import { useExpenses, useDeleteExpense } from "@/hooks/useExpenses";
 import { AddExpenseDialog } from "@/components/AddExpenseDialog";
 import { EditExpenseDialog } from "@/components/EditExpenseDialog";
+import { ExpenseTypesDialog } from "@/components/ExpenseTypesDialog";
 const Expenses = () => {
   const {
     data: expenses = [],
@@ -44,7 +46,10 @@ const Expenses = () => {
             <p className="text-gray-600">تتبع وإدارة جميع مصاريف المختبر</p>
           </div>
         </div>
-        <AddExpenseDialog />
+        <div className="flex gap-2">
+          <ExpenseTypesDialog />
+          <AddExpenseDialog />
+        </div>
       </div>
 
       {/* Total Expenses */}
@@ -81,17 +86,21 @@ const Expenses = () => {
             </div> : <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>اسم المادة</TableHead>
-                  <TableHead>السعر</TableHead>
-                  <TableHead>الكمية</TableHead>
-                  <TableHead>الإجمالي</TableHead>
-                  <TableHead>تاريخ الشراء</TableHead>
-                  <TableHead>إجراءات</TableHead>
+                  <TableHead className="text-right">اسم المادة</TableHead>
+                  <TableHead className="text-right">نوع المصروف</TableHead>
+                  <TableHead className="text-right">السعر</TableHead>
+                  <TableHead className="text-right">الكمية</TableHead>
+                  <TableHead className="text-right">الإجمالي</TableHead>
+                  <TableHead className="text-right">تاريخ الشراء</TableHead>
+                  <TableHead className="text-center">إجراءات</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredExpenses.map(expense => <TableRow key={expense.id}>
                     <TableCell className="font-semibold">{expense.item_name}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline">{expense.expense_type || "عام"}</Badge>
+                    </TableCell>
                     <TableCell>{Number(expense.unit_price).toFixed(2)} ₪</TableCell>
                     <TableCell>
                       <Badge variant="outline">{expense.quantity}</Badge>
@@ -101,7 +110,7 @@ const Expenses = () => {
                     </TableCell>
                     <TableCell>{new Date(expense.purchase_date).toLocaleDateString('en-GB')}</TableCell>
                     <TableCell>
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 justify-center">
                         <Button size="sm" variant="outline" className="text-green-600 hover:bg-green-50" onClick={() => handleEditExpense(expense)}>
                           <Edit className="w-4 h-4" />
                         </Button>

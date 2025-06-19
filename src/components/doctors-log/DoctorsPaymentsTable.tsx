@@ -1,9 +1,10 @@
+
 import { useDoctors } from "@/hooks/useDoctors";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import DoctorPaymentDialog from "./DoctorPaymentDialog";
+import AddPaymentDialog from "@/components/AddPaymentDialog";
 import { useState } from "react";
 import {
   Table,
@@ -20,8 +21,6 @@ interface DoctorsPaymentsTableProps {}
 
 export default function DoctorsPaymentsTable({ }: DoctorsPaymentsTableProps) {
   const { data: doctors = [], isLoading } = useDoctors();
-  const [selectedDoctor, setSelectedDoctor] = useState<any>(null);
-  const [dialogOpen, setDialogOpen] = useState(false);
 
   // جلب جميع الدفعات للطبيب
   const { data: doctorPayments = [] } = useQuery({
@@ -73,7 +72,10 @@ export default function DoctorsPaymentsTable({ }: DoctorsPaymentsTableProps) {
 
   return (
     <div className="bg-white rounded-lg shadow p-4 mt-6">
-      <h2 className="text-lg font-bold mb-3">دفعات الأطباء</h2>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-bold">دفعات الأطباء</h2>
+        <AddPaymentDialog />
+      </div>
       <Table>
         <TableHeader>
           <TableRow>
@@ -81,7 +83,6 @@ export default function DoctorsPaymentsTable({ }: DoctorsPaymentsTableProps) {
             <TableHead className="text-right w-[140px]">إجمالي المستحق</TableHead>
             <TableHead className="text-right w-[140px]">المدفوع</TableHead>
             <TableHead className="text-center w-[170px]">الدين/المتبقي</TableHead>
-            <TableHead className="text-center w-[130px]">إضافة دفعة</TableHead>
             <TableHead className="text-center w-[88px]">واتساب</TableHead>
           </TableRow>
         </TableHeader>
@@ -97,18 +98,6 @@ export default function DoctorsPaymentsTable({ }: DoctorsPaymentsTableProps) {
                   <Badge variant={remaining > 0 ? "destructive" : "default"} className={remaining > 0 ? "bg-red-500 text-white" : "bg-green-100 text-green-700"}>
                     {remaining > 0 ? `${remaining.toFixed(2)} ₪ دين` : "لا يوجد دين"}
                   </Badge>
-                </TableCell>
-                <TableCell className="text-center w-[130px]">
-                  <Button
-                    size="sm"
-                    className="bg-blue-600 text-white hover:bg-blue-700"
-                    onClick={() => {
-                      setSelectedDoctor(doc);
-                      setDialogOpen(true);
-                    }}
-                  >
-                    إضافة دفعة
-                  </Button>
                 </TableCell>
                 <TableCell className="text-center w-[88px]">
                   {doc.phone ? (
@@ -136,12 +125,6 @@ export default function DoctorsPaymentsTable({ }: DoctorsPaymentsTableProps) {
           })}
         </TableBody>
       </Table>
-      {/* نموذج إضافة دفعة */}
-      <DoctorPaymentDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        doctor={selectedDoctor}
-      />
     </div>
   );
 }

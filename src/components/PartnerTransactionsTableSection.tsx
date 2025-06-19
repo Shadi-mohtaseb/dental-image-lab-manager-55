@@ -51,13 +51,13 @@ export default function PartnerTransactionsTableSection({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>التاريخ</TableHead>
-                <TableHead>الشريك</TableHead>
-                <TableHead>نوع المعاملة</TableHead>
-                <TableHead>المبلغ</TableHead>
-                <TableHead>المصدر</TableHead>
-                <TableHead>الوصف</TableHead>
-                <TableHead>إجراءات</TableHead>
+                <TableHead className="text-center">التاريخ</TableHead>
+                <TableHead className="text-center">الشريك</TableHead>
+                <TableHead className="text-center">نوع المعاملة</TableHead>
+                <TableHead className="text-center">المبلغ</TableHead>
+                <TableHead className="text-center">المصدر</TableHead>
+                <TableHead className="text-center">الوصف</TableHead>
+                <TableHead className="text-center">إجراءات</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -65,25 +65,25 @@ export default function PartnerTransactionsTableSection({
                 const partner = partners.find((p) => p.id === transaction.partner_id);
                 return (
                   <TableRow key={transaction.id}>
-                    <TableCell>{transaction.transaction_date}</TableCell>
-                    <TableCell>{partner?.name || "-"}</TableCell>
-                    <TableCell>
+                    <TableCell className="text-center">{transaction.transaction_date}</TableCell>
+                    <TableCell className="text-center">{partner?.name || "-"}</TableCell>
+                    <TableCell className="text-center">
                       <Badge variant={transaction.transaction_type === "deposit" ? "default" : "destructive"}>
                         {transaction.transaction_type === "deposit" ? "إيداع" : "سحب"}
                       </Badge>
                     </TableCell>
-                    <TableCell className="font-semibold">
+                    <TableCell className="text-center font-semibold">
                       {Number(transaction.amount).toFixed(2)} ₪
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="text-center">
                       <Badge variant="outline">
                         {transaction.transaction_source === "personal_withdrawal" ? "سحب شخصي" : 
                           transaction.transaction_source === "case_profit" ? "ربح حالة" : "يدوي"}
                       </Badge>
                     </TableCell>
-                    <TableCell>{transaction.description}</TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
+                    <TableCell className="text-center">{transaction.description}</TableCell>
+                    <TableCell className="text-center">
+                      <div className="flex gap-2 justify-center">
                         <Button size="sm" variant="outline" onClick={() => handleEditTx(transaction)}>
                           <Edit className="w-4 h-4" />
                         </Button>

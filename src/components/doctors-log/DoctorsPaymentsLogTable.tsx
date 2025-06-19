@@ -127,9 +127,9 @@ export default function DoctorsPaymentsLogTable() {
             // حساب المتبقي للطبيب
             const remaining = getDoctorRemaining(payment.doctor_id);
 
-            // إعداد رسالة واتساب حسب طلبك
+            // رسالة واتساب محدثة حسب المطلوب
             const waMessage = doctor
-              ? `مرحبا ${doctor.name} تم استلام دفعة ${payment.payment_method ?? "نقدي"} بمبلغ ${Number(payment.amount).toFixed(2)}₪ بتاريخ ${payment.transaction_date} المبلغ المتبقي في حسابك: ${remaining.toFixed(2)}₪`
+              ? `مرحبا ${doctor.name}\n\nتم استلام دفعة ${payment.payment_method ?? "نقدي"} بمبلغ ${Number(payment.amount).toFixed(2)}₪\n\nبتاريخ ${payment.transaction_date}\n\nالمبلغ المتبقي عليك : ${remaining.toFixed(2)}₪`
               : "";
 
             // تجهيز رابط الواتساب إذا توفر

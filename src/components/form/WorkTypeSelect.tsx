@@ -1,17 +1,34 @@
 
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
-const workTypes = ["زيركون", "مؤقت"] as const;
+import { WorkTypesManagementDialog } from "@/components/WorkTypesManagementDialog";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 export function WorkTypeSelect({ form, name }: { form: any; name: string }) {
+  // جلب أنواع العمل من قاعدة البيانات
+  const { data: workTypes = [] } = useQuery({
+    queryKey: ["work_types"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("work_types")
+        .select("*")
+        .order("name");
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
   return (
     <FormField
       control={form.control}
       name={name}
       render={({ field }: any) => (
         <FormItem>
-          <FormLabel>نوع العمل *</FormLabel>
+          <FormLabel className="flex items-center gap-2">
+            نوع العمل *
+            <WorkTypesManagementDialog />
+          </FormLabel>
           <Select onValueChange={field.onChange} value={field.value}>
             <FormControl>
               <SelectTrigger>
@@ -19,9 +36,9 @@ export function WorkTypeSelect({ form, name }: { form: any; name: string }) {
               </SelectTrigger>
             </FormControl>
             <SelectContent>
-              {workTypes.map((type) => (
-                <SelectItem key={type} value={type}>
-                  {type}
+              {workTypes.map((type: any) => (
+                <SelectItem key={type.id} value={type.name}>
+                  {type.name}
                 </SelectItem>
               ))}
             </SelectContent>
