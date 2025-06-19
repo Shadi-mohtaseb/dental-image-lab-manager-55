@@ -17,16 +17,25 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useAddExpense } from "@/hooks/useExpenses";
+import { useExpenseTypesData } from "@/components/expense-types/useExpenseTypesData";
 import { Receipt } from "lucide-react";
 
 const formSchema = z.object({
   item_name: z.string().min(2, "اسم المنتج مطلوب"),
+  expense_type_id: z.string().min(1, "نوع المصروف مطلوب"),
   description: z.string().optional(),
   quantity: z.number().min(1, "الكمية يجب أن تكون 1 على الأقل"),
   unit_price: z.number().min(0, "السعر يجب أن يكون موجباً"),
@@ -39,11 +48,13 @@ type FormData = z.infer<typeof formSchema>;
 export function AddExpenseDialog() {
   const [open, setOpen] = useState(false);
   const addExpense = useAddExpense();
+  const { expenseTypes, isLoading: typesLoading } = useExpenseTypesData();
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       item_name: "",
+      expense_type_id: "",
       description: "",
       quantity: 1,
       unit_price: 0,
@@ -57,6 +68,7 @@ export function AddExpenseDialog() {
       const totalAmount = data.quantity * data.unit_price;
       await addExpense.mutateAsync({
         item_name: data.item_name,
+        expense_type_id: data.expense_type_id,
         description: data.description || null,
         quantity: data.quantity,
         unit_price: data.unit_price,
@@ -97,6 +109,36 @@ export function AddExpenseDialog() {
                   <FormControl>
                     <Input placeholder="مواد طبية" {...field} />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="expense_type_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>نوع المصروف *</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="اختر نوع المصروف" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {typesLoading ? (
+                        <SelectItem value="" disabled>جاري التحميل...</SelectItem>
+                      ) : expenseTypes.length === 0 ? (
+                        <SelectItem value="" disabled>لا توجد أنواع مصروفات</SelectItem>
+                      ) : (
+                        expenseTypes.map((type: any) => (
+                          <SelectItem key={type.id} value={type.id}>
+                            {type.name}
+                          </SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
@@ -179,7 +221,7 @@ export function AddExpenseDialog() {
                 </FormItem>
               )}
             />
-            <div className="flex justify-end space-x-2">
+            <div className="flex justify-end space-x-2 gap-2">
               <Button
                 type="button"
                 variant="outline"

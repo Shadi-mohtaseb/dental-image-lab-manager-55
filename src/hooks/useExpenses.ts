@@ -13,7 +13,10 @@ export const useExpenses = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("expenses")
-        .select("*")
+        .select(`
+          *,
+          expense_type:expense_types(name)
+        `)
         .order("purchase_date", { ascending: false });
       
       if (error) throw error;
