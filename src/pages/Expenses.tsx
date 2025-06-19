@@ -9,27 +9,32 @@ import { Receipt, Edit, Trash2, Search } from "lucide-react";
 import { useExpenses, useDeleteExpense } from "@/hooks/useExpenses";
 import { AddExpenseDialog } from "@/components/AddExpenseDialog";
 import { EditExpenseDialog } from "@/components/EditExpenseDialog";
-import { ExpenseTypesDialog } from "@/components/ExpenseTypesDialog";
+import { ExpenseTypesDialog } from "@/components/expense-types/ExpenseTypesDialog";
+
 const Expenses = () => {
   const {
     data: expenses = [],
     isLoading
   } = useExpenses();
   const deleteExpense = useDeleteExpense();
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm,setSearchTerm] = useState("");
   const [editExpenseOpen, setEditExpenseOpen] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState(null);
   const totalExpenses = expenses.reduce((sum, expense) => sum + Number(expense.total_amount), 0);
+  
   const handleDeleteExpense = async (expenseId: string) => {
     if (window.confirm("هل أنت متأكد من حذف هذا المصروف؟")) {
       await deleteExpense.mutateAsync(expenseId);
     }
   };
+  
   const handleEditExpense = expense => {
     setSelectedExpense(expense);
     setEditExpenseOpen(true);
   };
+  
   const filteredExpenses = expenses.filter(expense => expense.item_name.toLowerCase().includes(searchTerm.toLowerCase()));
+  
   if (isLoading) {
     return <div className="space-y-6 animate-fade-in">
         <div className="flex items-center justify-center p-8">
@@ -37,6 +42,7 @@ const Expenses = () => {
         </div>
       </div>;
   }
+  
   return <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -99,7 +105,7 @@ const Expenses = () => {
                 {filteredExpenses.map(expense => <TableRow key={expense.id}>
                     <TableCell className="font-semibold">{expense.item_name}</TableCell>
                     <TableCell>
-                      <Badge variant="outline">{expense.expense_type || "عام"}</Badge>
+                      <Badge variant="outline">{'expense_type' in expense ? (expense as any).expense_type || "عام" : "عام"}</Badge>
                     </TableCell>
                     <TableCell>{Number(expense.unit_price).toFixed(2)} ₪</TableCell>
                     <TableCell>
@@ -132,4 +138,5 @@ const Expenses = () => {
     }} expenseData={selectedExpense} />
     </div>;
 };
+
 export default Expenses;

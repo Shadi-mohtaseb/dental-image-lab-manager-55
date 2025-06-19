@@ -1,7 +1,7 @@
 
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { WorkTypesManagementDialog } from "@/components/WorkTypesManagementDialog";
+import { WorkTypesManagementDialog } from "@/components/work-types/WorkTypesManagementDialog";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -11,7 +11,7 @@ export function WorkTypeSelect({ form, name }: { form: any; name: string }) {
     queryKey: ["work_types"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("work_types")
+        .from("work_types" as any)
         .select("*")
         .order("name");
       if (error) throw error;

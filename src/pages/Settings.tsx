@@ -2,9 +2,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Settings as SettingsIcon, Globe, Database } from "lucide-react";
+import { Settings as SettingsIcon, Globe } from "lucide-react";
 import { useState } from "react";
-import { BackupRestoreSection } from "@/components/BackupRestoreSection";
+import { BackupRestoreSection } from "@/components/backup/BackupRestoreSection";
 import { toast } from "@/hooks/use-toast";
 
 const Settings = () => {
