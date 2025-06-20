@@ -37,7 +37,7 @@ const Expenses = () => {
   // دالة للحصول على اسم نوع المصروف
   const getExpenseTypeName = (typeId: string) => {
     if (!Array.isArray(expenseTypes)) return "غير محدد";
-    const type = expenseTypes.find((t: any) => t && t.id === typeId);
+    const type = expenseTypes.find((t: any) => t && typeof t === 'object' && 'id' in t && 'name' in t && t.id === typeId);
     return type?.name || "غير محدد";
   };
 
