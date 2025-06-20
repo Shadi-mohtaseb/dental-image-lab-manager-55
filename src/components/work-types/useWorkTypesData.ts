@@ -12,7 +12,10 @@ export const useWorkTypesData = () => {
         .from("work_types" as any)
         .select("*")
         .order("name");
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching work types:", error);
+        return [];
+      }
       return data || [];
     },
   });
@@ -38,7 +41,7 @@ export const useAddWorkType = () => {
       if (error) throw error;
       
       // إنشاء أسعار افتراضية للأطباء
-      if (data) {
+      if (data?.id) {
         await createPrices.mutateAsync(data.id);
       }
       

@@ -23,22 +23,24 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useAddExpense } from "@/hooks/useExpenses";
 import { Plus } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 
 const formSchema = z.object({
   description: z.string().min(1, "وصف المصروف مطلوب"),
+  item_name: z.string().min(1, "اسم العنصر مطلوب"),
   total_amount: z.preprocess(
     (val) => (val === "" ? undefined : Number(val)),
     z.number({ invalid_type_error: "يرجى إدخال المبلغ" }).min(0, "المبلغ يجب أن يكون أكبر من صفر")
   ),
+  unit_price: z.preprocess(
+    (val) => (val === "" ? undefined : Number(val)),
+    z.number({ invalid_type_error: "يرجى إدخال سعر الوحدة" }).min(0, "سعر الوحدة يجب أن يكون أكبر من صفر")
+  ),
   purchase_date: z.string().min(1, "تاريخ الشراء مطلوب"),
-  expense_type_id: z.string().min(1, "نوع المصروف مطلوب"),
   quantity: z.preprocess(
     (val) => (val === "" ? 1 : Number(val)),
     z.number().min(1, "الكمية يجب أن تكون أكبر من صفر").optional()
   ),
+  notes: z.string().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -47,42 +49,29 @@ export function AddExpenseDialog() {
   const [open, setOpen] = useState(false);
   const addExpense = useAddExpense();
 
-  // جلب أنواع المصاريف
-  const { data: expenseTypes = [] } = useQuery({
-    queryKey: ["expense_types"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("expense_types" as any)
-        .select("*")
-        .order("name");
-      if (error) throw error;
-      return data || [];
-    },
-  });
-
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       description: "",
+      item_name: "",
       total_amount: 0,
+      unit_price: 0,
       purchase_date: new Date().toISOString().split('T')[0],
-      expense_type_id: "",
       quantity: 1,
+      notes: "",
     },
   });
-
-  const selectedExpenseType = form.watch("expense_type_id");
-  const selectedType = expenseTypes.find((type: any) => type.id === selectedExpenseType);
-  const isMaterial = selectedType?.name === "مادة";
 
   const onSubmit = async (data: FormData) => {
     try {
       await addExpense.mutateAsync({
         description: data.description,
+        item_name: data.item_name,
         total_amount: data.total_amount,
+        unit_price: data.unit_price,
         purchase_date: data.purchase_date,
-        expense_type_id: data.expense_type_id,
-        quantity: isMaterial ? data.quantity : 1,
+        quantity: data.quantity || 1,
+        notes: data.notes || "",
       });
       form.reset();
       setOpen(false);
@@ -110,24 +99,13 @@ export function AddExpenseDialog() {
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
-              name="expense_type_id"
+              name="item_name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>نوع المصروف *</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="اختر نوع المصروف" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {expenseTypes.map((type: any) => (
-                        <SelectItem key={type.id} value={type.id}>
-                          {type.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <FormLabel>اسم العنصر *</FormLabel>
+                  <FormControl>
+                    <Input placeholder="مثال: أدوات مكتبية" {...field} />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -139,27 +117,38 @@ export function AddExpenseDialog() {
                 <FormItem>
                   <FormLabel>وصف المصروف *</FormLabel>
                   <FormControl>
-                    <Input placeholder="مثال: أدوات مكتبية" {...field} />
+                    <Input placeholder="تفاصيل إضافية" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            {isMaterial && (
-              <FormField
-                control={form.control}
-                name="quantity"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>الكمية</FormLabel>
-                    <FormControl>
-                      <Input type="number" min={1} placeholder="1" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
+            <FormField
+              control={form.control}
+              name="quantity"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>الكمية</FormLabel>
+                  <FormControl>
+                    <Input type="number" min={1} placeholder="1" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="unit_price"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>سعر الوحدة (شيكل) *</FormLabel>
+                  <FormControl>
+                    <Input type="number" min={0} step={0.01} placeholder="0" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="total_amount"
@@ -181,6 +170,19 @@ export function AddExpenseDialog() {
                   <FormLabel>تاريخ الشراء *</FormLabel>
                   <FormControl>
                     <Input type="date" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="notes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>ملاحظات</FormLabel>
+                  <FormControl>
+                    <Input placeholder="ملاحظات إضافية" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

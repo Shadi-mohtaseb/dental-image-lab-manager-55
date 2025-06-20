@@ -1,5 +1,6 @@
+
 import { format } from "date-fns";
-import ar from "date-fns/locale/ar";
+import { ar } from "date-fns/locale/ar";
 import { Receipt, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -23,7 +24,10 @@ const Expenses = () => {
         .from("expense_types" as any)
         .select("*")
         .order("name");
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching expense types:", error);
+        return [];
+      }
       return data || [];
     },
   });
@@ -50,11 +54,6 @@ const Expenses = () => {
           title: "تم حذف المصروف بنجاح",
           description: "تم حذف المصروف من النظام",
         });
-
-        // تحديث بيانات المصاريف بعد الحذف
-        // يمكنك استخدام invalidateQueries أو refetchQueries هنا
-        // مثال:
-        // queryClient.invalidateQueries({ queryKey: ["expenses"] });
       } catch (error: any) {
         console.error("Error deleting expense:", error);
         toast({
@@ -114,7 +113,6 @@ const Expenses = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>الوصف</TableHead>
-                  <TableHead>نوع المصروف</TableHead>
                   <TableHead>الكمية</TableHead>
                   <TableHead>المبلغ</TableHead>
                   <TableHead>تاريخ الشراء</TableHead>
@@ -125,10 +123,7 @@ const Expenses = () => {
                 {expenses?.map((expense) => (
                   <TableRow key={expense.id}>
                     <TableCell className="font-medium">
-                      {expense.description}
-                    </TableCell>
-                    <TableCell>
-                      {getExpenseTypeName(expense.expense_type_id)}
+                      {expense.description || expense.item_name}
                     </TableCell>
                     <TableCell>
                       {expense.quantity || 1}
@@ -143,7 +138,7 @@ const Expenses = () => {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <EditExpenseDialog expense={expense} />
+                        <EditExpenseDialog expenseData={expense} />
                         <Button
                           variant="outline"
                           size="sm"
