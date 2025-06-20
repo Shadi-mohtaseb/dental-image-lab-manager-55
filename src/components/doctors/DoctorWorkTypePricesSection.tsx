@@ -20,7 +20,9 @@ export function DoctorWorkTypePricesSection({ doctorId }: DoctorWorkTypePricesSe
   const [editingPrice, setEditingPrice] = useState<number>(0);
 
   const getDoctorPrice = (workTypeId: string) => {
-    const price = prices.find((p: any) => p.doctor_id === doctorId && p.work_type_id === workTypeId);
+    const price = Array.isArray(prices) 
+      ? prices.find((p: any) => p.doctor_id === doctorId && p.work_type_id === workTypeId)
+      : null;
     return price?.price || 0;
   };
 
@@ -103,7 +105,7 @@ export function DoctorWorkTypePricesSection({ doctorId }: DoctorWorkTypePricesSe
                         variant="outline"
                         onClick={() => handleEdit(workType.id, currentPrice)}
                       >
-                        <Edit className="w-4 h-4" />
+                        <Edit className="w-4 w-4" />
                       </Button>
                     </>
                   )}
