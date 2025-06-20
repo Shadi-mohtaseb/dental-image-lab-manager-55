@@ -9,7 +9,7 @@ export const useWorkTypesData = () => {
     queryKey: ["work_types"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("work_types" as any)
+        .from("work_types")
         .select("*")
         .order("name");
       if (error) {
@@ -34,14 +34,14 @@ export const useAddWorkType = () => {
   return useMutation({
     mutationFn: async (name: string) => {
       const { data, error } = await supabase
-        .from("work_types" as any)
+        .from("work_types")
         .insert({ name })
         .select()
         .single();
       if (error) throw error;
       
       // إنشاء أسعار افتراضية للأطباء
-      if (data && data.id) {
+      if (data?.id) {
         try {
           await createPrices.mutateAsync(data.id);
         } catch (priceError) {
@@ -68,7 +68,7 @@ export const useUpdateWorkType = () => {
   return useMutation({
     mutationFn: async ({ id, name }: { id: string; name: string }) => {
       const { data, error } = await supabase
-        .from("work_types" as any)
+        .from("work_types")
         .update({ name })
         .eq("id", id)
         .select()
@@ -92,7 +92,7 @@ export const useDeleteWorkType = () => {
   return useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
-        .from("work_types" as any)
+        .from("work_types")
         .delete()
         .eq("id", id);
       if (error) throw error;

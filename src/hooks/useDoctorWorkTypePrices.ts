@@ -8,7 +8,7 @@ export const useDoctorWorkTypePrices = () => {
     queryKey: ["doctor_work_type_prices"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("doctor_work_type_prices" as any)
+        .from("doctor_work_type_prices")
         .select("*");
       if (error) throw error;
       return data || [];
@@ -36,7 +36,7 @@ export const useCreateDoctorWorkTypePricesForNewWorkType = () => {
       }));
       
       const { error } = await supabase
-        .from("doctor_work_type_prices" as any)
+        .from("doctor_work_type_prices")
         .insert(priceEntries);
       
       if (error) throw error;
@@ -66,7 +66,7 @@ export const useUpdateDoctorWorkTypePrice = () => {
   return useMutation({
     mutationFn: async ({ doctorId, workTypeId, price }: { doctorId: string; workTypeId: string; price: number }) => {
       const { error } = await supabase
-        .from("doctor_work_type_prices" as any)
+        .from("doctor_work_type_prices")
         .upsert({
           doctor_id: doctorId,
           work_type_id: workTypeId,
