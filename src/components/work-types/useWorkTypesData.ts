@@ -41,8 +41,8 @@ export const useAddWorkType = () => {
       if (error) throw error;
       
       // إنشاء أسعار افتراضية للأطباء
-      if (data?.id) {
-        await createPrices.mutateAsync(data.id);
+      if (data && typeof data === 'object' && 'id' in data) {
+        await createPrices.mutateAsync(data.id as string);
       }
       
       return data;

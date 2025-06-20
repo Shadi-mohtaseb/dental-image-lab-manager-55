@@ -1,7 +1,6 @@
-
 import { format } from "date-fns";
-import { ar } from "date-fns/locale/ar";
-import { Receipt, Trash2 } from "lucide-react";
+import { ar } from "date-fns/locale";
+import { Receipt, Trash2, Edit } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -11,10 +10,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { AddExpenseDialog } from "@/components/AddExpenseDialog";
 import { EditExpenseDialog } from "@/components/EditExpenseDialog";
 import { toast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 // صفحة المصاريف
 const Expenses = () => {
   const { data: expenses, isLoading, error } = useExpenses();
+  const [editingExpense, setEditingExpense] = useState<any>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
 
   // جلب أنواع المصاريف
   const { data: expenseTypes = [] } = useQuery({
@@ -34,7 +36,8 @@ const Expenses = () => {
 
   // دالة للحصول على اسم نوع المصروف
   const getExpenseTypeName = (typeId: string) => {
-    const type = expenseTypes.find((t: any) => t.id === typeId);
+    if (!Array.isArray(expenseTypes)) return "غير محدد";
+    const type = expenseTypes.find((t: any) => t && t.id === typeId);
     return type?.name || "غير محدد";
   };
 
@@ -63,6 +66,11 @@ const Expenses = () => {
         });
       }
     }
+  };
+
+  const handleEdit = (expense: any) => {
+    setEditingExpense(expense);
+    setEditDialogOpen(true);
   };
 
   if (isLoading) {
@@ -138,7 +146,13 @@ const Expenses = () => {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <EditExpenseDialog expenseData={expense} />
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEdit(expense)}
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
                         <Button
                           variant="outline"
                           size="sm"
@@ -156,6 +170,12 @@ const Expenses = () => {
           </div>
         </CardContent>
       </Card>
+
+      <EditExpenseDialog 
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        expenseData={editingExpense}
+      />
     </div>
   );
 };
