@@ -12,6 +12,15 @@ interface DoctorWorkTypePricesSectionProps {
   doctorId: string;
 }
 
+interface DoctorWorkTypePrice {
+  id: string;
+  doctor_id: string;
+  work_type_id: string;
+  price: number;
+  created_at: string;
+  updated_at: string;
+}
+
 export function DoctorWorkTypePricesSection({ doctorId }: DoctorWorkTypePricesSectionProps) {
   const { workTypes } = useWorkTypesData();
   const { data: prices = [] } = useDoctorWorkTypePrices();
@@ -19,10 +28,10 @@ export function DoctorWorkTypePricesSection({ doctorId }: DoctorWorkTypePricesSe
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingPrice, setEditingPrice] = useState<number>(0);
 
-  const getDoctorPrice = (workTypeId: string) => {
+  const getDoctorPrice = (workTypeId: string): number => {
     if (!Array.isArray(prices)) return 0;
     
-    const price = prices.find((p: any) => 
+    const price = prices.find((p: DoctorWorkTypePrice) => 
       p?.doctor_id === doctorId && p?.work_type_id === workTypeId
     );
     return price?.price || 0;

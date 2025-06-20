@@ -8,7 +8,7 @@ export const useWorkTypesData = () => {
   const query = useQuery({
     queryKey: ["work_types"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("work_types")
         .select("*")
         .order("name");
@@ -33,7 +33,7 @@ export const useAddWorkType = () => {
   
   return useMutation({
     mutationFn: async (name: string) => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("work_types")
         .insert({ name })
         .select()
@@ -67,7 +67,7 @@ export const useUpdateWorkType = () => {
   
   return useMutation({
     mutationFn: async ({ id, name }: { id: string; name: string }) => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("work_types")
         .update({ name })
         .eq("id", id)
@@ -91,7 +91,7 @@ export const useDeleteWorkType = () => {
   
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from("work_types")
         .delete()
         .eq("id", id);
