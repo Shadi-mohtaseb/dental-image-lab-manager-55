@@ -5,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Settings as SettingsIcon, Globe } from "lucide-react";
 import { useState } from "react";
 import { BackupRestoreSection } from "@/components/backup/BackupRestoreSection";
+import { WorkTypesSection } from "@/components/settings/WorkTypesSection";
 import { toast } from "@/hooks/use-toast";
 
 const Settings = () => {
@@ -62,6 +63,9 @@ const Settings = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* إدارة أنواع العمل */}
+      <WorkTypesSection />
 
       {/* النسخ الاحتياطي */}
       <BackupRestoreSection />

@@ -1,3 +1,4 @@
+
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
 import { Receipt, Trash2, Edit } from "lucide-react";
@@ -5,8 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { useExpenses } from "@/hooks/useExpenses";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { AddExpenseDialog } from "@/components/AddExpenseDialog";
 import { EditExpenseDialog } from "@/components/EditExpenseDialog";
 import { toast } from "@/hooks/use-toast";
@@ -17,29 +16,6 @@ const Expenses = () => {
   const { data: expenses, isLoading, error } = useExpenses();
   const [editingExpense, setEditingExpense] = useState<any>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-
-  // جلب أنواع المصاريف
-  const { data: expenseTypes = [] } = useQuery({
-    queryKey: ["expense_types"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("expense_types" as any)
-        .select("*")
-        .order("name");
-      if (error) {
-        console.error("Error fetching expense types:", error);
-        return [];
-      }
-      return data || [];
-    },
-  });
-
-  // دالة للحصول على اسم نوع المصروف
-  const getExpenseTypeName = (typeId: string) => {
-    if (!Array.isArray(expenseTypes)) return "غير محدد";
-    const type = expenseTypes.find((t: any) => t && typeof t === 'object' && 'id' in t && 'name' in t && t.id === typeId);
-    return type?.name || "غير محدد";
-  };
 
   const handleDelete = async (expenseId: string) => {
     if (window.confirm("هل أنت متأكد من حذف هذا المصروف؟")) {

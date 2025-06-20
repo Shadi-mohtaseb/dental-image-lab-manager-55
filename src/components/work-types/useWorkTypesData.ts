@@ -42,13 +42,18 @@ export const useAddWorkType = () => {
       
       // إنشاء أسعار افتراضية للأطباء
       if (data && typeof data === 'object' && 'id' in data && data.id) {
-        await createPrices.mutateAsync(data.id as string);
+        try {
+          await createPrices.mutateAsync(data.id as string);
+        } catch (priceError) {
+          console.error("Error creating default prices:", priceError);
+        }
       }
       
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["work_types"] });
+      queryClient.invalidateQueries({ queryKey: ["doctor_work_type_prices"] });
       toast({ title: "تم إضافة نوع العمل بنجاح مع ربطه بجميع الأطباء" });
     },
     onError: () => {
