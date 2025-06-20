@@ -18,7 +18,8 @@ export type DoctorInsert = {
   name: string;
   zircon_price: number;
   temp_price: number;
-  phone?: string | null; // تمت الإضافة هنا
+  phone?: string | null;
+  workTypePrices?: Record<string, number>;
 };
 
 // جلب الأطباء
@@ -28,10 +29,9 @@ export const useDoctors = () => {
     queryFn: async (): Promise<Doctor[]> => {
       const { data, error } = await supabase
         .from("doctors")
-        .select("id, name, zircon_price, temp_price, phone, created_at, updated_at") // أضفنا phone
+        .select("id, name, zircon_price, temp_price, phone, created_at, updated_at")
         .order("created_at", { ascending: false });
       if (error) throw error;
-      // التأكد من إرجاع بيانات صحيحة بذات الحقول المطلوبة
       return (data as any[] ?? []).map((row) => ({
         id: row.id,
         name: row.name,
@@ -51,19 +51,46 @@ export const useAddDoctor = () => {
 
   return useMutation({
     mutationFn: async (doctor: DoctorInsert) => {
-      const { data, error } = await supabase
+      // إضافة الطبيب أولاً
+      const { data: doctorData, error: doctorError } = await supabase
         .from("doctors")
-        .insert(doctor)
-        .select("id, name, zircon_price, temp_price, phone, created_at, updated_at") // أضفنا phone
+        .insert({
+          name: doctor.name,
+          phone: doctor.phone,
+          zircon_price: doctor.zircon_price,
+          temp_price: doctor.temp_price,
+        })
+        .select("id, name, zircon_price, temp_price, phone, created_at, updated_at")
         .single();
-      if (error) throw error;
-      return data as Doctor;
+      
+      if (doctorError) throw doctorError;
+
+      // إضافة أسعار أنواع العمل إذا كانت موجودة
+      if (doctor.workTypePrices && Object.keys(doctor.workTypePrices).length > 0) {
+        const priceEntries = Object.entries(doctor.workTypePrices).map(([workTypeId, price]) => ({
+          doctor_id: doctorData.id,
+          work_type_id: workTypeId,
+          price: price,
+        }));
+
+        const { error: pricesError } = await supabase
+          .from("doctor_work_type_prices" as any)
+          .insert(priceEntries);
+
+        if (pricesError) {
+          console.error("Error adding work type prices:", pricesError);
+          // لا نرمي خطأ هنا لأن الطبيب تم إضافته بنجاح
+        }
+      }
+
+      return doctorData as Doctor;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["doctors"] });
+      queryClient.invalidateQueries({ queryKey: ["doctor_work_type_prices"] });
       toast({
         title: "تم إضافة الطبيب بنجاح",
-        description: "تم حفظ بيانات الطبيب في النظام",
+        description: "تم حفظ بيانات الطبيب وأسعار أنواع العمل في النظام",
       });
     },
     onError: (error) => {

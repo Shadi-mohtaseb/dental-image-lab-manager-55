@@ -17,30 +17,28 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useAddExpense } from "@/hooks/useExpenses";
-import { useExpenseTypesData } from "@/components/expense-types/useExpenseTypesData";
-import { Receipt } from "lucide-react";
+import { Plus } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const formSchema = z.object({
-  item_name: z.string().min(2, "اسم المنتج مطلوب"),
+  description: z.string().min(1, "وصف المصروف مطلوب"),
+  total_amount: z.preprocess(
+    (val) => (val === "" ? undefined : Number(val)),
+    z.number({ invalid_type_error: "يرجى إدخال المبلغ" }).min(0, "المبلغ يجب أن يكون أكبر من صفر")
+  ),
+  purchase_date: z.string().min(1, "تاريخ الشراء مطلوب"),
   expense_type_id: z.string().min(1, "نوع المصروف مطلوب"),
-  description: z.string().optional(),
-  quantity: z.number().min(1, "الكمية يجب أن تكون 1 على الأقل"),
-  unit_price: z.number().min(0, "السعر يجب أن يكون موجباً"),
-  purchase_date: z.string(),
-  notes: z.string().optional(),
+  quantity: z.preprocess(
+    (val) => (val === "" ? 1 : Number(val)),
+    z.number().min(1, "الكمية يجب أن تكون أكبر من صفر").optional()
+  ),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -48,36 +46,43 @@ type FormData = z.infer<typeof formSchema>;
 export function AddExpenseDialog() {
   const [open, setOpen] = useState(false);
   const addExpense = useAddExpense();
-  const { expenseTypes, isLoading: typesLoading } = useExpenseTypesData();
+
+  // جلب أنواع المصاريف
+  const { data: expenseTypes = [] } = useQuery({
+    queryKey: ["expense_types"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("expense_types" as any)
+        .select("*")
+        .order("name");
+      if (error) throw error;
+      return data || [];
+    },
+  });
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      item_name: "",
-      expense_type_id: "",
       description: "",
-      quantity: 1,
-      unit_price: 0,
+      total_amount: 0,
       purchase_date: new Date().toISOString().split('T')[0],
-      notes: "",
+      expense_type_id: "",
+      quantity: 1,
     },
   });
 
   const selectedExpenseType = form.watch("expense_type_id");
-  const selectedType = expenseTypes.find(type => type.id === selectedExpenseType);
-  const showQuantityField = selectedType?.name === "مادة";
+  const selectedType = expenseTypes.find((type: any) => type.id === selectedExpenseType);
+  const isMaterial = selectedType?.name === "مادة";
 
   const onSubmit = async (data: FormData) => {
     try {
-      const totalAmount = data.quantity * data.unit_price;
       await addExpense.mutateAsync({
-        item_name: data.item_name,
-        description: data.description || null,
-        quantity: data.quantity,
-        unit_price: data.unit_price,
-        total_amount: totalAmount,
+        description: data.description,
+        total_amount: data.total_amount,
         purchase_date: data.purchase_date,
-        notes: data.notes || null,
+        expense_type_id: data.expense_type_id,
+        quantity: isMaterial ? data.quantity : 1,
       });
       form.reset();
       setOpen(false);
@@ -89,8 +94,8 @@ export function AddExpenseDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-purple-600 hover:bg-purple-700">
-          <Receipt className="w-4 h-4 mr-2" />
+        <Button className="bg-red-600 hover:bg-red-700">
+          <Plus className="w-4 h-4 mr-2" />
           إضافة مصروف جديد
         </Button>
       </DialogTrigger>
@@ -98,48 +103,29 @@ export function AddExpenseDialog() {
         <DialogHeader>
           <DialogTitle>إضافة مصروف جديد</DialogTitle>
           <DialogDescription>
-            أدخل تفاصيل المصروف لإضافته إلى النظام
+            أدخل تفاصيل المصروف الجديد
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
-              name="item_name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>اسم المنتج *</FormLabel>
-                  <FormControl>
-                    <Input placeholder="مواد طبية" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
               name="expense_type_id"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>نوع المصروف *</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="اختر نوع المصروف" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {typesLoading ? (
-                        <SelectItem value="" disabled>جاري التحميل...</SelectItem>
-                      ) : expenseTypes.length === 0 ? (
-                        <SelectItem value="" disabled>لا توجد أنواع مصروفات</SelectItem>
-                      ) : (
-                        expenseTypes.map((type: any) => (
-                          <SelectItem key={type.id} value={type.id}>
-                            {type.name}
-                          </SelectItem>
-                        ))
-                      )}
+                      {expenseTypes.map((type: any) => (
+                        <SelectItem key={type.id} value={type.id}>
+                          {type.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -151,55 +137,42 @@ export function AddExpenseDialog() {
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>الوصف</FormLabel>
+                  <FormLabel>وصف المصروف *</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="وصف المنتج" {...field} />
+                    <Input placeholder="مثال: أدوات مكتبية" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <div className="grid grid-cols-2 gap-4">
-              {showQuantityField && (
-                <FormField
-                  control={form.control}
-                  name="quantity"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>الكمية *</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="number" 
-                          min="1"
-                          {...field}
-                          onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
+            {isMaterial && (
               <FormField
                 control={form.control}
-                name="unit_price"
+                name="quantity"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>السعر للوحدة *</FormLabel>
+                    <FormLabel>الكمية</FormLabel>
                     <FormControl>
-                      <Input 
-                        type="number" 
-                        min="0" 
-                        step="0.01"
-                        {...field}
-                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                      />
+                      <Input type="number" min={1} placeholder="1" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-            </div>
+            )}
+            <FormField
+              control={form.control}
+              name="total_amount"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>المبلغ الإجمالي (شيكل) *</FormLabel>
+                  <FormControl>
+                    <Input type="number" min={0} step={0.01} placeholder="0" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="purchase_date"
@@ -213,20 +186,7 @@ export function AddExpenseDialog() {
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="notes"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>ملاحظات</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder="ملاحظات إضافية" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="flex justify-end space-x-2 gap-2">
+            <div className="flex justify-end space-x-2">
               <Button
                 type="button"
                 variant="outline"
