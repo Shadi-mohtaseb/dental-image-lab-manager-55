@@ -2,6 +2,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { useCreateDoctorWorkTypePricesForNewWorkType } from "@/hooks/useDoctorWorkTypePrices";
 
 export const useWorkTypesData = () => {
   const query = useQuery({
@@ -25,6 +26,7 @@ export const useWorkTypesData = () => {
 
 export const useAddWorkType = () => {
   const queryClient = useQueryClient();
+  const createPrices = useCreateDoctorWorkTypePricesForNewWorkType();
   
   return useMutation({
     mutationFn: async (name: string) => {
@@ -34,11 +36,15 @@ export const useAddWorkType = () => {
         .select()
         .single();
       if (error) throw error;
+      
+      // إنشاء أسعار افتراضية للأطباء
+      await createPrices.mutateAsync(data.id);
+      
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["work_types"] });
-      toast({ title: "تم إضافة نوع العمل بنجاح" });
+      toast({ title: "تم إضافة نوع العمل بنجاح مع ربطه بجميع الأطباء" });
     },
     onError: () => {
       toast({ title: "حدث خطأ أثناء إضافة نوع العمل", variant: "destructive" });

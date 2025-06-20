@@ -14,8 +14,7 @@ export const useExpenses = () => {
       const { data, error } = await supabase
         .from("expenses")
         .select(`
-          *,
-          expense_type:expense_types(name)
+          *
         `)
         .order("purchase_date", { ascending: false });
       
@@ -84,7 +83,6 @@ export const useDeleteExpense = () => {
   });
 };
 
-// جديد: تحديث المصروف
 export const useUpdateExpense = () => {
   const queryClient = useQueryClient();
   return useMutation({

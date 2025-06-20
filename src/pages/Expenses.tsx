@@ -10,12 +10,14 @@ import { useExpenses, useDeleteExpense } from "@/hooks/useExpenses";
 import { AddExpenseDialog } from "@/components/AddExpenseDialog";
 import { EditExpenseDialog } from "@/components/EditExpenseDialog";
 import { ExpenseTypesDialog } from "@/components/expense-types/ExpenseTypesDialog";
+import { useExpenseTypesData } from "@/components/expense-types/useExpenseTypesData";
 
 const Expenses = () => {
   const {
     data: expenses = [],
     isLoading
   } = useExpenses();
+  const { expenseTypes } = useExpenseTypesData();
   const deleteExpense = useDeleteExpense();
   const [searchTerm, setSearchTerm] = useState("");
   const [editExpenseOpen, setEditExpenseOpen] = useState(false);
@@ -36,6 +38,11 @@ const Expenses = () => {
   const filteredExpenses = expenses.filter(expense => 
     expense.item_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const getExpenseTypeName = (expenseId: string) => {
+    const type = expenseTypes.find(t => t.id === expenseId);
+    return type?.name || "عام";
+  };
   
   if (isLoading) {
     return (
@@ -120,12 +127,12 @@ const Expenses = () => {
                     <TableCell className="font-semibold">{expense.item_name}</TableCell>
                     <TableCell>
                       <Badge variant="outline">
-                        {expense.expense_type?.name || "عام"}
+                        عام
                       </Badge>
                     </TableCell>
                     <TableCell>{Number(expense.unit_price).toFixed(2)} ₪</TableCell>
                     <TableCell>
-                      <Badge variant="outline">{expense.quantity}</Badge>
+                      <Badge variant="outline">{expense.quantity || 1}</Badge>
                     </TableCell>
                     <TableCell className="font-semibold text-primary">
                       {Number(expense.total_amount).toFixed(2)} ₪

@@ -63,12 +63,15 @@ export function AddExpenseDialog() {
     },
   });
 
+  const selectedExpenseType = form.watch("expense_type_id");
+  const selectedType = expenseTypes.find(type => type.id === selectedExpenseType);
+  const showQuantityField = selectedType?.name === "مادة";
+
   const onSubmit = async (data: FormData) => {
     try {
       const totalAmount = data.quantity * data.unit_price;
       await addExpense.mutateAsync({
         item_name: data.item_name,
-        expense_type_id: data.expense_type_id,
         description: data.description || null,
         quantity: data.quantity,
         unit_price: data.unit_price,
@@ -157,24 +160,26 @@ export function AddExpenseDialog() {
               )}
             />
             <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="quantity"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>الكمية *</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        min="1"
-                        {...field}
-                        onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {showQuantityField && (
+                <FormField
+                  control={form.control}
+                  name="quantity"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>الكمية *</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          min="1"
+                          {...field}
+                          onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
               <FormField
                 control={form.control}
                 name="unit_price"
