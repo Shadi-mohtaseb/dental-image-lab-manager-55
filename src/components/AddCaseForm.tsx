@@ -1,3 +1,4 @@
+
 import {
   Form,
   FormControl,
@@ -22,6 +23,9 @@ import { ToothNumberField } from "@/components/form/add-case/ToothNumberField";
 import { NotesField } from "@/components/form/add-case/NotesField";
 import { PriceField } from "@/components/form/add-case/PriceField";
 import { SubmissionAndDeliveryDatesFields } from "@/components/form/add-case/SubmissionAndDeliveryDatesFields";
+import { useDoctorWorkTypePrices } from "@/hooks/useDoctorWorkTypePrices";
+import { useWorkTypesData } from "@/components/work-types/useWorkTypesData";
+import { Input } from "@/components/ui/input";
 
 import { CalendarIcon } from "lucide-react";
 import {
@@ -32,7 +36,6 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 
-const workTypes = ["زيركون", "مؤقت"] as const;
 const caseStatuses = [
   "قيد التنفيذ",
   "تجهيز العمل",
@@ -46,7 +49,7 @@ const caseStatuses = [
 const formSchema = z.object({
   patient_name: z.string().min(2, "اسم المريض مطلوب"),
   doctor_id: z.string().min(1, "اختيار الطبيب مطلوب"),
-  work_type: z.enum(workTypes, { required_error: "نوع العمل مطلوب" }),
+  work_type: z.string().min(1, "نوع العمل مطلوب"),
   number_of_teeth: z
     .preprocess(val => (val === "" ? undefined : Number(val)), z.number({ invalid_type_error: "يرجى إدخال عدد الأسنان" }).min(1, "يرجى إدخال عدد الأسنان").optional()),
   tooth_number: z.string().optional(),
@@ -55,6 +58,10 @@ const formSchema = z.object({
   price: z.preprocess(
     (val) => (val === "" ? undefined : Number(val)),
     z.number({ invalid_type_error: "يرجى إدخال سعر صالح" }).min(0, "يرجى إدخال السعر")
+  ),
+  work_type_price: z.preprocess(
+    (val) => (val === "" ? undefined : Number(val)),
+    z.number({ invalid_type_error: "يرجى إدخال سعر صالح" }).min(0, "سعر نوع العمل مطلوب")
   ),
   shade: z.string().optional(),
   zircon_block_type: z.string().optional(),
@@ -67,13 +74,23 @@ type FormData = z.infer<typeof formSchema>;
 export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
   const addCase = useAddCase();
   const { data: doctors = [] } = useDoctors();
+  const { data: doctorWorkTypePrices = [] } = useDoctorWorkTypePrices();
+  const { workTypes } = useWorkTypesData();
 
-  // لإيجاد السعر المناسب لنوع العمل للطبيب المختار
-  const getDoctorWorkTypePrice = (doctor: any, workType: string) => {
-    if (!doctor) return 0;
-    if (workType === "زيركون") return Number(doctor.zircon_price) || 0;
-    if (workType === "مؤقت") return Number(doctor.temp_price) || 0;
-    return 0;
+  // للحصول على سعر نوع العمل للطبيب المحدد
+  const getDoctorWorkTypePrice = (doctorId: string, workType: string) => {
+    if (!doctorId || !workType || !Array.isArray(doctorWorkTypePrices)) return 0;
+    
+    // البحث عن نوع العمل المطابق للاسم
+    const workTypeObj = workTypes?.find((wt: any) => wt.name === workType);
+    if (!workTypeObj) return 0;
+    
+    // البحث عن السعر المحدد لهذا الطبيب ونوع العمل
+    const priceRecord = doctorWorkTypePrices.find((price: any) =>
+      price.doctor_id === doctorId && price.work_type_id === workTypeObj.id
+    );
+    
+    return priceRecord?.price || 0;
   };
 
   // إعداد تاريخ اليوم كنص (YYYY-MM-DD)
@@ -84,12 +101,13 @@ export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
     defaultValues: {
       patient_name: "",
       doctor_id: "",
-      work_type: "زيركون",
+      work_type: "",
       tooth_number: "",
       number_of_teeth: undefined,
       status: "قيد التنفيذ",
       notes: "",
       price: 0,
+      work_type_price: 0,
       shade: "",
       zircon_block_type: "",
       delivery_date: "",
@@ -97,14 +115,23 @@ export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
     },
   });
 
-  // تحديث السعر عند تغيير الطبيب أو نوع العمل أو عدد الأسنان
+  // تحديث سعر نوع العمل عند تغيير الطبيب أو نوع العمل
   useEffect(() => {
     const doctorId = form.watch("doctor_id");
     const workType = form.watch("work_type");
+    
+    if (doctorId && workType) {
+      const workTypePrice = getDoctorWorkTypePrice(doctorId, workType);
+      form.setValue("work_type_price", workTypePrice);
+    }
+  }, [form.watch("doctor_id"), form.watch("work_type"), doctorWorkTypePrices, workTypes]);
+
+  // تحديث السعر الإجمالي عند تغيير سعر نوع العمل أو عدد الأسنان
+  useEffect(() => {
+    const workTypePrice = form.watch("work_type_price");
     const numberOfTeeth = form.watch("number_of_teeth");
-    if (doctorId && workType && doctors.length > 0) {
-      const doctor: any = doctors.find((d: any) => d.id === doctorId);
-      const pricePerTooth = getDoctorWorkTypePrice(doctor, workType);
+    
+    if (workTypePrice !== undefined) {
       let teethCount = 1;
       if (numberOfTeeth !== undefined && numberOfTeeth !== null) {
         const parsedTeeth = Number(numberOfTeeth);
@@ -112,18 +139,10 @@ export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
           teethCount = parsedTeeth;
         }
       }
-      const totalPrice = pricePerTooth * teethCount;
-      if (form.getValues("price") !== totalPrice) {
-        form.setValue("price", totalPrice);
-      }
+      const totalPrice = workTypePrice * teethCount;
+      form.setValue("price", totalPrice);
     }
-    // eslint-disable-next-line
-  }, [
-    form.watch("doctor_id"),
-    form.watch("work_type"),
-    form.watch("number_of_teeth"),
-    doctors,
-  ]);
+  }, [form.watch("work_type_price"), form.watch("number_of_teeth")]);
 
   const onSubmit = async (data: FormData) => {
     try {
@@ -166,6 +185,32 @@ export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
         <PatientInfoFields form={form} />
         <TeethDetailsFields form={form} />
         <ToothNumberField form={form} />
+        
+        {/* حقل سعر نوع العمل الجديد */}
+        <FormField
+          control={form.control}
+          name="work_type_price"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>سعر نوع العمل (شيكل) *</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  min={0}
+                  step={0.01}
+                  placeholder="سعر الوحدة لنوع العمل"
+                  {...field}
+                  onChange={(e) => {
+                    const value = e.target.value === "" ? 0 : Number(e.target.value);
+                    field.onChange(value);
+                  }}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
         <SubmissionAndDeliveryDatesFields form={form} />
         <StatusSelect form={form} name="status" />
         <NotesField form={form} />

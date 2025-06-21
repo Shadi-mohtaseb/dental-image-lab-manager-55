@@ -19,7 +19,7 @@ export function WorkTypeSelect({ form, name }: { form: any; name: string }) {
                 <SelectValue placeholder={isLoading ? "جاري التحميل..." : "اختر نوع العمل"} />
               </SelectTrigger>
             </FormControl>
-            <SelectContent>
+            <SelectContent className="bg-white z-50">
               {workTypes?.map((type: any) => (
                 <SelectItem key={type.id} value={type.name}>
                   {type.name}
