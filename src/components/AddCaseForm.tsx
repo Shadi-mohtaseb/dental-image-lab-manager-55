@@ -1,4 +1,3 @@
-
 import {
   Form,
   FormControl,
@@ -50,7 +49,7 @@ const caseStatuses = [
 const formSchema = z.object({
   patient_name: z.string().min(2, "اسم المريض مطلوب"),
   doctor_id: z.string().min(1, "اختيار الطبيب مطلوب"),
-  work_type: z.string().min(1, "نوع العمل مطلوب"),
+  work_type: z.string().min(1, "نوع العمل مطلوب"), // تغيير هذا من enum إلى string
   number_of_teeth: z
     .preprocess(val => (val === "" ? undefined : Number(val)), z.number({ invalid_type_error: "يرجى إدخال عدد الأسنان" }).min(1, "يرجى إدخال عدد الأسنان").optional()),
   tooth_number: z.string().optional(),
