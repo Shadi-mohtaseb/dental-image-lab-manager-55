@@ -25,6 +25,7 @@ import { useAddDoctor } from "@/hooks/useDoctors";
 import { UserPlus } from "lucide-react";
 import { useWorkTypesData } from "@/components/work-types/useWorkTypesData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const formSchema = z.object({
   name: z.string().min(2, "اسم الطبيب مطلوب"),
@@ -36,6 +37,7 @@ type FormData = z.infer<typeof formSchema>;
 
 export function AddDoctorDialog() {
   const [open, setOpen] = useState(false);
+  const [selectedWorkType, setSelectedWorkType] = useState<string>("");
   const addDoctor = useAddDoctor();
   const { workTypes, isLoading: loadingWorkTypes } = useWorkTypesData();
 
@@ -70,10 +72,27 @@ export function AddDoctorDialog() {
         workTypePrices: data.workTypePrices,
       });
       form.reset();
+      setSelectedWorkType("");
       setOpen(false);
     } catch (error) {
       console.error("Error adding doctor:", error);
     }
+  };
+
+  const handleWorkTypeSelect = (workTypeId: string) => {
+    setSelectedWorkType(workTypeId);
+  };
+
+  const getCurrentWorkTypePrice = (workTypeId: string): number => {
+    return form.watch("workTypePrices")[workTypeId] || 0;
+  };
+
+  const updateWorkTypePrice = (workTypeId: string, price: number) => {
+    const currentPrices = form.getValues("workTypePrices");
+    form.setValue("workTypePrices", {
+      ...currentPrices,
+      [workTypeId]: price
+    });
   };
 
   if (loadingWorkTypes) {
@@ -138,29 +157,56 @@ export function AddDoctorDialog() {
                 <CardTitle className="text-lg">أسعار أنواع العمل</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {workTypes.map((workType: any) => (
-                  <FormField
-                    key={workType.id}
-                    control={form.control}
-                    name={`workTypePrices.${workType.id}`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{workType.name} (شيكل)</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="number" 
-                            min={0} 
-                            step={0.01} 
-                            placeholder="0"
-                            {...field}
-                            onChange={(e) => field.onChange(Number(e.target.value) || 0)}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                ))}
+                {/* قائمة منسدلة لاختيار نوع العمل */}
+                <div>
+                  <FormLabel>اختر نوع العمل لتعديل سعره</FormLabel>
+                  <Select value={selectedWorkType} onValueChange={handleWorkTypeSelect}>
+                    <SelectTrigger className="bg-white">
+                      <SelectValue placeholder="اختر نوع العمل" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white z-50">
+                      {workTypes.map((workType: any) => (
+                        <SelectItem key={workType.id} value={workType.id}>
+                          {workType.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* عرض حقل السعر للنوع المحدد */}
+                {selectedWorkType && (
+                  <div className="border rounded-lg p-4 bg-gray-50">
+                    <FormLabel className="text-base font-medium">
+                      سعر {workTypes.find((wt: any) => wt.id === selectedWorkType)?.name} (شيكل)
+                    </FormLabel>
+                    <Input
+                      type="number"
+                      min={0}
+                      step={0.01}
+                      placeholder="0"
+                      value={getCurrentWorkTypePrice(selectedWorkType)}
+                      onChange={(e) => updateWorkTypePrice(selectedWorkType, Number(e.target.value) || 0)}
+                      className="mt-2"
+                    />
+                  </div>
+                )}
+
+                {/* عرض جميع الأسعار المحددة */}
+                <div className="space-y-2">
+                  <FormLabel className="text-sm font-medium text-gray-600">ملخص الأسعار المحددة:</FormLabel>
+                  <div className="grid grid-cols-1 gap-2 max-h-32 overflow-y-auto">
+                    {workTypes.map((workType: any) => {
+                      const price = getCurrentWorkTypePrice(workType.id);
+                      return (
+                        <div key={workType.id} className="flex justify-between items-center text-sm p-2 bg-white rounded border">
+                          <span>{workType.name}</span>
+                          <span className="font-bold text-green-600">{price} شيكل</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
               </CardContent>
             </Card>
 
@@ -168,7 +214,10 @@ export function AddDoctorDialog() {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => setOpen(false)}
+                onClick={() => {
+                  setOpen(false);
+                  setSelectedWorkType("");
+                }}
               >
                 إلغاء
               </Button>
