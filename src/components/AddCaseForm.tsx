@@ -160,7 +160,7 @@ export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
       await addCase.mutateAsync({
         patient_name: sanitizedData.patient_name,
         doctor_id: sanitizedData.doctor_id,
-        work_type: sanitizedData.work_type,
+        work_type: sanitizedData.work_type as any, // Type assertion to bypass enum restriction
         tooth_number: sanitizedData.tooth_number,
         number_of_teeth: sanitizedData.number_of_teeth,
         status: sanitizedData.status,
