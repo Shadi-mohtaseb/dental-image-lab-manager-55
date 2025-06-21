@@ -15,7 +15,6 @@ import { Button } from "@/components/ui/button";
 import { useDoctors } from "@/hooks/useDoctors";
 import { useEffect } from "react";
 import { format } from "date-fns";
-// إعادة استيراد المكونات المساعدة بشكل صحيح
 import { PatientInfoFields } from "@/components/form/add-case/PatientInfoFields";
 import { TeethDetailsFields } from "@/components/form/add-case/TeethDetailsFields";
 import { ToothNumberField } from "@/components/form/add-case/ToothNumberField";
@@ -26,16 +25,6 @@ import { useDoctorWorkTypePrices } from "@/hooks/useDoctorWorkTypePrices";
 import { useWorkTypesData } from "@/components/work-types/useWorkTypesData";
 import { Input } from "@/components/ui/input";
 
-import { CalendarIcon } from "lucide-react";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { cn } from "@/lib/utils";
-
-// إزالة caseStatuses المحفوظ مسبقاً وجعله ديناميكي
 const caseStatuses = [
   "قيد التنفيذ",
   "تجهيز العمل",
@@ -49,7 +38,7 @@ const caseStatuses = [
 const formSchema = z.object({
   patient_name: z.string().min(2, "اسم المريض مطلوب"),
   doctor_id: z.string().min(1, "اختيار الطبيب مطلوب"),
-  work_type: z.string().min(1, "نوع العمل مطلوب"), // تغيير هذا من enum إلى string
+  work_type: z.string().min(1, "نوع العمل مطلوب"),
   number_of_teeth: z
     .preprocess(val => (val === "" ? undefined : Number(val)), z.number({ invalid_type_error: "يرجى إدخال عدد الأسنان" }).min(1, "يرجى إدخال عدد الأسنان").optional()),
   tooth_number: z.string().optional(),
@@ -77,15 +66,12 @@ export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
   const { data: doctorWorkTypePrices = [] } = useDoctorWorkTypePrices();
   const { workTypes } = useWorkTypesData();
 
-  // للحصول على سعر نوع العمل للطبيب المحدد
   const getDoctorWorkTypePrice = (doctorId: string, workType: string) => {
     if (!doctorId || !workType || !Array.isArray(doctorWorkTypePrices)) return 0;
     
-    // البحث عن نوع العمل المطابق للاسم
     const workTypeObj = workTypes?.find((wt: any) => wt.name === workType);
     if (!workTypeObj) return 0;
     
-    // البحث عن السعر المحدد لهذا الطبيب ونوع العمل
     const priceRecord = doctorWorkTypePrices.find((price: any) =>
       price.doctor_id === doctorId && price.work_type_id === workTypeObj.id
     );
@@ -93,7 +79,6 @@ export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
     return priceRecord?.price || 0;
   };
 
-  // إعداد تاريخ اليوم كنص (YYYY-MM-DD)
   const todayStr = format(new Date(), "yyyy-MM-dd");
 
   const form = useForm<FormData>({
@@ -115,7 +100,6 @@ export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
     },
   });
 
-  // تحديث سعر نوع العمل عند تغيير الطبيب أو نوع العمل
   useEffect(() => {
     const doctorId = form.watch("doctor_id");
     const workType = form.watch("work_type");
@@ -126,7 +110,6 @@ export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
     }
   }, [form.watch("doctor_id"), form.watch("work_type"), doctorWorkTypePrices, workTypes]);
 
-  // تحديث السعر الإجمالي عند تغيير سعر نوع العمل أو عدد الأسنان
   useEffect(() => {
     const workTypePrice = form.watch("work_type_price");
     const numberOfTeeth = form.watch("number_of_teeth");
@@ -186,7 +169,6 @@ export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
         <TeethDetailsFields form={form} />
         <ToothNumberField form={form} />
         
-        {/* حقل سعر نوع العمل */}
         <FormField
           control={form.control}
           name="work_type_price"

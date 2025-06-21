@@ -15,8 +15,11 @@ export function WorkTypesSection() {
           <Briefcase className="w-5 h-5" />
           إدارة أنواع العمل
         </CardTitle>
+        <p className="text-sm text-gray-600">
+          إضافة وتعديل وحذف أنواع العمل مع تحديد أسعار خاصة لكل طبيب
+        </p>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-6">
         <AddWorkTypeForm />
         <WorkTypesList workTypes={workTypes} isLoading={isLoading} />
       </CardContent>

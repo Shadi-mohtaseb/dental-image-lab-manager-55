@@ -1,25 +1,12 @@
 
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { DoctorSelect } from "../DoctorSelect";
+import { WorkTypeSelect } from "../WorkTypeSelect";
 
 export function PatientInfoFields({ form }: { form: any }) {
   return (
-    <>
-      <FormField
-        control={form.control}
-        name="patient_name"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>اسم المريض *</FormLabel>
-            <FormControl>
-              <Input placeholder="محمد أحمد" {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       <DoctorSelect form={form} name="doctor_id" />
-    </>
+      <WorkTypeSelect form={form} name="work_type" />
+    </div>
   );
 }
