@@ -67,8 +67,6 @@ export function AddDoctorDialog() {
       await addDoctor.mutateAsync({
         name: data.name,
         phone: data.phone ?? "",
-        zircon_price: 0, // قيمة مؤقتة للتوافق مع النظام القديم
-        temp_price: 0, // قيمة مؤقتة للتوافق مع النظام القديم
         workTypePrices: data.workTypePrices,
       });
       form.reset();
