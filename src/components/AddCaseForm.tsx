@@ -1,4 +1,3 @@
-
 import {
   Form,
   FormControl,
@@ -36,6 +35,7 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 
+// إزالة caseStatuses المحفوظ مسبقاً وجعله ديناميكي
 const caseStatuses = [
   "قيد التنفيذ",
   "تجهيز العمل",
@@ -160,7 +160,7 @@ export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
       await addCase.mutateAsync({
         patient_name: sanitizedData.patient_name,
         doctor_id: sanitizedData.doctor_id,
-        work_type: sanitizedData.work_type as any, // Type assertion to bypass enum restriction
+        work_type: sanitizedData.work_type,
         tooth_number: sanitizedData.tooth_number,
         number_of_teeth: sanitizedData.number_of_teeth,
         status: sanitizedData.status,
@@ -186,7 +186,7 @@ export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
         <TeethDetailsFields form={form} />
         <ToothNumberField form={form} />
         
-        {/* حقل سعر نوع العمل الجديد */}
+        {/* حقل سعر نوع العمل */}
         <FormField
           control={form.control}
           name="work_type_price"

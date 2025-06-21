@@ -4,7 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useDoctors } from "@/hooks/useDoctors";
 
 export function DoctorSelect({ form, name }: { form: any; name: string }) {
-  const { data: doctors = [] } = useDoctors();
+  const { data: doctors = [], isLoading } = useDoctors();
 
   return (
     <FormField
@@ -13,17 +13,14 @@ export function DoctorSelect({ form, name }: { form: any; name: string }) {
       render={({ field }: any) => (
         <FormItem>
           <FormLabel>الطبيب *</FormLabel>
-          <Select
-            onValueChange={field.onChange}
-            value={field.value}
-          >
+          <Select onValueChange={field.onChange} value={field.value} disabled={isLoading}>
             <FormControl>
               <SelectTrigger>
-                <SelectValue placeholder="اختر الطبيب" />
+                <SelectValue placeholder={isLoading ? "جاري التحميل..." : "اختر الطبيب"} />
               </SelectTrigger>
             </FormControl>
-            <SelectContent>
-              {doctors.map((doctor: any) => (
+            <SelectContent className="bg-white z-50">
+              {doctors?.map((doctor: any) => (
                 <SelectItem key={doctor.id} value={doctor.id}>
                   {doctor.name}
                 </SelectItem>

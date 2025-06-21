@@ -16,8 +16,6 @@ export type Doctor = {
 
 export type DoctorInsert = {
   name: string;
-  zircon_price: number;
-  temp_price: number;
   phone?: string | null;
   workTypePrices?: Record<string, number>;
 };
@@ -51,14 +49,14 @@ export const useAddDoctor = () => {
 
   return useMutation({
     mutationFn: async (doctor: DoctorInsert) => {
-      // إضافة الطبيب أولاً
+      // إضافة الطبيب أولاً مع قيم افتراضية للحقول القديمة
       const { data: doctorData, error: doctorError } = await supabase
         .from("doctors")
         .insert({
           name: doctor.name,
           phone: doctor.phone,
-          zircon_price: doctor.zircon_price,
-          temp_price: doctor.temp_price,
+          zircon_price: 0, // قيمة افتراضية للتوافق مع النظام القديم
+          temp_price: 0, // قيمة افتراضية للتوافق مع النظام القديم
         })
         .select("id, name, zircon_price, temp_price, phone, created_at, updated_at")
         .single();
@@ -79,7 +77,6 @@ export const useAddDoctor = () => {
 
         if (pricesError) {
           console.error("Error adding work type prices:", pricesError);
-          // لا نرمي خطأ هنا لأن الطبيب تم إضافته بنجاح
         }
       }
 
@@ -118,9 +115,9 @@ export const useUpdateDoctor = () => {
     }: { id: string; name: string; zircon_price: number; temp_price: number; phone?: string | null }) => {
       const { data, error } = await supabase
         .from("doctors")
-        .update({ name, zircon_price, temp_price, phone }) // مررنا phone
+        .update({ name, zircon_price, temp_price, phone })
         .eq("id", id)
-        .select("id, name, zircon_price, temp_price, phone, created_at, updated_at") // أضفنا phone
+        .select("id, name, zircon_price, temp_price, phone, created_at, updated_at")
         .single();
       if (error) throw error;
       return data as Doctor;
@@ -172,4 +169,3 @@ export const useDeleteDoctor = () => {
     },
   });
 };
-
