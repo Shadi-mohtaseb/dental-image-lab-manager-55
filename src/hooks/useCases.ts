@@ -1,12 +1,28 @@
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Tables, TablesInsert } from "@/integrations/supabase/types";
+import { Tables } from "@/integrations/supabase/types";
 import { toast } from "@/hooks/use-toast";
 
 export type Case = Tables<"cases"> & {
   doctor?: Tables<"doctors">;
 };
-export type CaseInsert = TablesInsert<"cases">;
+
+// Create a custom type for case insertion that uses string for work_type
+export type CaseInsert = {
+  patient_name: string;
+  doctor_id: string;
+  work_type: string; // Changed from enum to string
+  tooth_number?: string | null;
+  number_of_teeth?: number | null;
+  status: string;
+  notes?: string | null;
+  price: number;
+  shade?: string | null;
+  zircon_block_type?: string | null;
+  delivery_date?: string | null;
+  submission_date: string;
+};
 
 export const useCases = () => {
   return useQuery({
@@ -30,7 +46,7 @@ export const useAddCase = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (caseData: Omit<TablesInsert<"cases">, "case_number" | "id" | "created_at" | "updated_at">) => {
+    mutationFn: async (caseData: Omit<CaseInsert, "case_number" | "id" | "created_at" | "updated_at">) => {
       // يجب توفير case_number عشوائي حاليًا، لأنه مطلوب في الجدول
       const case_number = Math.random().toString(36).substr(2, 9) + Date.now().toString();
       const withCaseNumber = { ...caseData, case_number };
