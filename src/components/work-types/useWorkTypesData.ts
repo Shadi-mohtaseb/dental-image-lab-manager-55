@@ -2,14 +2,14 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
-import { useCreateDoctorWorkTypePricesForNewWorkType } from "@/hooks/useDoctorWorkTypePrices";
+import { useCreateDoctorWorkTypePricesForNewWorkType } from "@/hooks/useCreateDoctorWorkTypePricesForNewWorkType";
 
 export const useWorkTypesData = () => {
   const query = useQuery({
     queryKey: ["work_types"],
     queryFn: async () => {
       console.log("Fetching work types...");
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("work_types")
         .select("*")
         .order("name");
@@ -37,7 +37,7 @@ export const useAddWorkType = () => {
     mutationFn: async (name: string) => {
       console.log("Starting to add work type:", name);
       
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("work_types")
         .insert({ name })
         .select()
@@ -58,6 +58,7 @@ export const useAddWorkType = () => {
           console.log("Default prices created successfully");
         } catch (priceError) {
           console.error("Error creating default prices:", priceError);
+          // لا نرمي الخطأ هنا لأن نوع العمل تم إضافته بنجاح
         }
       }
       
