@@ -3,13 +3,14 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
-// تعريف واجهة الطبيب مع الحقول الجديدة
+// تعريف واجهة الطبيب بدون الحقول القديمة
 export type Doctor = {
   id: string;
   name: string;
-  zircon_price: number;
-  temp_price: number;
   phone?: string | null;
+  email?: string | null;
+  address?: string | null;
+  specialty?: string | null;
   created_at?: string;
   updated_at?: string;
 };
@@ -27,15 +28,16 @@ export const useDoctors = () => {
     queryFn: async (): Promise<Doctor[]> => {
       const { data, error } = await supabase
         .from("doctors")
-        .select("id, name, zircon_price, temp_price, phone, created_at, updated_at")
+        .select("id, name, phone, email, address, specialty, created_at, updated_at")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return (data as any[] ?? []).map((row) => ({
         id: row.id,
         name: row.name,
-        zircon_price: Number(row.zircon_price) || 0,
-        temp_price: Number(row.temp_price) || 0,
         phone: row.phone ?? "",
+        email: row.email ?? "",
+        address: row.address ?? "",
+        specialty: row.specialty ?? "",
         created_at: row.created_at,
         updated_at: row.updated_at,
       }));
@@ -49,16 +51,14 @@ export const useAddDoctor = () => {
 
   return useMutation({
     mutationFn: async (doctor: DoctorInsert) => {
-      // إضافة الطبيب أولاً مع قيم افتراضية للحقول القديمة
+      // إضافة الطبيب أولاً
       const { data: doctorData, error: doctorError } = await supabase
         .from("doctors")
         .insert({
           name: doctor.name,
           phone: doctor.phone,
-          zircon_price: 0, // قيمة افتراضية للتوافق مع النظام القديم
-          temp_price: 0, // قيمة افتراضية للتوافق مع النظام القديم
         })
-        .select("id, name, zircon_price, temp_price, phone, created_at, updated_at")
+        .select("id, name, phone, email, address, specialty, created_at, updated_at")
         .single();
       
       if (doctorError) throw doctorError;
@@ -109,15 +109,13 @@ export const useUpdateDoctor = () => {
     mutationFn: async ({
       id,
       name,
-      zircon_price,
-      temp_price,
       phone,
-    }: { id: string; name: string; zircon_price: number; temp_price: number; phone?: string | null }) => {
+    }: { id: string; name: string; phone?: string | null }) => {
       const { data, error } = await supabase
         .from("doctors")
-        .update({ name, zircon_price, temp_price, phone })
+        .update({ name, phone })
         .eq("id", id)
-        .select("id, name, zircon_price, temp_price, phone, created_at, updated_at")
+        .select("id, name, phone, email, address, specialty, created_at, updated_at")
         .single();
       if (error) throw error;
       return data as Doctor;

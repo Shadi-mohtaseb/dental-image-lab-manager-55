@@ -5,8 +5,6 @@ interface Doctor {
   name: string;
   phone?: string | null;
   email?: string | null;
-  zircon_price: number;
-  temp_price: number;
   address?: string | null;
   specialty?: string | null;
   casesLength: number;
@@ -29,12 +27,6 @@ export function DoctorInfoCard({ doctor }: { doctor: Doctor }) {
           </div>
           <div className="mb-2 text-gray-700">
             <span className="font-semibold">البريد الإلكتروني:</span> {doctor.email || "-"}
-          </div>
-          <div className="mb-2 text-gray-700">
-            <span className="font-semibold">السعر الزيركون:</span> {doctor.zircon_price} شيكل
-          </div>
-          <div className="mb-2 text-gray-700">
-            <span className="font-semibold">السعر المؤقت:</span> {doctor.temp_price} شيكل
           </div>
           <div className="mb-2 text-gray-700">
             <span className="font-semibold">العنوان:</span> {doctor.address || "-"}

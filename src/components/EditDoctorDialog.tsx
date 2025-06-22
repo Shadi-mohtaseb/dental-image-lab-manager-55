@@ -53,8 +53,6 @@ export function EditDoctorDialog({
         id: doctor.id,
         name: data.name,
         phone: data.phone ?? "",
-        zircon_price: 0, // قيمة افتراضية للتوافق مع النظام
-        temp_price: 0, // قيمة افتراضية للتوافق مع النظام
       });
       setOpen(false);
     } catch (error) {

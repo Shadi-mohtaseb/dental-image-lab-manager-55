@@ -5,11 +5,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
-import { useEffect, useState } from "react";
-import { Badge } from "@/components/ui/badge";
 import { DoctorInfoCard } from "@/components/doctors-details/DoctorInfoCard";
 import { DoctorCasesTable } from "@/components/doctors-details/DoctorCasesTable";
 import { DoctorTransactionsTable } from "@/components/doctors-details/DoctorTransactionsTable";
+import { DoctorWorkTypePricesSection } from "@/components/doctors/DoctorWorkTypePricesSection";
 
 const DoctorDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -73,9 +72,7 @@ const DoctorDetails = () => {
     return sum;
   }, 0);
 
-  // ======== إصلاح حسابات المستحق والمدفوع والدين الطبيب =========
-
-  // إجمالي المستحق من الحالات (وليس من معاملات doctor_transactions فقط!)
+  // إجمالي المستحق من الحالات
   const totalDue = cases.reduce((sum: number, c: any) => sum + (Number(c.price) || 0), 0);
 
   // المدفوع للطبيب = مجموع كل المعاملات من نوع "دفعة"
@@ -113,6 +110,9 @@ const DoctorDetails = () => {
         casesLength: cases.length,
         totalTeeth
       }} />
+
+      {/* أسعار أنواع العمل للطبيب */}
+      {id && <DoctorWorkTypePricesSection doctorId={id} />}
 
       {/* جدول الدفعات */}
       <Card>
