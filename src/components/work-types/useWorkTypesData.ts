@@ -8,6 +8,7 @@ export const useWorkTypesData = () => {
   const query = useQuery({
     queryKey: ["work_types"],
     queryFn: async () => {
+      console.log("Fetching work types...");
       const { data, error } = await (supabase as any)
         .from("work_types")
         .select("*")
@@ -16,6 +17,7 @@ export const useWorkTypesData = () => {
         console.error("Error fetching work types:", error);
         return [];
       }
+      console.log("Fetched work types:", data);
       return data || [];
     },
   });
@@ -33,17 +35,27 @@ export const useAddWorkType = () => {
   
   return useMutation({
     mutationFn: async (name: string) => {
+      console.log("Starting to add work type:", name);
+      
       const { data, error } = await (supabase as any)
         .from("work_types")
         .insert({ name })
         .select()
         .single();
-      if (error) throw error;
+        
+      if (error) {
+        console.error("Error adding work type:", error);
+        throw error;
+      }
+      
+      console.log("Work type added successfully:", data);
       
       // إنشاء أسعار افتراضية للأطباء
       if (data?.id) {
         try {
+          console.log("Creating default prices for work type:", data.id);
           await createPrices.mutateAsync(data.id);
+          console.log("Default prices created successfully");
         } catch (priceError) {
           console.error("Error creating default prices:", priceError);
         }
@@ -51,12 +63,14 @@ export const useAddWorkType = () => {
       
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log("Work type mutation successful:", data);
       queryClient.invalidateQueries({ queryKey: ["work_types"] });
       queryClient.invalidateQueries({ queryKey: ["doctor_work_type_prices"] });
       toast({ title: "تم إضافة نوع العمل بنجاح مع ربطه بجميع الأطباء" });
     },
-    onError: () => {
+    onError: (error) => {
+      console.error("Work type mutation failed:", error);
       toast({ title: "حدث خطأ أثناء إضافة نوع العمل", variant: "destructive" });
     },
   });

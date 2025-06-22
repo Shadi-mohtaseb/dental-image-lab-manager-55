@@ -11,8 +11,16 @@ export function AddWorkTypeForm() {
 
   const handleAdd = () => {
     if (newWorkType.trim()) {
+      console.log("Adding new work type:", newWorkType.trim());
       addWorkType.mutate(newWorkType.trim());
       setNewWorkType("");
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleAdd();
     }
   };
 
@@ -22,10 +30,16 @@ export function AddWorkTypeForm() {
         placeholder="اسم نوع العمل الجديد"
         value={newWorkType}
         onChange={(e) => setNewWorkType(e.target.value)}
-        onKeyDown={(e) => e.key === "Enter" && handleAdd()}
+        onKeyDown={handleKeyPress}
+        disabled={addWorkType.isPending}
       />
-      <Button onClick={handleAdd} disabled={addWorkType.isPending}>
-        <Plus className="h-4 w-4" />
+      <Button 
+        onClick={handleAdd} 
+        disabled={addWorkType.isPending || !newWorkType.trim()}
+        className="whitespace-nowrap"
+      >
+        <Plus className="h-4 w-4 ml-1" />
+        إضافة
       </Button>
     </div>
   );
