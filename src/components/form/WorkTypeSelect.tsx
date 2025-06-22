@@ -2,6 +2,7 @@
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useWorkTypesData } from "@/components/work-types/useWorkTypesData";
+import { WorkTypesManagementDialog } from "@/components/work-types/WorkTypesManagementDialog";
 
 export function WorkTypeSelect({ form, name }: { form: any; name: string }) {
   const { workTypes, isLoading } = useWorkTypesData();
@@ -12,7 +13,10 @@ export function WorkTypeSelect({ form, name }: { form: any; name: string }) {
       name={name}
       render={({ field }: any) => (
         <FormItem>
-          <FormLabel>نوع العمل *</FormLabel>
+          <FormLabel className="flex items-center justify-between">
+            نوع العمل *
+            <WorkTypesManagementDialog />
+          </FormLabel>
           <Select onValueChange={field.onChange} value={field.value} disabled={isLoading}>
             <FormControl>
               <SelectTrigger>

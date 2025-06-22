@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
@@ -10,6 +9,7 @@ export type Case = Tables<"cases"> & {
 
 // Create a custom type for case insertion that uses string for work_type
 export type CaseInsert = {
+  case_number: string;
   patient_name: string;
   doctor_id: string;
   work_type: string; // Changed from enum to string
@@ -53,7 +53,7 @@ export const useAddCase = () => {
 
       const { data, error } = await supabase
         .from("cases")
-        .insert(withCaseNumber)
+        .insert(withCaseNumber as any) // استخدام any للتغلب على مشكلة النوع المؤقت
         .select()
         .single();
       if (error) throw error;

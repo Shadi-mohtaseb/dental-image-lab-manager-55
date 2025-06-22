@@ -16,7 +16,8 @@ import { Button } from "@/components/ui/button";
 import { useDoctors } from "@/hooks/useDoctors";
 import { useEffect } from "react";
 import { format } from "date-fns";
-import { PatientInfoFields } from "@/components/form/add-case/PatientInfoFields";
+import { DoctorSelect } from "@/components/form/DoctorSelect";
+import { WorkTypeSelect } from "@/components/form/WorkTypeSelect";
 import { TeethDetailsFields } from "@/components/form/add-case/TeethDetailsFields";
 import { ToothNumberField } from "@/components/form/add-case/ToothNumberField";
 import { NotesField } from "@/components/form/add-case/NotesField";
@@ -166,8 +167,30 @@ export function AddCaseForm({ onSuccess }: { onSuccess: () => void }) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <PatientInfoFields form={form} />
-        <TeethDetailsFields form={form} />
+        {/* معلومات المريض والطبيب */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="patient_name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>اسم المريض *</FormLabel>
+                <FormControl>
+                  <Input placeholder="أدخل اسم المريض" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <DoctorSelect form={form} name="doctor_id" />
+        </div>
+
+        {/* نوع العمل وتفاصيل الأسنان */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <WorkTypeSelect form={form} name="work_type" />
+          <TeethDetailsFields form={form} />
+        </div>
+
         <ToothNumberField form={form} />
         
         <FormField
