@@ -4,9 +4,6 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 interface Doctor {
   name: string;
   phone?: string | null;
-  email?: string | null;
-  address?: string | null;
-  specialty?: string | null;
   casesLength: number;
   totalTeeth: number;
 }
@@ -24,15 +21,6 @@ export function DoctorInfoCard({ doctor }: { doctor: Doctor }) {
           </div>
           <div className="mb-2 text-gray-700">
             <span className="font-semibold">رقم الهاتف:</span> {doctor.phone || "-"}
-          </div>
-          <div className="mb-2 text-gray-700">
-            <span className="font-semibold">البريد الإلكتروني:</span> {doctor.email || "-"}
-          </div>
-          <div className="mb-2 text-gray-700">
-            <span className="font-semibold">العنوان:</span> {doctor.address || "-"}
-          </div>
-          <div className="mb-2 text-gray-700">
-            <span className="font-semibold">التخصص:</span> {doctor.specialty || "-"}
           </div>
           <div className="mb-2 text-gray-700">
             <span className="font-semibold">إجمالي عدد الحالات:</span> {doctor.casesLength}

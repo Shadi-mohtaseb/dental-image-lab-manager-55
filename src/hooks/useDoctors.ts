@@ -3,14 +3,11 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
-// تعريف واجهة الطبيب بدون الحقول القديمة
+// تعريف واجهة الطبيب بالحقول الموجودة فقط
 export type Doctor = {
   id: string;
   name: string;
   phone?: string | null;
-  email?: string | null;
-  address?: string | null;
-  specialty?: string | null;
   created_at?: string;
   updated_at?: string;
 };
@@ -28,16 +25,13 @@ export const useDoctors = () => {
     queryFn: async (): Promise<Doctor[]> => {
       const { data, error } = await supabase
         .from("doctors")
-        .select("id, name, phone, email, address, specialty, created_at, updated_at")
+        .select("id, name, phone, created_at, updated_at")
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return (data as any[] ?? []).map((row) => ({
+      return (data ?? []).map((row) => ({
         id: row.id,
         name: row.name,
         phone: row.phone ?? "",
-        email: row.email ?? "",
-        address: row.address ?? "",
-        specialty: row.specialty ?? "",
         created_at: row.created_at,
         updated_at: row.updated_at,
       }));
@@ -58,7 +52,7 @@ export const useAddDoctor = () => {
           name: doctor.name,
           phone: doctor.phone,
         })
-        .select("id, name, phone, email, address, specialty, created_at, updated_at")
+        .select("id, name, phone, created_at, updated_at")
         .single();
       
       if (doctorError) throw doctorError;
@@ -72,7 +66,7 @@ export const useAddDoctor = () => {
         }));
 
         const { error: pricesError } = await supabase
-          .from("doctor_work_type_prices" as any)
+          .from("doctor_work_type_prices")
           .insert(priceEntries);
 
         if (pricesError) {
@@ -115,7 +109,7 @@ export const useUpdateDoctor = () => {
         .from("doctors")
         .update({ name, phone })
         .eq("id", id)
-        .select("id, name, phone, email, address, specialty, created_at, updated_at")
+        .select("id, name, phone, created_at, updated_at")
         .single();
       if (error) throw error;
       return data as Doctor;

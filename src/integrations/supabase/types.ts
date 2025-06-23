@@ -9,13 +9,361 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      cases: {
+        Row: {
+          created_at: string
+          delivery_date: string | null
+          doctor_id: string | null
+          id: string
+          notes: string | null
+          patient_age: number | null
+          patient_name: string
+          patient_phone: string | null
+          price: number | null
+          shade: string | null
+          status: string | null
+          submission_date: string
+          teeth_count: number | null
+          tooth_number: string | null
+          updated_at: string
+          work_type: string
+          zircon_block_type: string | null
+        }
+        Insert: {
+          created_at?: string
+          delivery_date?: string | null
+          doctor_id?: string | null
+          id?: string
+          notes?: string | null
+          patient_age?: number | null
+          patient_name: string
+          patient_phone?: string | null
+          price?: number | null
+          shade?: string | null
+          status?: string | null
+          submission_date?: string
+          teeth_count?: number | null
+          tooth_number?: string | null
+          updated_at?: string
+          work_type: string
+          zircon_block_type?: string | null
+        }
+        Update: {
+          created_at?: string
+          delivery_date?: string | null
+          doctor_id?: string | null
+          id?: string
+          notes?: string | null
+          patient_age?: number | null
+          patient_name?: string
+          patient_phone?: string | null
+          price?: number | null
+          shade?: string | null
+          status?: string | null
+          submission_date?: string
+          teeth_count?: number | null
+          tooth_number?: string | null
+          updated_at?: string
+          work_type?: string
+          zircon_block_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cases_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_capital: {
+        Row: {
+          id: string
+          total_capital: number | null
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          total_capital?: number | null
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          total_capital?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      doctor_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          doctor_id: string
+          id: string
+          notes: string | null
+          payment_method: string | null
+          status: string | null
+          transaction_date: string
+          transaction_type: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          doctor_id: string
+          id?: string
+          notes?: string | null
+          payment_method?: string | null
+          status?: string | null
+          transaction_date: string
+          transaction_type: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          doctor_id?: string
+          id?: string
+          notes?: string | null
+          payment_method?: string | null
+          status?: string | null
+          transaction_date?: string
+          transaction_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "doctor_transactions_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      doctor_work_type_prices: {
+        Row: {
+          created_at: string
+          doctor_id: string
+          id: string
+          price: number
+          updated_at: string
+          work_type_id: string
+        }
+        Insert: {
+          created_at?: string
+          doctor_id: string
+          id?: string
+          price?: number
+          updated_at?: string
+          work_type_id: string
+        }
+        Update: {
+          created_at?: string
+          doctor_id?: string
+          id?: string
+          price?: number
+          updated_at?: string
+          work_type_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "doctor_work_type_prices_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "doctor_work_type_prices_work_type_id_fkey"
+            columns: ["work_type_id"]
+            isOneToOne: false
+            referencedRelation: "work_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      doctors: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      expenses: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          item_name: string
+          notes: string | null
+          purchase_date: string
+          quantity: number
+          total_amount: number
+          unit_price: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          item_name: string
+          notes?: string | null
+          purchase_date: string
+          quantity?: number
+          total_amount: number
+          unit_price: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          item_name?: string
+          notes?: string | null
+          purchase_date?: string
+          quantity?: number
+          total_amount?: number
+          unit_price?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      partner_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string | null
+          id: string
+          partner_id: string
+          transaction_date: string
+          transaction_source: string | null
+          transaction_type: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          partner_id: string
+          transaction_date: string
+          transaction_source?: string | null
+          transaction_type: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          partner_id?: string
+          transaction_date?: string
+          transaction_source?: string | null
+          transaction_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_transactions_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partners: {
+        Row: {
+          address: string | null
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          partnership_percentage: number | null
+          personal_balance: number | null
+          phone: string | null
+          total_amount: number | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          partnership_percentage?: number | null
+          personal_balance?: number | null
+          phone?: string | null
+          total_amount?: number | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          partnership_percentage?: number | null
+          personal_balance?: number | null
+          phone?: string | null
+          total_amount?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      work_types: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      calculate_company_capital: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      distribute_profits_to_partners: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
