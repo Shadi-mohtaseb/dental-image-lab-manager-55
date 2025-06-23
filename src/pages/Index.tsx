@@ -223,19 +223,42 @@ const Index = () => {
           <CardContent>
             <div className="space-y-4">
               {recentCases.length > 0 ? (
-                recentCases.map((caseItem) => (
-                  <div key={caseItem.id} className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                    <div>
-                      <p className="text-sm font-medium">
-                        حالة جديدة - {caseItem.work_type} - {caseItem.patient_name}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {caseItem.doctor?.name || 'غير محدد'} - رقم الحالة: {caseItem.case_number}
-                      </p>
-                    </div>
-                  </div>
-                ))
+                <div className="overflow-x-auto">
+                  <table className="min-w-full">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="px-4 py-2 text-right">رقم الحالة</th>
+                        <th className="px-4 py-2 text-right">اسم المريض</th>
+                        <th className="px-4 py-2 text-right">الطبيب</th>
+                        <th className="px-4 py-2 text-right">نوع العمل</th>
+                        <th className="px-4 py-2 text-right">التاريخ</th>
+                        <th className="px-4 py-2 text-right">الحالة</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {recentCases.map((caseItem) => (
+                        <tr key={caseItem.id} className="border-b hover:bg-gray-50">
+                          <td className="px-4 py-2">#{caseItem.id.slice(0, 8)}</td>
+                          <td className="px-4 py-2">{caseItem.patient_name}</td>
+                          <td className="px-4 py-2">{caseItem.doctor?.name || "غير محدد"}</td>
+                          <td className="px-4 py-2">{caseItem.work_type}</td>
+                          <td className="px-4 py-2">
+                            {new Date(caseItem.created_at).toLocaleDateString("ar-EG")}
+                          </td>
+                          <td className="px-4 py-2">
+                            <span className={`px-2 py-1 rounded-full text-xs ${
+                              caseItem.status === "تم التسليم" 
+                                ? "bg-green-100 text-green-800" 
+                                : "bg-yellow-100 text-yellow-800"
+                            }`}>
+                              {caseItem.status || "في الانتظار"}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               ) : (
                 <p className="text-gray-500 text-center py-4">لا توجد حالات حديثة</p>
               )}

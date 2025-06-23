@@ -21,8 +21,8 @@ export function CasesTable({
 }: CasesTableProps) {
   // دالة لإظهار السعر الإجمالي بناء على المشكلة المذكورة
   const getTotalPrice = (caseItem: any) => {
-    if (caseItem.price && caseItem.number_of_teeth && Number(caseItem.number_of_teeth) > 1 && (Number(caseItem.price) === Number(caseItem.price) / Number(caseItem.number_of_teeth) || Number(caseItem.price) < 200)) {
-      return `${Number(caseItem.price) * Number(caseItem.number_of_teeth)} ₪`;
+    if (caseItem.price && caseItem.teeth_count && Number(caseItem.teeth_count) > 1 && (Number(caseItem.price) === Number(caseItem.price) / Number(caseItem.teeth_count) || Number(caseItem.price) < 200)) {
+      return `${Number(caseItem.price) * Number(caseItem.teeth_count)} ₪`;
     }
     return caseItem.price ? `${caseItem.price} ₪` : "-";
   };
@@ -82,7 +82,7 @@ export function CasesTable({
             }) : "-"}
               </td>
               <td className="px-4 py-2">{getTotalPrice(caseItem)}</td>
-              <td className="px-4 py-2">{caseItem.number_of_teeth || "-"}</td>
+              <td className="px-4 py-2">{caseItem.teeth_count || "-"}</td>
               <td className="px-4 py-2">{caseItem.work_type || "-"}</td>
               <td className="px-4 py-2">{caseItem.shade || "-"}</td>
               <td className="px-4 py-2">{caseItem.zircon_block_type || "-"}</td>

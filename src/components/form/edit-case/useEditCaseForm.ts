@@ -11,7 +11,7 @@ type CaseForm = {
   doctor_id: string;
   work_type: string;
   tooth_number: string;
-  number_of_teeth?: number | string;
+  teeth_count?: number | string;
   price?: number | string;
   shade?: string;
   zircon_block_type?: string;
@@ -37,7 +37,7 @@ export function useEditCaseForm(
           doctor_id: caseData.doctor_id || "",
           work_type: caseData.work_type,
           tooth_number: caseData.tooth_number || "",
-          number_of_teeth: caseData.number_of_teeth ?? "",
+          teeth_count: caseData.teeth_count ?? "",
           price: caseData.price ?? "",
           shade: caseData.shade || "",
           zircon_block_type: caseData.zircon_block_type || "",
@@ -63,7 +63,7 @@ export function useEditCaseForm(
   useEffect(() => {
     if (caseData) {
       console.log("إعادة تحميل بيانات الحالة:", {
-        number_of_teeth: caseData.number_of_teeth,
+        teeth_count: caseData.teeth_count,
         price: caseData.price,
         work_type: caseData.work_type,
         doctor_id: caseData.doctor_id
@@ -74,7 +74,7 @@ export function useEditCaseForm(
         doctor_id: caseData.doctor_id || "",
         work_type: caseData.work_type || "",
         tooth_number: caseData.tooth_number || "",
-        number_of_teeth: caseData.number_of_teeth ?? "",
+        teeth_count: caseData.teeth_count ?? "",
         price: caseData.price ?? "",
         shade: caseData.shade || "",
         zircon_block_type: caseData.zircon_block_type || "",
@@ -88,19 +88,18 @@ export function useEditCaseForm(
       setTimeout(() => {
         const doctorId = caseData.doctor_id;
         const workType = caseData.work_type;
-        const numberOfTeeth = caseData.number_of_teeth;
+        const teethCount = caseData.teeth_count;
         
         console.log("فرض إعادة حساب السعر:", {
           doctorId,
           workType,
-          numberOfTeeth,
+          teethCount,
           doctorsAvailable: doctors.length > 0
         });
 
-        if (doctorId && workType && doctors.length > 0 && numberOfTeeth) {
+        if (doctorId && workType && doctors.length > 0 && teethCount) {
           const doctor: any = doctors.find((d: any) => d.id === doctorId);
           const pricePerTooth = getDoctorWorkTypePrice(doctor, workType);
-          const teethCount = Number(numberOfTeeth);
           const totalPrice = pricePerTooth * teethCount;
           
           console.log("إجبار حساب السعر:", {
@@ -121,13 +120,13 @@ export function useEditCaseForm(
   useEffect(() => {
     const doctorId = watch("doctor_id");
     const workType = watch("work_type");
-    const numberOfTeeth = watch("number_of_teeth");
+    const teethCount = watch("teeth_count");
     
     console.log("مراقبة تغيير القيم:", {
       doctorId,
       workType, 
-      numberOfTeeth,
-      numberOfTeethType: typeof numberOfTeeth,
+      teethCount,
+      teethCountType: typeof teethCount,
       doctorsLength: doctors.length
     });
     
@@ -136,22 +135,22 @@ export function useEditCaseForm(
       const pricePerTooth = getDoctorWorkTypePrice(doctor, workType);
       
       // تحويل عدد الأسنان إلى رقم صحيح
-      let teethCount = 1;
-      if (numberOfTeeth !== "" && numberOfTeeth !== null && numberOfTeeth !== undefined) {
-        const parsedTeeth = Number(numberOfTeeth);
+      let numberOfTeeth = 1;
+      if (teethCount !== "" && teethCount !== null && teethCount !== undefined) {
+        const parsedTeeth = Number(teethCount);
         if (!isNaN(parsedTeeth) && parsedTeeth > 0) {
-          teethCount = parsedTeeth;
+          numberOfTeeth = parsedTeeth;
         }
       }
       
-      const totalPrice = pricePerTooth * teethCount;
+      const totalPrice = pricePerTooth * numberOfTeeth;
       
       console.log("تفاصيل حساب السعر:", {
         doctor: doctor?.name,
         pricePerTooth,
-        teethCount,
+        numberOfTeeth,
         totalPrice,
-        calculation: `${pricePerTooth} × ${teethCount} = ${totalPrice}`,
+        calculation: `${pricePerTooth} × ${numberOfTeeth} = ${totalPrice}`,
         currentPrice: watch("price")
       });
       
@@ -161,17 +160,17 @@ export function useEditCaseForm(
         setValue("price", totalPrice);
       }
     }
-  }, [watch("doctor_id"), watch("work_type"), watch("number_of_teeth"), doctors, setValue, watch]);
+  }, [watch("doctor_id"), watch("work_type"), watch("teeth_count"), doctors, setValue, watch]);
 
   const onSubmit = async (values: any) => {
     if (!caseData) return;
     try {
-      // Convert price and number_of_teeth to numbers if they exist
+      // Convert price and teeth_count to numbers if they exist
       const payload = {
         ...values,
         id: caseData.id,
         price: values.price !== "" ? Number(values.price) : null,
-        number_of_teeth: values.number_of_teeth !== "" ? Number(values.number_of_teeth) : null,
+        teeth_count: values.teeth_count !== "" ? Number(values.teeth_count) : null,
       };
       
       console.log("إرسال البيانات المحدثة:", payload);

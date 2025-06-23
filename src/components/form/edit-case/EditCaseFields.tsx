@@ -41,7 +41,7 @@ export function EditCaseFields({ control, setValue }: EditCaseFieldsProps) {
       {/* Number of teeth */}
       <FormField
         control={control}
-        name="number_of_teeth"
+        name="teeth_count"
         render={({ field }) => (
           <FormItem>
             <FormLabel>عدد الأسنان</FormLabel>
