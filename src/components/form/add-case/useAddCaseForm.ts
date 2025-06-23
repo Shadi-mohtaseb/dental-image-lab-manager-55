@@ -22,7 +22,7 @@ const formSchema = z.object({
   patient_name: z.string().min(2, "اسم المريض مطلوب"),
   doctor_id: z.string().min(1, "اختيار الطبيب مطلوب"),
   work_type: z.string().min(1, "نوع العمل مطلوب"),
-  number_of_teeth: z
+  teeth_count: z
     .preprocess(val => (val === "" ? undefined : Number(val)), z.number({ invalid_type_error: "يرجى إدخال عدد الأسنان" }).min(1, "يرجى إدخال عدد الأسنان").optional()),
   tooth_number: z.string().optional(),
   status: z.enum(caseStatuses).default("قيد التنفيذ"),
@@ -57,7 +57,7 @@ export function useAddCaseForm(onSuccess: () => void) {
       doctor_id: "",
       work_type: "",
       tooth_number: "",
-      number_of_teeth: undefined,
+      teeth_count: undefined,
       status: "قيد التنفيذ",
       notes: "",
       price: 0,
@@ -96,7 +96,7 @@ export function useAddCaseForm(onSuccess: () => void) {
   // Update total price when work type price or number of teeth changes
   useEffect(() => {
     const workTypePrice = form.watch("work_type_price");
-    const numberOfTeeth = form.watch("number_of_teeth");
+    const numberOfTeeth = form.watch("teeth_count");
     
     if (workTypePrice !== undefined) {
       let teethCount = 1;
@@ -109,14 +109,14 @@ export function useAddCaseForm(onSuccess: () => void) {
       const totalPrice = workTypePrice * teethCount;
       form.setValue("price", totalPrice);
     }
-  }, [form.watch("work_type_price"), form.watch("number_of_teeth")]);
+  }, [form.watch("work_type_price"), form.watch("teeth_count")]);
 
   const onSubmit = async (data: FormData) => {
     try {
       const sanitizedData = {
         ...data,
         tooth_number: data.tooth_number || null,
-        number_of_teeth: data.number_of_teeth || null,
+        teeth_count: data.teeth_count || null,
         notes: data.notes || null,
         shade: data.shade || null,
         zircon_block_type: data.zircon_block_type || null,
@@ -129,7 +129,7 @@ export function useAddCaseForm(onSuccess: () => void) {
         doctor_id: sanitizedData.doctor_id,
         work_type: sanitizedData.work_type,
         tooth_number: sanitizedData.tooth_number,
-        number_of_teeth: sanitizedData.number_of_teeth,
+        teeth_count: sanitizedData.teeth_count,
         status: sanitizedData.status,
         notes: sanitizedData.notes,
         price: sanitizedData.price,
