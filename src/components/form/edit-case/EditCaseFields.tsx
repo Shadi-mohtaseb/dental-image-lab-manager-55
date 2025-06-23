@@ -51,6 +51,7 @@ export function EditCaseFields({ control, setValue }: EditCaseFieldsProps) {
                 min={1}
                 placeholder="مثال: 3"
                 {...field}
+                value={field.value || ""}
                 onChange={e => {
                   const value = e.target.value.replace(/[^0-9]/g, "");
                   field.onChange(value ? Number(value) : "");
@@ -76,6 +77,7 @@ export function EditCaseFields({ control, setValue }: EditCaseFieldsProps) {
                 step={0.01}
                 placeholder="0"
                 {...field}
+                value={field.value || ""}
                 readOnly
                 className="bg-gray-50"
               />
@@ -99,7 +101,7 @@ export function EditCaseFields({ control, setValue }: EditCaseFieldsProps) {
           <FormItem>
             <FormLabel>أرقام الأسنان</FormLabel>
             <FormControl>
-              <Input placeholder="مثال: 12 11 21" {...field} />
+              <Input placeholder="مثال: 12 11 21" {...field} value={field.value || ""} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -115,7 +117,7 @@ export function EditCaseFields({ control, setValue }: EditCaseFieldsProps) {
             <FormItem>
               <FormLabel>تاريخ التسليم *</FormLabel>
               <FormControl>
-                <Input type="date" {...field} />
+                <Input type="date" {...field} value={field.value || ""} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -128,7 +130,7 @@ export function EditCaseFields({ control, setValue }: EditCaseFieldsProps) {
             <FormItem>
               <FormLabel>تاريخ الاستلام</FormLabel>
               <FormControl>
-                <Input type="date" {...field} />
+                <Input type="date" {...field} value={field.value || ""} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -147,7 +149,7 @@ export function EditCaseFields({ control, setValue }: EditCaseFieldsProps) {
           <FormItem>
             <FormLabel>ملاحظات</FormLabel>
             <FormControl>
-              <Textarea {...field} />
+              <Textarea {...field} value={field.value || ""} />
             </FormControl>
             <FormMessage />
           </FormItem>
