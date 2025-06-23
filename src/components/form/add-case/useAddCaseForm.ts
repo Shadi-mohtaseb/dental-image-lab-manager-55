@@ -23,7 +23,7 @@ const formSchema = z.object({
   doctor_id: z.string().min(1, "اختيار الطبيب مطلوب"),
   work_type: z.string().min(1, "نوع العمل مطلوب"),
   teeth_count: z
-    .preprocess(val => (val === "" ? undefined : Number(val)), z.number({ invalid_type_error: "يرجى إدخال عدد الأسنان" }).min(1, "يرجى إدخال عدد الأسنان").optional()),
+    .preprocess(val => (val === "" || val === undefined ? undefined : Number(val)), z.number({ invalid_type_error: "يرجى إدخال عدد الأسنان" }).min(1, "يرجى إدخال عدد الأسنان").optional()),
   tooth_number: z.string().optional(),
   status: z.enum(caseStatuses).default("قيد التنفيذ"),
   notes: z.string().optional(),
@@ -84,60 +84,65 @@ export function useAddCaseForm(onSuccess: () => void) {
 
   // Update work type price when doctor or work type changes
   useEffect(() => {
-    const doctorId = form.watch("doctor_id");
-    const workType = form.watch("work_type");
+    const subscription = form.watch((value, { name }) => {
+      if (name === "doctor_id" || name === "work_type") {
+        const doctorId = value.doctor_id;
+        const workType = value.work_type;
+        
+        if (doctorId && workType) {
+          const workTypePrice = getDoctorWorkTypePrice(doctorId, workType);
+          form.setValue("work_type_price", workTypePrice);
+        }
+      }
+    });
     
-    if (doctorId && workType) {
-      const workTypePrice = getDoctorWorkTypePrice(doctorId, workType);
-      form.setValue("work_type_price", workTypePrice);
-    }
-  }, [form.watch("doctor_id"), form.watch("work_type"), doctorWorkTypePrices, workTypes]);
+    return () => subscription.unsubscribe();
+  }, [form, doctorWorkTypePrices, workTypes]);
 
   // Update total price when work type price or number of teeth changes
   useEffect(() => {
-    const workTypePrice = form.watch("work_type_price");
-    const numberOfTeeth = form.watch("teeth_count");
-    
-    if (workTypePrice !== undefined) {
-      let teethCount = 1;
-      if (numberOfTeeth !== undefined && numberOfTeeth !== null) {
-        const parsedTeeth = Number(numberOfTeeth);
-        if (!isNaN(parsedTeeth) && parsedTeeth > 0) {
-          teethCount = parsedTeeth;
+    const subscription = form.watch((value, { name }) => {
+      if (name === "work_type_price" || name === "teeth_count") {
+        const workTypePrice = value.work_type_price;
+        const numberOfTeeth = value.teeth_count;
+        
+        if (workTypePrice !== undefined && workTypePrice > 0) {
+          let teethCount = 1;
+          if (numberOfTeeth !== undefined && numberOfTeeth !== null) {
+            const parsedTeeth = Number(numberOfTeeth);
+            if (!isNaN(parsedTeeth) && parsedTeeth > 0) {
+              teethCount = parsedTeeth;
+            }
+          }
+          const totalPrice = workTypePrice * teethCount;
+          form.setValue("price", totalPrice);
         }
       }
-      const totalPrice = workTypePrice * teethCount;
-      form.setValue("price", totalPrice);
-    }
-  }, [form.watch("work_type_price"), form.watch("teeth_count")]);
+    });
+    
+    return () => subscription.unsubscribe();
+  }, [form]);
 
   const onSubmit = async (data: FormData) => {
     try {
+      console.log("Submitting case data:", data);
+      
       const sanitizedData = {
-        ...data,
+        patient_name: data.patient_name,
+        doctor_id: data.doctor_id,
+        work_type: data.work_type,
         tooth_number: data.tooth_number || null,
         teeth_count: data.teeth_count || null,
+        status: data.status,
         notes: data.notes || null,
+        price: data.price,
         shade: data.shade || null,
         zircon_block_type: data.zircon_block_type || null,
         delivery_date: data.delivery_date || null,
         submission_date: data.submission_date,
       };
 
-      await addCase.mutateAsync({
-        patient_name: sanitizedData.patient_name,
-        doctor_id: sanitizedData.doctor_id,
-        work_type: sanitizedData.work_type,
-        tooth_number: sanitizedData.tooth_number,
-        teeth_count: sanitizedData.teeth_count,
-        status: sanitizedData.status,
-        notes: sanitizedData.notes,
-        price: sanitizedData.price,
-        shade: sanitizedData.shade,
-        zircon_block_type: sanitizedData.zircon_block_type,
-        delivery_date: sanitizedData.delivery_date,
-        submission_date: sanitizedData.submission_date,
-      });
+      await addCase.mutateAsync(sanitizedData);
       
       form.reset();
       form.setValue("submission_date", todayStr);

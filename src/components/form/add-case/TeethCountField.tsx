@@ -6,7 +6,7 @@ export function TeethCountField({ form }: { form: any }) {
   return (
     <FormField
       control={form.control}
-      name="number_of_teeth"
+      name="teeth_count"
       render={({ field }) => (
         <FormItem>
           <FormLabel>عدد الأسنان</FormLabel>
@@ -20,7 +20,7 @@ export function TeethCountField({ form }: { form: any }) {
               onChange={e => {
                 // فقط أرقام موجبة
                 const value = e.target.value.replace(/[^0-9]/g, "");
-                field.onChange(value ? Number(value) : "");
+                field.onChange(value ? Number(value) : undefined);
               }}
             />
           </FormControl>
