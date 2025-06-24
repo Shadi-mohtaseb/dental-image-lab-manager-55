@@ -18,28 +18,32 @@ export const DoctorPDFDateRangePicker: React.FC<DoctorPDFDateRangePickerProps> =
   onToDateChange,
   disabled,
 }) => (
-  <div className="flex flex-col gap-3">
+  <div className="flex flex-col gap-4 max-h-[500px] overflow-y-auto">
     <div className="flex flex-col gap-2">
       <label className="font-medium text-right mr-1">من تاريخ:</label>
-      <Calendar
-        mode="single"
-        selected={fromDate}
-        onSelect={onFromDateChange}
-        className="p-3 pointer-events-auto"
-        locale={ar}
-        disabled={disabled}
-      />
+      <div className="border rounded-lg">
+        <Calendar
+          mode="single"
+          selected={fromDate}
+          onSelect={onFromDateChange}
+          className="p-2 pointer-events-auto"
+          locale={ar}
+          disabled={disabled}
+        />
+      </div>
     </div>
     <div className="flex flex-col gap-2">
       <label className="font-medium text-right mr-1">إلى تاريخ:</label>
-      <Calendar
-        mode="single"
-        selected={toDate}
-        onSelect={onToDateChange}
-        className="p-3 pointer-events-auto"
-        locale={ar}
-        disabled={disabled}
-      />
+      <div className="border rounded-lg">
+        <Calendar
+          mode="single"
+          selected={toDate}
+          onSelect={onToDateChange}
+          className="p-2 pointer-events-auto"
+          locale={ar}
+          disabled={disabled}
+        />
+      </div>
     </div>
   </div>
 );

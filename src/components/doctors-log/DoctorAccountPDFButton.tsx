@@ -60,7 +60,7 @@ export const DoctorAccountPDFButton: React.FC<Props> = ({
           <Printer className="ml-1" /> طباعة
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[330px] pointer-events-auto" align="end" sideOffset={6}>
+      <PopoverContent className="w-[400px] max-h-[600px] pointer-events-auto" align="end" sideOffset={6}>
         <DoctorPDFDateRangePicker
           fromDate={fromDate}
           toDate={toDate}
