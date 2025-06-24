@@ -44,10 +44,17 @@ export const DoctorAccountPDFButton: React.FC<Props> = ({
       });
       return;
     }
+
+    // إضافة معرف الطبيب لكل حالة لضمان وصول البيانات
+    const casesWithDoctorId = doctorCases.map(c => ({
+      ...c,
+      doctor_id: doctorId
+    }));
+
     printHTML({
       doctorName,
       summary,
-      doctorCases,
+      doctorCases: casesWithDoctorId,
       fromDate,
       toDate,
     });

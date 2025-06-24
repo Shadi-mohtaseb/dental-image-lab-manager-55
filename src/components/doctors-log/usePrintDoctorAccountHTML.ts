@@ -17,7 +17,7 @@ interface PrintArgs {
 }
 
 export function usePrintDoctorAccountHTML() {
-  const printHTML = ({
+  const printHTML = async ({
     doctorName,
     summary,
     doctorCases,
@@ -35,6 +35,72 @@ export function usePrintDoctorAccountHTML() {
         return true;
       });
     }
+
+    // جلب الدفعات للطبيب من قاعدة البيانات
+    const { supabase } = await import("@/integrations/supabase/client");
+    let doctorPayments: any[] = [];
+    
+    try {
+      const { data: paymentsData, error } = await supabase
+        .from("doctor_transactions")
+        .select("*")
+        .eq("doctor_id", doctorCases[0]?.doctor_id)
+        .eq("transaction_type", "دفعة");
+
+      if (!error && paymentsData) {
+        doctorPayments = paymentsData;
+      }
+    } catch (error) {
+      console.error("خطأ في جلب الدفعات:", error);
+    }
+
+    // فلترة الدفعات حسب الفترة المحددة
+    let filteredPayments = doctorPayments;
+    if (fromDate || toDate) {
+      filteredPayments = doctorPayments.filter((payment: any) => {
+        const paymentDate = new Date(payment.transaction_date);
+        if (fromDate && paymentDate < new Date(fromDate.setHours(0, 0, 0, 0))) return false;
+        if (toDate && paymentDate > new Date(toDate.setHours(23, 59, 59, 999))) return false;
+        return true;
+      });
+    }
+
+    // حساب البيانات المالية للفترة المحددة
+    const periodTotalDue = filteredCases.reduce((sum: number, c: any) => sum + (Number(c.price) || 0), 0);
+    const periodTotalPaid = filteredPayments.reduce((sum: number, p: any) => sum + (Number(p.amount) || 0), 0);
+    const periodNetAmount = periodTotalDue - periodTotalPaid;
+
+    // حساب عدد الأسنان المعالجة في الفترة
+    const periodTeethCount = filteredCases.reduce((total: number, c: any) => {
+      if (c?.number_of_teeth && Number(c.number_of_teeth) > 0) {
+        return total + Number(c.number_of_teeth);
+      } else if (c?.tooth_number) {
+        return total + c.tooth_number.split(" ").filter(Boolean).length;
+      }
+      return total;
+    }, 0);
+
+    // حساب الدين السابق (ما قبل الفترة المحددة)
+    let previousDebt = 0;
+    if (fromDate) {
+      const casesBeforePeriod = (doctorCases || []).filter((c: any) => {
+        if (!c?.submission_date) return false;
+        const submissionDate = new Date(c.submission_date);
+        return submissionDate < new Date(fromDate.setHours(0, 0, 0, 0));
+      });
+      
+      const paymentsBeforePeriod = doctorPayments.filter((payment: any) => {
+        const paymentDate = new Date(payment.transaction_date);
+        return paymentDate < new Date(fromDate.setHours(0, 0, 0, 0));
+      });
+
+      const totalDueBeforePeriod = casesBeforePeriod.reduce((sum: number, c: any) => sum + (Number(c.price) || 0), 0);
+      const totalPaidBeforePeriod = paymentsBeforePeriod.reduce((sum: number, p: any) => sum + (Number(p.amount) || 0), 0);
+      previousDebt = totalDueBeforePeriod - totalPaidBeforePeriod;
+    }
+
+    // إجمالي صافي المبلغ والدين السابق
+    const totalNetAmountWithPreviousDebt = periodNetAmount + previousDebt;
 
     // فتح نافذة جديدة للطباعة
     const printWindow = window.open("", "_blank", "width=900,height=900,scrollbars=yes") as Window;
@@ -75,22 +141,39 @@ export function usePrintDoctorAccountHTML() {
       }
     ).join("");
 
+    // بيانات الدفعات
+    const paymentRows = filteredPayments.map((payment: any) => {
+      const paymentDate = new Date(payment.transaction_date).toLocaleDateString("ar-EG");
+      const checkCashDate = payment.check_cash_date ? new Date(payment.check_cash_date).toLocaleDateString("ar-EG") : "";
+      return `
+        <tr>
+          <td>${paymentDate}</td>
+          <td>${Number(payment.amount).toLocaleString()}</td>
+          <td>${payment.payment_method ?? ""}</td>
+          <td>${checkCashDate}</td>
+          <td>${payment.notes ?? ""}</td>
+        </tr>
+      `;
+    }).join("");
+
     const style = `
       <style>
         body { font-family: "Cairo", Arial, sans-serif; direction: rtl; background: #f4f7fc; color: #233266; }
         h1 { text-align: center; font-size: 2.1rem; margin-top: 1.5rem; }
         h2 { color: #233266; font-size: 1.2rem; margin-bottom:0 }
+        h3 { color: #233266; font-size: 1.1rem; margin: 20px 0 10px; }
         .summary { 
           background: #e8edf9; margin: 24px auto 15px; border-radius: 13px;
           width: 85%; padding: 16px; box-shadow:0 2px 8px #e0e6f9;
-          display: flex; gap: 60px; justify-content: space-between; font-size:1.07rem;
+          display: grid; grid-template-columns: 1fr 1fr; gap: 20px; font-size:1.07rem;
         }
         .summary-item { }
         .summary-label { color: #314295; margin-left: 7px;}
         .summary-value { font-weight: bold;}
         .red { color: #e73737 }
+        .green { color: #28a745 }
         .table-container { width: 98%; margin: 1rem auto 2rem; }
-        table { border-collapse: collapse; width: 100%; background: white;}
+        table { border-collapse: collapse; width: 100%; background: white; margin-bottom: 20px;}
         th, td { border: 1px solid #bbbde6; padding: 7px 3px; text-align: right;}
         th { background: #283366; color: white; }
         tfoot td { background: #eff2fb; color:#314295; font-weight: bold; }
@@ -125,11 +208,16 @@ export function usePrintDoctorAccountHTML() {
         <h2 style="text-align:center;font-weight:600;margin-bottom:18px;">${doctorName}</h2>
         ${dateRange}
         <div class="summary">
-          <div class="summary-item"><span class="summary-label">إجمالي المستحق:</span> <span class="summary-value">${(summary.totalDue ?? 0).toLocaleString()} ₪</span></div>
-          <div class="summary-item"><span class="summary-label">المدفوع:</span> <span class="summary-value">${(summary.totalPaid ?? 0).toLocaleString()} ₪</span></div>
-          <div class="summary-item"><span class="summary-label">المتبقي (دين):</span> <span class="summary-value red">${(summary.remaining ?? 0).toLocaleString()} ₪</span></div>
+          <div class="summary-item"><span class="summary-label">إجمالي المستحق خلال الفترة:</span> <span class="summary-value">${periodTotalDue.toLocaleString()} ₪</span></div>
+          <div class="summary-item"><span class="summary-label">إجمالي المدفوع خلال الفترة:</span> <span class="summary-value green">${periodTotalPaid.toLocaleString()} ₪</span></div>
+          <div class="summary-item"><span class="summary-label">عدد الأسنان المعالجة:</span> <span class="summary-value">${periodTeethCount} سن</span></div>
+          <div class="summary-item"><span class="summary-label">صافي المبلغ للفترة:</span> <span class="summary-value">${periodNetAmount.toLocaleString()} ₪</span></div>
+          <div class="summary-item"><span class="summary-label">الدين السابق:</span> <span class="summary-value red">${previousDebt.toLocaleString()} ₪</span></div>
+          <div class="summary-item"><span class="summary-label">إجمالي صافي المبلغ والدين:</span> <span class="summary-value red">${totalNetAmountWithPreviousDebt.toLocaleString()} ₪</span></div>
         </div>
+        
         <div class="table-container">
+          <h3>تفاصيل الحالات خلال الفترة</h3>
           <table>
             <thead>
               <tr>
@@ -148,6 +236,25 @@ export function usePrintDoctorAccountHTML() {
             </tbody>
           </table>
         </div>
+
+        <div class="table-container">
+          <h3>الدفعات خلال الفترة</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>تاريخ الدفع</th>
+                <th>المبلغ</th>
+                <th>طريقة الدفع</th>
+                <th>تاريخ صرف الشيك</th>
+                <th>ملاحظات</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${paymentRows || "<tr><td colspan='5' style='text-align:center;color:#aaa'>لا توجد دفعات لعرضها</td></tr>"}
+            </tbody>
+          </table>
+        </div>
+        
         <div class="footer">
           تم إنشاء كشف الحساب بواسطة نظام إدارة المختبر - ${new Date().toLocaleDateString("ar-EG")}
         </div>
