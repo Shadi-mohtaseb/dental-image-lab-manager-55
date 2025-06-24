@@ -22,11 +22,14 @@ export default function DoctorPaymentDialog({ open, onOpenChange, doctor }: Doct
       amount: "",
       payment_method: "نقدي",
       transaction_date: new Date().toISOString().slice(0, 10),
+      check_cash_date: "",
       notes: "",
     },
   });
-  const { register, handleSubmit, reset } = form;
+  const { register, handleSubmit, reset, watch } = form;
   const [loading, setLoading] = useState(false);
+
+  const paymentMethod = watch("payment_method");
 
   const onSubmit = async (values: any) => {
     if (!doctor?.id) {
@@ -34,7 +37,7 @@ export default function DoctorPaymentDialog({ open, onOpenChange, doctor }: Doct
       return;
     }
     setLoading(true);
-    const { amount, payment_method, transaction_date, notes } = values;
+    const { amount, payment_method, transaction_date, check_cash_date, notes } = values;
     // تحويل doctor_id إلى uuid صريح إذا كان موجوداً
     const doctor_id =
       typeof doctor.id === "string" && doctor.id.length === 36
@@ -47,6 +50,7 @@ export default function DoctorPaymentDialog({ open, onOpenChange, doctor }: Doct
       payment_method,
       transaction_type: "دفعة",
       transaction_date,
+      check_cash_date: payment_method === "شيك" && check_cash_date ? check_cash_date : null,
       notes,
       status: "مؤكد",
     });
@@ -87,6 +91,12 @@ export default function DoctorPaymentDialog({ open, onOpenChange, doctor }: Doct
             <Label>تاريخ الدفع</Label>
             <Input type="date" {...register("transaction_date")} />
           </div>
+          {paymentMethod === "شيك" && (
+            <div>
+              <Label>تاريخ صرف الشيك</Label>
+              <Input type="date" {...register("check_cash_date")} />
+            </div>
+          )}
           <div>
             <Label>ملاحظات</Label>
             <Input type="text" {...register("notes")} />

@@ -33,11 +33,14 @@ export default function AddPaymentDialog({ open: controlledOpen, onOpenChange: c
       amount: "",
       payment_method: "نقدي",
       transaction_date: new Date().toISOString().slice(0, 10),
+      check_cash_date: "",
       notes: "",
     },
   });
   const { register, handleSubmit, reset, watch, setValue } = form;
   const [loading, setLoading] = useState(false);
+
+  const paymentMethod = watch("payment_method");
 
   const onSubmit = async (values: any) => {
     if (!values.doctor_id) {
@@ -45,7 +48,7 @@ export default function AddPaymentDialog({ open: controlledOpen, onOpenChange: c
       return;
     }
     setLoading(true);
-    const { amount, payment_method, transaction_date, notes, doctor_id } = values;
+    const { amount, payment_method, transaction_date, check_cash_date, notes, doctor_id } = values;
 
     const { error } = await supabase.from("doctor_transactions").insert({
       doctor_id,
@@ -53,6 +56,7 @@ export default function AddPaymentDialog({ open: controlledOpen, onOpenChange: c
       payment_method,
       transaction_type: "دفعة",
       transaction_date,
+      check_cash_date: payment_method === "شيك" && check_cash_date ? check_cash_date : null,
       notes,
       status: "مؤكد",
     });
@@ -121,6 +125,12 @@ export default function AddPaymentDialog({ open: controlledOpen, onOpenChange: c
             <Label>تاريخ الدفع</Label>
             <Input type="date" {...register("transaction_date")} />
           </div>
+          {paymentMethod === "شيك" && (
+            <div>
+              <Label>تاريخ صرف الشيك</Label>
+              <Input type="date" {...register("check_cash_date")} />
+            </div>
+          )}
           <div>
             <Label>ملاحظات</Label>
             <Input type="text" {...register("notes")} />

@@ -22,17 +22,21 @@ export default function EditDoctorPaymentDialog({ open, onOpenChange, payment }:
       amount: "",
       payment_method: "",
       transaction_date: "",
+      check_cash_date: "",
       notes: "",
     },
   });
-  const { register, handleSubmit, reset, setValue } = form;
+  const { register, handleSubmit, reset, setValue, watch } = form;
   const [loading, setLoading] = useState(false);
+
+  const paymentMethod = watch("payment_method");
 
   useEffect(() => {
     if (payment && open) {
       setValue("amount", payment.amount?.toString() || "");
       setValue("payment_method", payment.payment_method || "نقدي");
       setValue("transaction_date", payment.transaction_date || new Date().toISOString().slice(0, 10));
+      setValue("check_cash_date", payment.check_cash_date || "");
       setValue("notes", payment.notes || "");
     }
   }, [payment, open, setValue]);
@@ -41,11 +45,12 @@ export default function EditDoctorPaymentDialog({ open, onOpenChange, payment }:
 
   const onSubmit = async (values: any) => {
     setLoading(true);
-    const { amount, payment_method, transaction_date, notes } = values;
+    const { amount, payment_method, transaction_date, check_cash_date, notes } = values;
     const { error } = await supabase.from("doctor_transactions").update({
       amount: Number(amount),
       payment_method,
       transaction_date,
+      check_cash_date: payment_method === "شيك" && check_cash_date ? check_cash_date : null,
       notes
     }).eq("id", payment.id);
     setLoading(false);
@@ -84,6 +89,12 @@ export default function EditDoctorPaymentDialog({ open, onOpenChange, payment }:
             <Label>تاريخ الدفع</Label>
             <Input type="date" {...register("transaction_date")} />
           </div>
+          {paymentMethod === "شيك" && (
+            <div>
+              <Label>تاريخ صرف الشيك</Label>
+              <Input type="date" {...register("check_cash_date")} />
+            </div>
+          )}
           <div>
             <Label>ملاحظات</Label>
             <Input type="text" {...register("notes")} />

@@ -107,13 +107,14 @@ export default function DoctorsPaymentsLogTable() {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="text-right w-[180px]">اسم الطبيب</TableHead>
-            <TableHead className="text-center w-[110px]">المبلغ</TableHead>
-            <TableHead className="text-center w-[130px]">طريقة الدفع</TableHead>
-            <TableHead className="text-center w-[130px]">التاريخ</TableHead>
-            <TableHead className="text-center w-[160px]">ملاحظات</TableHead>
-            <TableHead className="text-center w-[120px]">واتساب</TableHead>
-            <TableHead className="text-center w-[180px]">إجراءات</TableHead>
+            <TableHead className="text-right w-[150px]">اسم الطبيب</TableHead>
+            <TableHead className="text-center w-[100px]">المبلغ</TableHead>
+            <TableHead className="text-center w-[110px]">طريقة الدفع</TableHead>
+            <TableHead className="text-center w-[110px]">التاريخ</TableHead>
+            <TableHead className="text-center w-[120px]">تاريخ صرف الشيك</TableHead>
+            <TableHead className="text-center w-[130px]">ملاحظات</TableHead>
+            <TableHead className="text-center w-[100px]">واتساب</TableHead>
+            <TableHead className="text-center w-[150px]">إجراءات</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -140,15 +141,23 @@ export default function DoctorsPaymentsLogTable() {
 
             return (
               <TableRow key={payment.id}>
-                <TableCell className="text-right w-[180px]">{doctor?.name ?? "-"}</TableCell>
-                <TableCell className="text-center w-[110px]">{Number(payment.amount).toFixed(2)} ₪</TableCell>
-                <TableCell className="text-center w-[130px]">
+                <TableCell className="text-right w-[150px]">{doctor?.name ?? "-"}</TableCell>
+                <TableCell className="text-center w-[100px]">{Number(payment.amount).toFixed(2)} ₪</TableCell>
+                <TableCell className="text-center w-[110px]">
                   <Badge>{payment.payment_method ?? "بدون"}</Badge>
                 </TableCell>
-                <TableCell className="text-center w-[130px]">{payment.transaction_date}</TableCell>
-                <TableCell className="text-center w-[160px]">{payment.notes || "-"}</TableCell>
-                {/* عمود واتساب */}
+                <TableCell className="text-center w-[110px]">{payment.transaction_date}</TableCell>
                 <TableCell className="text-center w-[120px]">
+                  {payment.payment_method === "شيك" && payment.check_cash_date 
+                    ? payment.check_cash_date 
+                    : payment.payment_method === "شيك" 
+                      ? <span className="text-gray-400">غير محدد</span>
+                      : "-"
+                  }
+                </TableCell>
+                <TableCell className="text-center w-[130px]">{payment.notes || "-"}</TableCell>
+                {/* عمود واتساب */}
+                <TableCell className="text-center w-[100px]">
                   {hasPhone && waLink ? (
                     <a
                       href={waLink}
@@ -169,7 +178,7 @@ export default function DoctorsPaymentsLogTable() {
                     <span className="text-gray-300">—</span>
                   )}
                 </TableCell>
-                <TableCell className="text-center w-[180px]">
+                <TableCell className="text-center w-[150px]">
                   <div className="flex gap-2 justify-center">
                     <Button size="sm" variant="outline"
                       onClick={() => { setSelectedPayment(payment); setEditOpen(true); }}>

@@ -98,6 +98,7 @@ export type Database = {
       doctor_transactions: {
         Row: {
           amount: number
+          check_cash_date: string | null
           created_at: string
           doctor_id: string
           id: string
@@ -110,6 +111,7 @@ export type Database = {
         }
         Insert: {
           amount: number
+          check_cash_date?: string | null
           created_at?: string
           doctor_id: string
           id?: string
@@ -122,6 +124,7 @@ export type Database = {
         }
         Update: {
           amount?: number
+          check_cash_date?: string | null
           created_at?: string
           doctor_id?: string
           id?: string
