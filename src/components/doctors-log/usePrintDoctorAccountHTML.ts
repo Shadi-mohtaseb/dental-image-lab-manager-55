@@ -1,4 +1,3 @@
-
 import { toast } from "@/hooks/use-toast";
 
 // استدع هذا الهوك لطباعة كشف حساب الطبيب كصفحة HTML منسقة للطباعة
@@ -170,7 +169,7 @@ export function usePrintDoctorAccountHTML() {
         th { background: #1e40af; color: white; font-weight: bold; }
         tbody tr:nth-child(even) { background: #f8fafc; }
         tbody tr:hover { background: #e2e8f0; }
-        .summary-table th { background: #059669; }
+        .summary-table th { background: #1e40af; }
         .summary-table .label-col { font-weight: bold; color: #064e3b; }
         .summary-table .value-col { font-weight: bold; }
         .red { color: #dc2626; }
@@ -212,6 +211,46 @@ export function usePrintDoctorAccountHTML() {
         </div>
         
         <div class="table-container">
+          <h3 style="color: #1e40af; margin-bottom: 10px;">تفاصيل الحالات خلال الفترة</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>اسم المريض</th>
+                <th>نوع العمل</th>
+                <th>اللون</th>
+                <th>المبلغ</th>
+                <th>عدد الأسنان</th>
+                <th>رقم/أرقام الأسنان</th>
+                <th>الحالة</th>
+                <th>تاريخ الاستلام</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${tableRows || "<tr><td colspan='8' style='text-align:center;color:#64748b'>لا توجد حالات لعرضها</td></tr>"}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="table-container">
+          <h3 style="color: #1e40af; margin-bottom: 10px;">الدفعات خلال الفترة</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>تاريخ الدفع</th>
+                <th>المبلغ</th>
+                <th>طريقة الدفع</th>
+                <th>تاريخ صرف الشيك</th>
+                <th>ملاحظات</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${paymentRows || "<tr><td colspan='5' style='text-align:center;color:#64748b'>لا توجد دفعات لعرضها</td></tr>"}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="table-container">
+          <h3 style="color: #1e40af; margin-bottom: 10px;">ملخص الحساب</h3>
           <table class="summary-table">
             <thead>
               <tr>
@@ -244,45 +283,6 @@ export function usePrintDoctorAccountHTML() {
                 <td class="label-col" style="color: #92400e;">إجمالي صافي المبلغ والدين</td>
                 <td class="value-col red" style="font-size: 1.1rem;">${totalNetAmountWithPreviousDebt.toLocaleString()} ₪</td>
               </tr>
-            </tbody>
-          </table>
-        </div>
-        
-        <div class="table-container">
-          <h3 style="color: #1e40af; margin-bottom: 10px;">تفاصيل الحالات خلال الفترة</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>اسم المريض</th>
-                <th>نوع العمل</th>
-                <th>اللون</th>
-                <th>المبلغ</th>
-                <th>عدد الأسنان</th>
-                <th>رقم/أرقام الأسنان</th>
-                <th>الحالة</th>
-                <th>تاريخ الاستلام</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${tableRows || "<tr><td colspan='8' style='text-align:center;color:#64748b'>لا توجد حالات لعرضها</td></tr>"}
-            </tbody>
-          </table>
-        </div>
-
-        <div class="table-container">
-          <h3 style="color: #059669; margin-bottom: 10px;">الدفعات خلال الفترة</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>تاريخ الدفع</th>
-                <th>المبلغ</th>
-                <th>طريقة الدفع</th>
-                <th>تاريخ صرف الشيك</th>
-                <th>ملاحظات</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${paymentRows || "<tr><td colspan='5' style='text-align:center;color:#64748b'>لا توجد دفعات لعرضها</td></tr>"}
             </tbody>
           </table>
         </div>
