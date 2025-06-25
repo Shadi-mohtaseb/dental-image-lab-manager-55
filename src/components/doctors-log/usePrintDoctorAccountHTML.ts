@@ -158,36 +158,36 @@ export function usePrintDoctorAccountHTML() {
 
     const style = `
       <style>
-        body { font-family: "Cairo", Arial, sans-serif; direction: rtl; background: #f4f7fc; color: #233266; }
-        h1 { text-align: center; font-size: 2.1rem; margin-top: 1.5rem; }
-        h2 { color: #233266; font-size: 1.2rem; margin-bottom:0 }
-        h3 { color: #233266; font-size: 1.1rem; margin: 20px 0 10px; }
-        .summary { 
-          background: #e8edf9; margin: 24px auto 15px; border-radius: 13px;
-          width: 85%; padding: 16px; box-shadow:0 2px 8px #e0e6f9;
-          display: grid; grid-template-columns: 1fr 1fr; gap: 20px; font-size:1.07rem;
-        }
-        .summary-item { }
-        .summary-label { color: #314295; margin-left: 7px;}
-        .summary-value { font-weight: bold;}
-        .red { color: #e73737 }
-        .green { color: #28a745 }
-        .table-container { width: 98%; margin: 1rem auto 2rem; }
-        table { border-collapse: collapse; width: 100%; background: white; margin-bottom: 20px;}
-        th, td { border: 1px solid #bbbde6; padding: 7px 3px; text-align: right;}
-        th { background: #283366; color: white; }
-        tfoot td { background: #eff2fb; color:#314295; font-weight: bold; }
-        .footer { text-align: center; color: #868ccd; font-size: 1rem; margin-top:1.4rem; }
+        body { font-family: "Cairo", Arial, sans-serif; direction: rtl; background: #f8fafc; color: #1e293b; margin: 0; padding: 20px; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .lab-name { font-size: 1.8rem; font-weight: bold; color: #0f172a; margin-bottom: 8px; }
+        .statement-title { font-size: 1.5rem; color: #334155; margin-bottom: 8px; }
+        .doctor-name { font-size: 1.3rem; font-weight: 600; color: #475569; margin-bottom: 20px; }
+        .date-range { color: #64748b; font-size: 1rem; margin-bottom: 20px; }
+        .table-container { width: 100%; margin: 20px auto; }
+        table { border-collapse: collapse; width: 100%; background: white; margin-bottom: 25px; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        th, td { border: 1px solid #e2e8f0; padding: 12px 8px; text-align: right; }
+        th { background: #1e40af; color: white; font-weight: bold; }
+        tbody tr:nth-child(even) { background: #f8fafc; }
+        tbody tr:hover { background: #e2e8f0; }
+        .summary-table th { background: #059669; }
+        .summary-table .label-col { font-weight: bold; color: #064e3b; }
+        .summary-table .value-col { font-weight: bold; }
+        .red { color: #dc2626; }
+        .green { color: #059669; }
+        .blue { color: #2563eb; }
+        .footer { text-align: center; color: #64748b; font-size: 0.9rem; margin-top: 30px; border-top: 1px solid #e2e8f0; padding-top: 20px; }
         @media print {
-          body { margin: 0; }
-          .footer { font-size: 0.9rem; color: #aaa !important;}
+          body { margin: 0; padding: 15px; }
+          .footer { font-size: 0.8rem; }
+          table { box-shadow: none; }
         }
       </style>
     `;
 
     let dateRange = "";
     if (fromDate || toDate) {
-      dateRange = `<div style="text-align:center;color:#2c4069;font-size:1rem;">
+      dateRange = `<div class="date-range">
         الفترة بناءً على <b>تاريخ الاستلام</b>: 
         ${fromDate ? fromDate.toLocaleDateString("ar-EG") : "..."} 
         - 
@@ -200,24 +200,56 @@ export function usePrintDoctorAccountHTML() {
       <head>
         <title>كشف حساب الطبيب - ${doctorName}</title>
         <meta charset="UTF-8" />
-        <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
         ${style}
       </head>
       <body>
-        <h1>كشف حساب الطبيب</h1>
-        <h2 style="text-align:center;font-weight:600;margin-bottom:18px;">${doctorName}</h2>
-        ${dateRange}
-        <div class="summary">
-          <div class="summary-item"><span class="summary-label">إجمالي المستحق خلال الفترة:</span> <span class="summary-value">${periodTotalDue.toLocaleString()} ₪</span></div>
-          <div class="summary-item"><span class="summary-label">إجمالي المدفوع خلال الفترة:</span> <span class="summary-value green">${periodTotalPaid.toLocaleString()} ₪</span></div>
-          <div class="summary-item"><span class="summary-label">عدد الأسنان المعالجة:</span> <span class="summary-value">${periodTeethCount} سن</span></div>
-          <div class="summary-item"><span class="summary-label">صافي المبلغ للفترة:</span> <span class="summary-value">${periodNetAmount.toLocaleString()} ₪</span></div>
-          <div class="summary-item"><span class="summary-label">الدين السابق:</span> <span class="summary-value red">${previousDebt.toLocaleString()} ₪</span></div>
-          <div class="summary-item"><span class="summary-label">إجمالي صافي المبلغ والدين:</span> <span class="summary-value red">${totalNetAmountWithPreviousDebt.toLocaleString()} ₪</span></div>
+        <div class="header">
+          <div class="lab-name">مختبر الأسنان الطبي</div>
+          <div class="statement-title">كشف حساب الطبيب</div>
+          <div class="doctor-name">${doctorName}</div>
+          ${dateRange}
         </div>
         
         <div class="table-container">
-          <h3>تفاصيل الحالات خلال الفترة</h3>
+          <table class="summary-table">
+            <thead>
+              <tr>
+                <th style="width: 60%;">البيان</th>
+                <th style="width: 40%;">المبلغ</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="label-col">إجمالي المستحق خلال الفترة</td>
+                <td class="value-col blue">${periodTotalDue.toLocaleString()} ₪</td>
+              </tr>
+              <tr>
+                <td class="label-col">إجمالي المدفوع خلال الفترة</td>
+                <td class="value-col green">${periodTotalPaid.toLocaleString()} ₪</td>
+              </tr>
+              <tr>
+                <td class="label-col">عدد الأسنان المعالجة</td>
+                <td class="value-col">${periodTeethCount} سن</td>
+              </tr>
+              <tr>
+                <td class="label-col">صافي المبلغ للفترة</td>
+                <td class="value-col">${periodNetAmount.toLocaleString()} ₪</td>
+              </tr>
+              <tr>
+                <td class="label-col">الدين السابق</td>
+                <td class="value-col red">${previousDebt.toLocaleString()} ₪</td>
+              </tr>
+              <tr style="background: #fef3c7; font-weight: bold;">
+                <td class="label-col" style="color: #92400e;">إجمالي صافي المبلغ والدين</td>
+                <td class="value-col red" style="font-size: 1.1rem;">${totalNetAmountWithPreviousDebt.toLocaleString()} ₪</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <div class="table-container">
+          <h3 style="color: #1e40af; margin-bottom: 10px;">تفاصيل الحالات خلال الفترة</h3>
           <table>
             <thead>
               <tr>
@@ -232,13 +264,13 @@ export function usePrintDoctorAccountHTML() {
               </tr>
             </thead>
             <tbody>
-              ${tableRows || "<tr><td colspan='8' style='text-align:center;color:#aaa'>لا توجد حالات لعرضها</td></tr>"}
+              ${tableRows || "<tr><td colspan='8' style='text-align:center;color:#64748b'>لا توجد حالات لعرضها</td></tr>"}
             </tbody>
           </table>
         </div>
 
         <div class="table-container">
-          <h3>الدفعات خلال الفترة</h3>
+          <h3 style="color: #059669; margin-bottom: 10px;">الدفعات خلال الفترة</h3>
           <table>
             <thead>
               <tr>
@@ -250,13 +282,13 @@ export function usePrintDoctorAccountHTML() {
               </tr>
             </thead>
             <tbody>
-              ${paymentRows || "<tr><td colspan='5' style='text-align:center;color:#aaa'>لا توجد دفعات لعرضها</td></tr>"}
+              ${paymentRows || "<tr><td colspan='5' style='text-align:center;color:#64748b'>لا توجد دفعات لعرضها</td></tr>"}
             </tbody>
           </table>
         </div>
         
         <div class="footer">
-          تم إنشاء كشف الحساب بواسطة نظام إدارة المختبر - ${new Date().toLocaleDateString("ar-EG")}
+          تم إنشاء كشف الحساب بواسطة نظام إدارة مختبر الأسنان الطبي - ${new Date().toLocaleDateString("ar-EG")}
         </div>
         <script>
           // طباعة تلقائية عند الفتح
