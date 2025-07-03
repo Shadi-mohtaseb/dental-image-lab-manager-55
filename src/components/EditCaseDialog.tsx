@@ -14,9 +14,9 @@ export type EditCaseDialogProps = {
 export function EditCaseDialog({ caseData, open, onOpenChange, onUpdate }: EditCaseDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="sm:max-w-[500px] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>تعديل بيانات الحالة بالكامل</DialogTitle>
+          <DialogTitle>تعديل بيانات الحالة</DialogTitle>
         </DialogHeader>
         <EditCaseForm 
           caseData={caseData}
