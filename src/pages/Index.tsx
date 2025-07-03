@@ -115,7 +115,7 @@ const Index = () => {
     },
   ];
 
-  // إجراءات سريعة - تم إزالة الخلفية من بطاقة إدارة الحسابات
+  // إجراءات سريعة - تم تحديث خلفية بطاقة إدارة الحسابات
   const quickActions = [
     {
       title: "إضافة حالة جديدة",
@@ -130,6 +130,7 @@ const Index = () => {
       icon: Users,
       action: () => navigate("/partnership-accounts"),
       color: "bg-green-500 hover:bg-green-600",
+      backgroundImage: "/lovable-uploads/0cf8c4a4-9777-4faf-a046-2d9e762d3334.png",
     },
     {
       title: "تسجيل مصروف",
