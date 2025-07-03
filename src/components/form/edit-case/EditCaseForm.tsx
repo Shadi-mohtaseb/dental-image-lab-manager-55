@@ -14,7 +14,7 @@ interface EditCaseFormProps {
 }
 
 export function EditCaseForm({ caseData, open, onUpdate, onOpenChange }: EditCaseFormProps) {
-  const { handleSubmit, control, setValue, onSubmit, isLoading } = useEditCaseForm(
+  const { handleSubmit, control, setValue, onSubmit, isLoading, recalculatePrice } = useEditCaseForm(
     caseData,
     open,
     onUpdate,
@@ -26,7 +26,11 @@ export function EditCaseForm({ caseData, open, onUpdate, onOpenChange }: EditCas
       // @ts-ignore
       onSubmit={handleSubmit(onSubmit)}
     >
-      <EditCaseFields control={control} setValue={setValue} />
+      <EditCaseFields 
+        control={control} 
+        setValue={setValue} 
+        onRecalculatePrice={recalculatePrice}
+      />
       <div className="mt-6">
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? "جاري الحفظ..." : "حفظ التغييرات"}

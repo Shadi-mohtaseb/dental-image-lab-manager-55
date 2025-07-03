@@ -4,6 +4,8 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/comp
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Calculator } from "lucide-react";
 import { DoctorSelect } from "@/components/form/DoctorSelect";
 import { WorkTypeSelect } from "@/components/form/WorkTypeSelect";
 import { ShadeSelectField } from "@/components/form/add-case/ShadeSelectField";
@@ -13,9 +15,10 @@ import { StatusSelect } from "@/components/form/StatusSelect";
 interface EditCaseFieldsProps {
   control: any;
   setValue: any;
+  onRecalculatePrice?: () => void;
 }
 
-export function EditCaseFields({ control, setValue }: EditCaseFieldsProps) {
+export function EditCaseFields({ control, setValue, onRecalculatePrice }: EditCaseFieldsProps) {
   return (
     <div className="space-y-6">
       {/* معلومات المريض الأساسية */}
@@ -111,7 +114,21 @@ export function EditCaseFields({ control, setValue }: EditCaseFieldsProps) {
             name="price"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>السعر (شيكل) - يتم حسابه تلقائياً</FormLabel>
+                <FormLabel className="flex items-center justify-between">
+                  السعر (شيكل)
+                  {onRecalculatePrice && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={onRecalculatePrice}
+                      className="flex items-center gap-2"
+                    >
+                      <Calculator className="w-4 h-4" />
+                      إعادة حساب تلقائي
+                    </Button>
+                  )}
+                </FormLabel>
                 <FormControl>
                   <Input
                     type="number"
@@ -120,8 +137,10 @@ export function EditCaseFields({ control, setValue }: EditCaseFieldsProps) {
                     placeholder="0"
                     {...field}
                     value={field.value || ""}
-                    readOnly
-                    className="bg-gray-50"
+                    onChange={e => {
+                      const value = e.target.value;
+                      field.onChange(value ? Number(value) : "");
+                    }}
                   />
                 </FormControl>
                 <FormMessage />

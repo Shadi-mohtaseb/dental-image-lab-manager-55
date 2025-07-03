@@ -59,6 +59,55 @@ export function useEditCaseForm(
     return 0;
   };
 
+  // Function to recalculate price manually
+  const recalculatePrice = () => {
+    const doctorId = watch("doctor_id");
+    const workType = watch("work_type");
+    const teethCount = watch("teeth_count");
+    
+    console.log("إعادة حساب السعر يدوياً:", {
+      doctorId,
+      workType,
+      teethCount,
+      doctorsLength: doctors.length
+    });
+
+    if (doctorId && workType && doctors.length > 0) {
+      const doctor: any = doctors.find((d: any) => d.id === doctorId);
+      const pricePerTooth = getDoctorWorkTypePrice(doctor, workType);
+      
+      let numberOfTeeth = 1;
+      if (teethCount !== "" && teethCount !== null && teethCount !== undefined) {
+        const parsedTeeth = Number(teethCount);
+        if (!isNaN(parsedTeeth) && parsedTeeth > 0) {
+          numberOfTeeth = parsedTeeth;
+        }
+      }
+      
+      const totalPrice = pricePerTooth * numberOfTeeth;
+      
+      console.log("نتيجة إعادة الحساب:", {
+        doctor: doctor?.name,
+        pricePerTooth,
+        numberOfTeeth,
+        totalPrice
+      });
+      
+      setValue("price", totalPrice);
+      
+      toast({
+        title: "تم إعادة حساب السعر",
+        description: `السعر الجديد: ${totalPrice} شيكل`,
+      });
+    } else {
+      toast({
+        title: "تعذر حساب السعر",
+        description: "تأكد من اختيار الطبيب ونوع العمل",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Reset form when case data or dialog state changes
   useEffect(() => {
     if (caseData) {
@@ -83,84 +132,8 @@ export function useEditCaseForm(
         submission_date: caseData.submission_date || "",
         delivery_date: caseData.delivery_date || "",
       });
-
-      // Force recalculate price after form reset
-      setTimeout(() => {
-        const doctorId = caseData.doctor_id;
-        const workType = caseData.work_type;
-        const teethCount = caseData.teeth_count;
-        
-        console.log("فرض إعادة حساب السعر:", {
-          doctorId,
-          workType,
-          teethCount,
-          doctorsAvailable: doctors.length > 0
-        });
-
-        if (doctorId && workType && doctors.length > 0 && teethCount) {
-          const doctor: any = doctors.find((d: any) => d.id === doctorId);
-          const pricePerTooth = getDoctorWorkTypePrice(doctor, workType);
-          const totalPrice = pricePerTooth * teethCount;
-          
-          console.log("إجبار حساب السعر:", {
-            doctor: doctor?.name,
-            pricePerTooth,
-            teethCount,
-            totalPrice,
-            calculation: `${pricePerTooth} × ${teethCount} = ${totalPrice}`
-          });
-          
-          setValue("price", totalPrice);
-        }
-      }, 100);
     }
-  }, [caseData, open, reset, doctors, setValue]);
-
-  // Auto-calculate price when doctor, work type, or number of teeth changes
-  useEffect(() => {
-    const doctorId = watch("doctor_id");
-    const workType = watch("work_type");
-    const teethCount = watch("teeth_count");
-    
-    console.log("مراقبة تغيير القيم:", {
-      doctorId,
-      workType, 
-      teethCount,
-      teethCountType: typeof teethCount,
-      doctorsLength: doctors.length
-    });
-    
-    if (doctorId && workType && doctors.length > 0) {
-      const doctor: any = doctors.find((d: any) => d.id === doctorId);
-      const pricePerTooth = getDoctorWorkTypePrice(doctor, workType);
-      
-      // تحويل عدد الأسنان إلى رقم صحيح
-      let numberOfTeeth = 1;
-      if (teethCount !== "" && teethCount !== null && teethCount !== undefined) {
-        const parsedTeeth = Number(teethCount);
-        if (!isNaN(parsedTeeth) && parsedTeeth > 0) {
-          numberOfTeeth = parsedTeeth;
-        }
-      }
-      
-      const totalPrice = pricePerTooth * numberOfTeeth;
-      
-      console.log("تفاصيل حساب السعر:", {
-        doctor: doctor?.name,
-        pricePerTooth,
-        numberOfTeeth,
-        totalPrice,
-        calculation: `${pricePerTooth} × ${numberOfTeeth} = ${totalPrice}`,
-        currentPrice: watch("price")
-      });
-      
-      // Only update if price has actually changed
-      if (watch("price") !== totalPrice) {
-        console.log("تحديث السعر من", watch("price"), "إلى", totalPrice);
-        setValue("price", totalPrice);
-      }
-    }
-  }, [watch("doctor_id"), watch("work_type"), watch("teeth_count"), doctors, setValue, watch]);
+  }, [caseData, open, reset]);
 
   const onSubmit = async (values: any) => {
     if (!caseData) return;
@@ -199,6 +172,7 @@ export function useEditCaseForm(
     setValue,
     watch,
     onSubmit,
+    recalculatePrice,
     isLoading: updateCase.isPending,
   };
 }
