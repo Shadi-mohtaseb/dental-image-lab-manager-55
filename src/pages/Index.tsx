@@ -20,9 +20,13 @@ import { useFinancialSummary } from "@/hooks/useFinancialSummary";
 import { usePartnerTransactions } from "@/hooks/usePartnerTransactions";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { AddCaseDialog } from "@/components/AddCaseDialog";
+import { useState } from "react";
 
 const Index = () => {
   const navigate = useNavigate();
+  const [addCaseDialogOpen, setAddCaseDialogOpen] = useState(false);
+  
   const { data: cases = [] } = useCases();
   const { data: doctors = [] } = useDoctors();
   const { data: expenses = [] } = useExpenses();
@@ -121,7 +125,7 @@ const Index = () => {
       title: "إضافة حالة جديدة",
       description: "تسجيل حالة جديدة للمريض",
       icon: FileText,
-      action: () => navigate("/cases"),
+      action: () => setAddCaseDialogOpen(true),
       color: "bg-blue-500 hover:bg-blue-600",
     },
     {
@@ -267,6 +271,9 @@ const Index = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Add Case Dialog */}
+      <AddCaseDialog />
     </div>
   );
 };
