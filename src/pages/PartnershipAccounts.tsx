@@ -5,6 +5,8 @@ import { usePartnerTransactions, useDeletePartnerTransaction } from "@/hooks/use
 import { useCompanyCapital } from "@/hooks/useCompanyCapital";
 import { useExpenses } from "@/hooks/useExpenses";
 import { useCases } from "@/hooks/useCases";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import PartnershipFinancialSummaryCards from "@/components/PartnershipFinancialSummaryCards";
 import PartnerActionHeaderSection from "@/components/PartnerActionHeaderSection";
@@ -30,10 +32,35 @@ export default function PartnershipAccounts() {
   const { data: cases = [] } = useCases();
   const deleteTransaction = useDeletePartnerTransaction();
 
+  // جلب معاملات الأطباء لحساب الديون
+  const { data: doctorTransactions = [] } = useQuery({
+    queryKey: ["doctor_transactions"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("doctor_transactions")
+        .select("*");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
   const totalRevenue = cases.reduce((sum, caseItem) => sum + (Number(caseItem.price) || 0), 0);
   const totalExpenses = expenses.reduce((sum, expense) => sum + Number(expense.total_amount), 0);
   const netProfit = totalRevenue - totalExpenses;
-  const totalDoctorsDebt = 0; // This would need to be calculated based on your business logic
+
+  // حساب إجمالي ديون الأطباء الصحيح
+  const totalDoctorsDebt = (() => {
+    // حساب إجمالي المبالغ المستحقة للأطباء من الحالات
+    const totalDue = cases.reduce((sum, caseItem) => sum + (Number(caseItem.price) || 0), 0);
+    
+    // حساب إجمالي المبالغ المدفوعة للأطباء
+    const totalPaid = doctorTransactions
+      .filter(t => t.transaction_type === "دفعة")
+      .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+    
+    // الديون = المستحق - المدفوع
+    return Math.max(0, totalDue - totalPaid);
+  })();
 
   const getPartnerStats = (partner: any) => {
     const withdrawals = partnerTransactions
