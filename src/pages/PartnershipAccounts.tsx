@@ -136,7 +136,8 @@ export default function PartnershipAccounts() {
       <EditPartnerTransactionDialog
         open={editTxDialogOpen}
         onOpenChange={setEditTxDialogOpen}
-        transaction={selectedTransaction}
+        partners={partners}
+        initialData={selectedTransaction}
       />
     </div>
   );
