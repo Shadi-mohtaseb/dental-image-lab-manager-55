@@ -21,20 +21,7 @@ interface Props {
   onWithdrawShare?: (partner: Partner) => void;
 }
 
-export default function PartnerCard({ partner, onWithdraw, onDelete, onWithdrawShare }: Props) {
-  // التأكد من وجود البيانات مع قيم افتراضية آمنة
-  const partnershipPercentage = Number(partner.partnership_percentage) || 0;
-  const totalAmount = Number(partner.total_amount) || 0;
-  const withdrawals = Number(partner.withdrawals) || 0;
-  const remainingShare = Number(partner.remaining_share) || Math.max(0, totalAmount - withdrawals);
-
-  console.log(`Partner ${partner.name}:`, {
-    partnership_percentage: partnershipPercentage,
-    total_amount: totalAmount,
-    withdrawals: withdrawals,
-    remaining_share: remainingShare
-  });
-
+export default function PartnerCard({ partner, /* onWithdraw,*/ onDelete, onWithdrawShare }: Props) {
   return (
     <Card className="hover:shadow-lg transition-shadow">
       <CardHeader className="pb-3">
@@ -42,43 +29,41 @@ export default function PartnerCard({ partner, onWithdraw, onDelete, onWithdrawS
           <CardTitle className="text-lg">{partner.name}</CardTitle>
           <div className="flex items-center gap-2">
             <Badge variant="secondary" className="bg-blue-100 text-blue-700">
-              {partnershipPercentage.toFixed(1)}%
+              {partner.partnership_percentage?.toFixed(1)}%
             </Badge>
             <Badge variant="outline" className="text-xs">
-              نسبة الشراكة
+              نسبة من رأس المال
             </Badge>
           </div>
         </div>
       </CardHeader>
       <CardContent>
-        <div className="space-y-3">
-          <div className="flex justify-between items-center border-b pb-2">
-            <span className="text-gray-600 font-medium">حصة من صافي الربح:</span>
-            <span className="font-bold text-green-600 text-lg">{totalAmount.toFixed(2)} ₪</span>
+        <div className="space-y-2">
+          <div className="flex justify-between border-b pb-2">
+            <span className="text-gray-600">حصة من صافي الربح:</span>
+            <span className="font-bold text-green-600">{Number(partner.total_amount).toFixed(2)} ₪</span>
           </div>
-          <div className="flex justify-between items-center text-sm">
+          <div className="flex justify-between text-sm">
             <span className="text-gray-600">المبلغ المسحوب:</span>
-            <span className="text-orange-600 font-semibold">{withdrawals.toFixed(2)} ₪</span>
+            <span className="text-orange-600">{Number(partner.withdrawals).toFixed(2)} ₪</span>
           </div>
-          <div className="flex justify-between items-center text-sm border-t pt-2">
-            <span className="text-gray-600 font-medium">المتبقي من الحصة:</span>
-            <span className="font-bold text-blue-800 text-lg">{remainingShare.toFixed(2)} ₪</span>
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-600">المتبقي من الحصة:</span>
+            <span className="font-semibold text-blue-800">{Number(partner.remaining_share).toFixed(2)} ₪</span>
           </div>
-          <div className="flex gap-2 mt-4 pt-2">
+          <div className="flex gap-2 mt-2">
             <Button
               size="sm"
               variant="outline"
-              className="text-blue-600 hover:bg-blue-50 border-blue-200 flex-1"
+              className="text-blue-600 flex-1"
               onClick={() => onWithdrawShare && onWithdrawShare(partner)}
-              disabled={remainingShare <= 0}
             >
-              <Wallet className="w-4 h-4 ml-1" /> 
-              {remainingShare > 0 ? "سحب من الحصة" : "لا يوجد رصيد"}
+              <Wallet className="w-4 h-4 ml-1" /> سحب من الربح (الحصة)
             </Button>
             <Button 
               size="sm"
               variant="outline"
-              className="text-red-600 hover:bg-red-50 border-red-200"
+              className="text-red-600"
               onClick={() => onDelete(partner.id)}
             >
               <Trash2 className="w-4 h-4" />

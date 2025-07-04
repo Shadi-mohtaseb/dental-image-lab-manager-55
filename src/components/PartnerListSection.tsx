@@ -16,15 +16,6 @@ export default function PartnerListSection({
   onWithdrawShare,
   getPartnerStats
 }: PartnerListSectionProps) {
-  // التأكد من وجود الشركاء
-  if (!partners || partners.length === 0) {
-    return (
-      <div className="text-center py-8 text-gray-500">
-        لا يوجد شركاء مضافين حتى الآن
-      </div>
-    );
-  }
-
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
       {partners.map((partner) => {
