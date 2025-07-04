@@ -64,14 +64,16 @@ export default function PartnerCard({ partner, onWithdraw, onDelete, onWithdrawS
             <span className="text-gray-600 font-medium">المتبقي من الحصة:</span>
             <span className="font-bold text-blue-800 text-lg">{remainingShare.toFixed(2)} ₪</span>
           </div>
-          <div className="flex gap-2 mt-4">
+          <div className="flex gap-2 mt-4 pt-2">
             <Button
               size="sm"
               variant="outline"
               className="text-blue-600 hover:bg-blue-50 border-blue-200 flex-1"
               onClick={() => onWithdrawShare && onWithdrawShare(partner)}
+              disabled={remainingShare <= 0}
             >
-              <Wallet className="w-4 h-4 ml-1" /> سحب من الحصة
+              <Wallet className="w-4 h-4 ml-1" /> 
+              {remainingShare > 0 ? "سحب من الحصة" : "لا يوجد رصيد"}
             </Button>
             <Button 
               size="sm"

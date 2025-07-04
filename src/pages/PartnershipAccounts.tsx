@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { usePartners } from "@/hooks/usePartners";
 import { usePartnerTransactions, useDeletePartnerTransaction } from "@/hooks/usePartnerTransactions";
-import { useCompanyCapital } from "@/hooks/useCompanyCapital";
+import { useCompanyCapital, useDistributeProfits } from "@/hooks/useCompanyCapital";
 import { useExpenses } from "@/hooks/useExpenses";
 import { useCases } from "@/hooks/useCases";
 import { useQuery } from "@tanstack/react-query";
@@ -16,6 +16,7 @@ import WithdrawFromPersonalBalanceDialog from "@/components/WithdrawFromPersonal
 import WithdrawFromShareDialog from "@/components/WithdrawFromShareDialog";
 import EditPartnerTransactionDialog from "@/components/EditPartnerTransactionDialog";
 import AutoDistributionIndicator from "@/components/AutoDistributionIndicator";
+import { useEffect } from "react";
 
 export default function PartnershipAccounts() {
   const [withdrawDialogOpen, setWithdrawDialogOpen] = useState(false);
@@ -31,6 +32,7 @@ export default function PartnershipAccounts() {
   const { data: expenses = [] } = useExpenses();
   const { data: cases = [] } = useCases();
   const deleteTransaction = useDeletePartnerTransaction();
+  const distributeProfits = useDistributeProfits();
 
   // جلب معاملات الأطباء لحساب الديون
   const { data: doctorTransactions = [] } = useQuery({
@@ -51,16 +53,28 @@ export default function PartnershipAccounts() {
   // حساب إجمالي ديون الأطباء الصحيح
   const totalDoctorsDebt = (() => {
     // حساب إجمالي المبالغ المستحقة للأطباء من الحالات
-    const totalDue = cases.reduce((sum, caseItem) => sum + (Number(caseItem.price) || 0), 0);
+    const totalDueToAllDoctors = cases.reduce((sum, caseItem) => sum + (Number(caseItem.price) || 0), 0);
     
-    // حساب إجمالي المبالغ المدفوعة للأطباء
-    const totalPaid = doctorTransactions
+    // حساب إجمالي المبالغ المدفوعة لجميع الأطباء
+    const totalPaidToAllDoctors = doctorTransactions
       .filter(t => t.transaction_type === "دفعة")
       .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
     
     // الديون = المستحق - المدفوع
-    return Math.max(0, totalDue - totalPaid);
+    return Math.max(0, totalDueToAllDoctors - totalPaidToAllDoctors);
   })();
+
+  // استدعاء توزيع الأرباح عند تحميل الصفحة إذا كان هناك صافي ربح
+  useEffect(() => {
+    if (netProfit > 0 && partners.length > 0) {
+      // التحقق من أن حصص الشركاء لم يتم توزيعها بعد
+      const partnersNeedUpdate = partners.some(p => !p.total_amount || Number(p.total_amount) === 0);
+      if (partnersNeedUpdate) {
+        console.log("توزيع الأرباح على الشركاء...");
+        distributeProfits.mutate();
+      }
+    }
+  }, [netProfit, partners.length]);
 
   const getPartnerStats = (partner: any) => {
     const withdrawals = partnerTransactions
