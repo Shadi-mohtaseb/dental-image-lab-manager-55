@@ -40,7 +40,7 @@ export default function PartnershipAccounts() {
       .filter(t => t.partner_id === partner.id && t.transaction_type === "سحب")
       .reduce((sum, t) => sum + Number(t.amount), 0);
     
-    const remaining_share = Number(partner.total_amount || 0) - withdrawals;
+    const remaining_share = Math.max(0, Number(partner.total_amount || 0) - withdrawals);
     
     return { withdrawals, remaining_share };
   };

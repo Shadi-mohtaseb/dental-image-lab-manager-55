@@ -21,7 +21,13 @@ interface Props {
   onWithdrawShare?: (partner: Partner) => void;
 }
 
-export default function PartnerCard({ partner, /* onWithdraw,*/ onDelete, onWithdrawShare }: Props) {
+export default function PartnerCard({ partner, onWithdraw, onDelete, onWithdrawShare }: Props) {
+  // التأكد من وجود البيانات مع قيم افتراضية
+  const partnershipPercentage = partner.partnership_percentage || 0;
+  const totalAmount = partner.total_amount || 0;
+  const withdrawals = partner.withdrawals || 0;
+  const remainingShare = partner.remaining_share || (totalAmount - withdrawals);
+
   return (
     <Card className="hover:shadow-lg transition-shadow">
       <CardHeader className="pb-3">
@@ -29,7 +35,7 @@ export default function PartnerCard({ partner, /* onWithdraw,*/ onDelete, onWith
           <CardTitle className="text-lg">{partner.name}</CardTitle>
           <div className="flex items-center gap-2">
             <Badge variant="secondary" className="bg-blue-100 text-blue-700">
-              {partner.partnership_percentage?.toFixed(1)}%
+              {partnershipPercentage.toFixed(1)}%
             </Badge>
             <Badge variant="outline" className="text-xs">
               نسبة من رأس المال
@@ -41,15 +47,15 @@ export default function PartnerCard({ partner, /* onWithdraw,*/ onDelete, onWith
         <div className="space-y-2">
           <div className="flex justify-between border-b pb-2">
             <span className="text-gray-600">حصة من صافي الربح:</span>
-            <span className="font-bold text-green-600">{Number(partner.total_amount).toFixed(2)} ₪</span>
+            <span className="font-bold text-green-600">{totalAmount.toFixed(2)} ₪</span>
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-gray-600">المبلغ المسحوب:</span>
-            <span className="text-orange-600">{Number(partner.withdrawals).toFixed(2)} ₪</span>
+            <span className="text-orange-600">{withdrawals.toFixed(2)} ₪</span>
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-gray-600">المتبقي من الحصة:</span>
-            <span className="font-semibold text-blue-800">{Number(partner.remaining_share).toFixed(2)} ₪</span>
+            <span className="font-semibold text-blue-800">{remainingShare.toFixed(2)} ₪</span>
           </div>
           <div className="flex gap-2 mt-2">
             <Button
