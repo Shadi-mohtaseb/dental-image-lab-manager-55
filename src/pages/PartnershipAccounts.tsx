@@ -1,6 +1,7 @@
+
 import { useState } from "react";
 import { usePartners } from "@/hooks/usePartners";
-import { usePartnerTransactions } from "@/hooks/usePartnerTransactions";
+import { usePartnerTransactions, useDeletePartnerTransaction } from "@/hooks/usePartnerTransactions";
 import { useCompanyCapital } from "@/hooks/useCompanyCapital";
 import { useExpenses } from "@/hooks/useExpenses";
 import { useCases } from "@/hooks/useCases";
@@ -11,18 +12,23 @@ import PartnerListSection from "@/components/PartnerListSection";
 import PartnerTransactionsTableSection from "@/components/PartnerTransactionsTableSection";
 import WithdrawFromPersonalBalanceDialog from "@/components/WithdrawFromPersonalBalanceDialog";
 import WithdrawFromShareDialog from "@/components/WithdrawFromShareDialog";
+import EditPartnerTransactionDialog from "@/components/EditPartnerTransactionDialog";
 import AutoDistributionIndicator from "@/components/AutoDistributionIndicator";
 
 export default function PartnershipAccounts() {
   const [withdrawDialogOpen, setWithdrawDialogOpen] = useState(false);
   const [shareWithdrawDialogOpen, setShareWithdrawDialogOpen] = useState(false);
   const [selectedPartner, setSelectedPartner] = useState<any>(null);
+  const [showAddTransaction, setShowAddTransaction] = useState(false);
+  const [editTxDialogOpen, setEditTxDialogOpen] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
 
   const { data: partners = [] } = usePartners();
   const { data: partnerTransactions = [] } = usePartnerTransactions();
   const { data: companyCapital } = useCompanyCapital();
   const { data: expenses = [] } = useExpenses();
   const { data: cases = [] } = useCases();
+  const deleteTransaction = useDeletePartnerTransaction();
 
   const totalRevenue = cases.reduce((sum, caseItem) => sum + (Number(caseItem.price) || 0), 0);
   const totalExpenses = expenses.reduce((sum, expense) => sum + Number(expense.total_amount), 0);
@@ -67,6 +73,21 @@ export default function PartnershipAccounts() {
     }
   };
 
+  const handleEditTx = (transaction: any) => {
+    setSelectedTransaction(transaction);
+    setEditTxDialogOpen(true);
+  };
+
+  const handleDeleteTransaction = async (transactionId: string) => {
+    if (window.confirm("هل أنت متأكد من حذف هذه المعاملة؟")) {
+      try {
+        await deleteTransaction.mutateAsync(transactionId);
+      } catch (error) {
+        console.error("Error deleting transaction:", error);
+      }
+    }
+  };
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       <PartnershipFinancialSummaryCards
@@ -91,7 +112,14 @@ export default function PartnershipAccounts() {
         getPartnerStats={getPartnerStats}
       />
 
-      <PartnerTransactionsTableSection />
+      <PartnerTransactionsTableSection
+        transactions={partnerTransactions}
+        partners={partners}
+        showAddTransaction={showAddTransaction}
+        setShowAddTransaction={setShowAddTransaction}
+        handleEditTx={handleEditTx}
+        handleDeleteTransaction={handleDeleteTransaction}
+      />
 
       <WithdrawFromPersonalBalanceDialog
         open={withdrawDialogOpen}
@@ -103,6 +131,12 @@ export default function PartnershipAccounts() {
         open={shareWithdrawDialogOpen}
         onOpenChange={setShareWithdrawDialogOpen}
         partner={selectedPartner}
+      />
+
+      <EditPartnerTransactionDialog
+        open={editTxDialogOpen}
+        onOpenChange={setEditTxDialogOpen}
+        transaction={selectedTransaction}
       />
     </div>
   );
