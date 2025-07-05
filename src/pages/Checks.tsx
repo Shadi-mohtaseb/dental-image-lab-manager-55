@@ -11,10 +11,12 @@ import { toast } from "@/hooks/use-toast";
 import AddCheckDialog from "@/components/AddCheckDialog";
 import EditCheckDialog from "@/components/EditCheckDialog";
 import ViewCheckDialog from "@/components/ViewCheckDialog";
+import EditPaymentCheckDialog from "@/components/EditPaymentCheckDialog";
 
 const Checks = () => {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editPaymentDialogOpen, setEditPaymentDialogOpen] = useState(false);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [selectedCheck, setSelectedCheck] = useState(null);
 
@@ -96,7 +98,11 @@ const Checks = () => {
 
   const handleEditCheck = (check: any) => {
     setSelectedCheck(check);
-    setEditDialogOpen(true);
+    if (check.source === 'checks') {
+      setEditDialogOpen(true);
+    } else {
+      setEditPaymentDialogOpen(true);
+    }
   };
 
   const handleViewCheck = (check: any) => {
@@ -140,7 +146,12 @@ const Checks = () => {
       displayAmount: payment.amount,
       check_date: payment.transaction_date,
       receive_date: payment.check_cash_date,
-      status: payment.status || 'مؤكد'
+      status: payment.status || 'مؤكد',
+      check_number: null,
+      bank_name: null,
+      recipient_name: null,
+      front_image_url: null,
+      back_image_url: null
     }))
   ].sort((a, b) => new Date(b.displayDate).getTime() - new Date(a.displayDate).getTime());
 
@@ -296,25 +307,23 @@ const Checks = () => {
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleEditCheck(check)}
+                          className="h-8 w-8 p-0"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
                         {check.source === 'checks' && (
-                          <>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleEditCheck(check)}
-                              className="h-8 w-8 p-0"
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleDeleteCheck(check.id)}
-                              className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleDeleteCheck(check.id)}
+                            className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                         )}
                       </div>
                     </TableCell>
@@ -348,6 +357,18 @@ const Checks = () => {
         onSuccess={() => {
           refetch();
           setEditDialogOpen(false);
+          setSelectedCheck(null);
+        }}
+      />
+
+      <EditPaymentCheckDialog
+        open={editPaymentDialogOpen}
+        onOpenChange={setEditPaymentDialogOpen}
+        payment={selectedCheck}
+        doctors={doctors}
+        onSuccess={() => {
+          refetch();
+          setEditPaymentDialogOpen(false);
           setSelectedCheck(null);
         }}
       />
