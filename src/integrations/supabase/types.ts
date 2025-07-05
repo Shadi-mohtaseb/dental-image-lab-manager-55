@@ -77,6 +77,65 @@ export type Database = {
           },
         ]
       }
+      checks: {
+        Row: {
+          amount: number
+          back_image_url: string | null
+          bank_name: string | null
+          check_date: string
+          check_number: string | null
+          created_at: string
+          doctor_id: string | null
+          front_image_url: string | null
+          id: string
+          notes: string | null
+          receive_date: string | null
+          recipient_name: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          back_image_url?: string | null
+          bank_name?: string | null
+          check_date: string
+          check_number?: string | null
+          created_at?: string
+          doctor_id?: string | null
+          front_image_url?: string | null
+          id?: string
+          notes?: string | null
+          receive_date?: string | null
+          recipient_name?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          back_image_url?: string | null
+          bank_name?: string | null
+          check_date?: string
+          check_number?: string | null
+          created_at?: string
+          doctor_id?: string | null
+          front_image_url?: string | null
+          id?: string
+          notes?: string | null
+          receive_date?: string | null
+          recipient_name?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "checks_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       company_capital: {
         Row: {
           id: string

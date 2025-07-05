@@ -15,6 +15,7 @@ import Cases from "./pages/Cases";
 import CaseDetails from "./pages/CaseDetails";
 import NotFound from "./pages/NotFound";
 import Settings from "./pages/Settings";
+import Checks from "./pages/Checks";
 
 // Lazy load DoctorDetails
 const DoctorDetails = lazy(() => import("./pages/DoctorDetails"));
@@ -65,6 +66,7 @@ const App = () => (
                 <Route path="/expenses" element={<Expenses />} />
                 <Route path="/cases" element={<Cases />} />
                 <Route path="/case/:id" element={<CaseDetails />} />
+                <Route path="/checks" element={<Checks />} />
                 <Route path="/settings" element={<Settings />} />
                 {/* إعادة توجيه صفحة دفعات الأطباء إلى حسابات الأطباء */}
                 <Route path="/doctors-payments" element={<Navigate to="/doctors-accounts" replace />} />
