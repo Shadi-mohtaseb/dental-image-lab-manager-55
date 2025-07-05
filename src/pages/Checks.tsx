@@ -18,8 +18,8 @@ const Checks = () => {
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [selectedCheck, setSelectedCheck] = useState(null);
 
-  // جلب الشيكات
-  const { data: checks = [], isLoading: loadingChecks, refetch } = useQuery({
+  // جلب الشيكات من جدول checks
+  const { data: checksData = [], isLoading: loadingChecks, refetch: refetchChecks } = useQuery({
     queryKey: ["checks"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -31,6 +31,26 @@ const Checks = () => {
           )
         `)
         .order("check_date", { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
+  // جلب دفعات الشيكات من جدول doctor_transactions
+  const { data: checkPayments = [], isLoading: loadingPayments, refetch: refetchPayments } = useQuery({
+    queryKey: ["check-payments"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("doctor_transactions")
+        .select(`
+          *,
+          doctors (
+            name
+          )
+        `)
+        .eq("payment_method", "شيك")
+        .order("transaction_date", { ascending: false });
       
       if (error) throw error;
       return data || [];
@@ -63,7 +83,7 @@ const Checks = () => {
           title: "تم حذف الشيك",
           description: "تم حذف الشيك بنجاح",
         });
-        refetch();
+        refetchChecks();
       } else {
         toast({
           title: "خطأ في حذف الشيك",
@@ -90,6 +110,7 @@ const Checks = () => {
       "في الانتظار": "bg-yellow-100 text-yellow-700",
       "مصروف": "bg-blue-100 text-blue-700",
       "مرتد": "bg-red-100 text-red-700",
+      "مؤكد": "bg-blue-100 text-blue-700",
     };
     
     return (
@@ -99,7 +120,31 @@ const Checks = () => {
     );
   };
 
-  if (loadingChecks) {
+  const refetch = () => {
+    refetchChecks();
+    refetchPayments();
+  };
+
+  // دمج البيانات من الجدولين
+  const allChecks = [
+    ...checksData.map(check => ({
+      ...check,
+      source: 'checks',
+      displayDate: check.check_date,
+      displayAmount: check.amount
+    })),
+    ...checkPayments.map(payment => ({
+      ...payment,
+      source: 'payments',
+      displayDate: payment.transaction_date,
+      displayAmount: payment.amount,
+      check_date: payment.transaction_date,
+      receive_date: payment.check_cash_date,
+      status: payment.status || 'مؤكد'
+    }))
+  ].sort((a, b) => new Date(b.displayDate).getTime() - new Date(a.displayDate).getTime());
+
+  if (loadingChecks || loadingPayments) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
@@ -134,16 +179,16 @@ const Checks = () => {
             <CardTitle className="text-sm font-medium text-gray-600">إجمالي الشيكات</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold">{checks.length}</p>
+            <p className="text-2xl font-bold">{allChecks.length}</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">الشيكات المستلمة</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-600">الشيكات المستلمة/المؤكدة</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold text-green-600">
-              {checks.filter(c => c.status === 'مستلم').length}
+              {allChecks.filter(c => c.status === 'مستلم' || c.status === 'مؤكد').length}
             </p>
           </CardContent>
         </Card>
@@ -153,7 +198,7 @@ const Checks = () => {
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold text-yellow-600">
-              {checks.filter(c => c.status === 'في الانتظار').length}
+              {allChecks.filter(c => c.status === 'في الانتظار').length}
             </p>
           </CardContent>
         </Card>
@@ -163,7 +208,7 @@ const Checks = () => {
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold text-blue-600">
-              {checks.reduce((sum, c) => sum + Number(c.amount || 0), 0).toFixed(2)} ₪
+              {allChecks.reduce((sum, c) => sum + Number(c.displayAmount || 0), 0).toFixed(2)} ₪
             </p>
           </CardContent>
         </Card>
@@ -179,8 +224,9 @@ const Checks = () => {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead>النوع</TableHead>
                   <TableHead>تاريخ الشيك</TableHead>
-                  <TableHead>تاريخ الاستلام</TableHead>
+                  <TableHead>تاريخ الاستلام/الصرف</TableHead>
                   <TableHead>الطبيب</TableHead>
                   <TableHead>المبلغ</TableHead>
                   <TableHead>رقم الشيك</TableHead>
@@ -192,10 +238,15 @@ const Checks = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {checks.map((check) => (
-                  <TableRow key={check.id}>
+                {allChecks.map((check) => (
+                  <TableRow key={`${check.source}-${check.id}`}>
                     <TableCell>
-                      {new Date(check.check_date).toLocaleDateString('ar-EG')}
+                      <Badge variant={check.source === 'checks' ? 'default' : 'secondary'}>
+                        {check.source === 'checks' ? 'شيك مباشر' : 'دفعة شيك'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {new Date(check.displayDate).toLocaleDateString('ar-EG')}
                     </TableCell>
                     <TableCell>
                       {check.receive_date 
@@ -207,7 +258,7 @@ const Checks = () => {
                       {check.doctors?.name || '-'}
                     </TableCell>
                     <TableCell className="font-medium">
-                      {Number(check.amount).toFixed(2)} ₪
+                      {Number(check.displayAmount).toFixed(2)} ₪
                     </TableCell>
                     <TableCell>{check.check_number || '-'}</TableCell>
                     <TableCell>{check.bank_name || '-'}</TableCell>
@@ -216,20 +267,24 @@ const Checks = () => {
                       {getStatusBadge(check.status)}
                     </TableCell>
                     <TableCell>
-                      <div className="flex gap-1">
-                        {check.front_image_url && (
-                          <Badge variant="outline" className="text-xs">
-                            <Image className="h-3 w-3 mr-1" />
-                            أمامي
-                          </Badge>
-                        )}
-                        {check.back_image_url && (
-                          <Badge variant="outline" className="text-xs">
-                            <Image className="h-3 w-3 mr-1" />
-                            خلفي
-                          </Badge>
-                        )}
-                      </div>
+                      {check.source === 'checks' ? (
+                        <div className="flex gap-1">
+                          {check.front_image_url && (
+                            <Badge variant="outline" className="text-xs">
+                              <Image className="h-3 w-3 mr-1" />
+                              أمامي
+                            </Badge>
+                          )}
+                          {check.back_image_url && (
+                            <Badge variant="outline" className="text-xs">
+                              <Image className="h-3 w-3 mr-1" />
+                              خلفي
+                            </Badge>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-gray-400 text-sm">-</span>
+                      )}
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-2">
@@ -241,22 +296,26 @@ const Checks = () => {
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleEditCheck(check)}
-                          className="h-8 w-8 p-0"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleDeleteCheck(check.id)}
-                          className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        {check.source === 'checks' && (
+                          <>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleEditCheck(check)}
+                              className="h-8 w-8 p-0"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleDeleteCheck(check.id)}
+                              className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>
@@ -264,7 +323,7 @@ const Checks = () => {
               </TableBody>
             </Table>
             
-            {checks.length === 0 && (
+            {allChecks.length === 0 && (
               <div className="text-center py-8 text-gray-500">
                 لا توجد شيكات مسجلة حتى الآن
               </div>
