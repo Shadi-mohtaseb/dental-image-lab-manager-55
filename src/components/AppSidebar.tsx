@@ -26,6 +26,10 @@ const menuItems = [{
   url: "/partnership-accounts",
   icon: Users
 }, {
+  title: "إدارة الشيكات",
+  url: "/checks",
+  icon: FileText
+}, {
   title: "الإعدادات",
   url: "/settings",
   icon: Settings
