@@ -36,14 +36,21 @@ function getDoctorFinancialSummaryForTable(doctorId: string, cases: any[], docto
 export default function DoctorsAccountsTable({ doctors, cases, doctorPayments }: Props) {
   const deleteDoctor = useDeleteDoctor();
 
-  // دالة لحساب إجمالي الأسنان لطبيب معيّن بناءً على كل حالاته
+  // دالة لحساب إجمالي الأسنان لطبيب معيّن بناءً على كل حالاته - تصحيح الحساب
   const calcTotalTeeth = (doctor_id: string) => {
     const doctorCases = cases.filter((c) => c.doctor_id === doctor_id);
     let total = 0;
     doctorCases.forEach(c => {
+      // أولاً نتحقق من وجود number_of_teeth (الحقل الجديد)
       if (c?.number_of_teeth && Number(c.number_of_teeth) > 0) {
         total += Number(c.number_of_teeth);
-      } else if (c?.tooth_number) {
+      }
+      // إذا لم يكن موجود، نتحقق من teeth_count (الحقل القديم)
+      else if (c?.teeth_count && Number(c.teeth_count) > 0) {
+        total += Number(c.teeth_count);
+      }
+      // إذا لم يكن أي منهما موجود، نحسب من tooth_number
+      else if (c?.tooth_number) {
         total += c.tooth_number.split(" ").filter(Boolean).length;
       }
     });
