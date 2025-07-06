@@ -7,7 +7,7 @@ export const useDoctorWorkTypePrices = () => {
   return useQuery({
     queryKey: ["doctor_work_type_prices"],
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("doctor_work_type_prices")
         .select("*");
       if (error) throw error;
@@ -35,7 +35,7 @@ export const useCreateDoctorWorkTypePricesForNewWorkType = () => {
         price: 0
       }));
       
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from("doctor_work_type_prices")
         .insert(priceEntries);
       
@@ -65,15 +65,40 @@ export const useUpdateDoctorWorkTypePrice = () => {
   
   return useMutation({
     mutationFn: async ({ doctorId, workTypeId, price }: { doctorId: string; workTypeId: string; price: number }) => {
-      const { error } = await (supabase as any)
+      // البحث عن السجل الموجود أولاً
+      const { data: existingRecord, error: searchError } = await supabase
         .from("doctor_work_type_prices")
-        .upsert({
-          doctor_id: doctorId,
-          work_type_id: workTypeId,
-          price: price
-        });
-      
-      if (error) throw error;
+        .select("id")
+        .eq("doctor_id", doctorId)
+        .eq("work_type_id", workTypeId)
+        .maybeSingle();
+
+      if (searchError) {
+        console.error("Error searching for existing record:", searchError);
+        throw searchError;
+      }
+
+      if (existingRecord) {
+        // تحديث السجل الموجود
+        const { error } = await supabase
+          .from("doctor_work_type_prices")
+          .update({ price: price })
+          .eq("doctor_id", doctorId)
+          .eq("work_type_id", workTypeId);
+        
+        if (error) throw error;
+      } else {
+        // إنشاء سجل جديد إذا لم يكن موجوداً
+        const { error } = await supabase
+          .from("doctor_work_type_prices")
+          .insert({
+            doctor_id: doctorId,
+            work_type_id: workTypeId,
+            price: price
+          });
+        
+        if (error) throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["doctor_work_type_prices"] });
