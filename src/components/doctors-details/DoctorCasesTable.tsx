@@ -7,6 +7,7 @@ interface CaseRow {
   submission_date: string;
   work_type: string;
   number_of_teeth?: number | string | null;
+  teeth_count?: number | string | null;
   tooth_number?: string | null;
   status: string;
 }
@@ -16,10 +17,16 @@ interface Props {
 }
 
 const getTeethCount = (c: CaseRow) => {
+  // أولاً نتحقق من وجود number_of_teeth (الحقل الجديد)
   if (c.number_of_teeth && Number(c.number_of_teeth) > 0) {
     return Number(c.number_of_teeth);
   }
-  if (c.tooth_number) {
+  // إذا لم يكن موجود، نتحقق من teeth_count (الحقل القديم)
+  else if (c.teeth_count && Number(c.teeth_count) > 0) {
+    return Number(c.teeth_count);
+  }
+  // إذا لم يكن أي منهما موجود، نحسب من tooth_number
+  else if (c.tooth_number) {
     return c.tooth_number.split(" ").filter(Boolean).length;
   }
   return 0;

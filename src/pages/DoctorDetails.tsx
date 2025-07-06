@@ -61,12 +61,18 @@ const DoctorDetails = () => {
     enabled: !!id,
   });
 
-  // حساب العدد الإجمالي للأسنان عبر الحالات
+  // حساب العدد الإجمالي للأسنان عبر الحالات - تصحيح الحساب
   const totalTeeth = cases.reduce((sum: number, c: any) => {
+    // أولاً نتحقق من وجود number_of_teeth (الحقل الجديد)
     if (c?.number_of_teeth && Number(c.number_of_teeth) > 0) {
       return sum + Number(c.number_of_teeth);
     }
-    if (c?.tooth_number) {
+    // إذا لم يكن موجود، نتحقق من teeth_count (الحقل القديم)
+    else if (c?.teeth_count && Number(c.teeth_count) > 0) {
+      return sum + Number(c.teeth_count);
+    }
+    // إذا لم يكن أي منهما موجود، نحسب من tooth_number
+    else if (c?.tooth_number) {
       return sum + c.tooth_number.split(" ").filter(Boolean).length;
     }
     return sum;
