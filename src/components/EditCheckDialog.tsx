@@ -220,7 +220,7 @@ export default function EditCheckDialog({ open, onOpenChange, check, doctors, on
             </div>
             
             <div>
-              <Label htmlFor="bank_name">اسم البnk</Label>
+              <Label htmlFor="bank_name">اسم البنك</Label>
               <Input
                 id="bank_name"
                 value={formData.bank_name}
