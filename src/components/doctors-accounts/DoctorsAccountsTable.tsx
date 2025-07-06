@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -36,22 +35,14 @@ function getDoctorFinancialSummaryForTable(doctorId: string, cases: any[], docto
 export default function DoctorsAccountsTable({ doctors, cases, doctorPayments }: Props) {
   const deleteDoctor = useDeleteDoctor();
 
-  // دالة لحساب إجمالي الأسنان لطبيب معيّن بناءً على كل حالاته - تصحيح الحساب
+  // دالة لحساب إجمالي الأسنان لطبيب معيّن بناءً على كل حالاته - الحساب من teeth_count فقط
   const calcTotalTeeth = (doctor_id: string) => {
     const doctorCases = cases.filter((c) => c.doctor_id === doctor_id);
     let total = 0;
     doctorCases.forEach(c => {
-      // أولاً نتحقق من وجود number_of_teeth (الحقل الجديد)
-      if (c?.number_of_teeth && Number(c.number_of_teeth) > 0) {
-        total += Number(c.number_of_teeth);
-      }
-      // إذا لم يكن موجود، نتحقق من teeth_count (الحقل القديم)
-      else if (c?.teeth_count && Number(c.teeth_count) > 0) {
+      // حساب عدد الأسنان من teeth_count فقط
+      if (c?.teeth_count && Number(c.teeth_count) > 0) {
         total += Number(c.teeth_count);
-      }
-      // إذا لم يكن أي منهما موجود، نحسب من tooth_number
-      else if (c?.tooth_number) {
-        total += c.tooth_number.split(" ").filter(Boolean).length;
       }
     });
     return total;
