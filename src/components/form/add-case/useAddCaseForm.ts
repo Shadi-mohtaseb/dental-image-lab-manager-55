@@ -86,15 +86,21 @@ export function useAddCaseForm(onSuccess: () => void) {
   useEffect(() => {
     const subscription = form.watch((value, { name }) => {
       if (name === "doctor_id" || name === "work_type") {
-        const doctorId = value.doctor_id;
-        const workType = value.work_type;
+        const doctorId = form.getValues("doctor_id");
+        const workType = form.getValues("work_type");
         
         if (doctorId && workType) {
           const workTypePrice = getDoctorWorkTypePrice(doctorId, workType);
           const currentWorkTypePrice = form.getValues("work_type_price");
           
+          // Only update if the value is actually different
           if (workTypePrice !== currentWorkTypePrice) {
-            form.setValue("work_type_price", workTypePrice, { shouldValidate: false });
+            form.setValue("work_type_price", workTypePrice, { shouldValidate: false, shouldDirty: false });
+            
+            // Also update total price
+            const teethCount = form.getValues("teeth_count") || 1;
+            const totalPrice = workTypePrice * teethCount;
+            form.setValue("price", totalPrice, { shouldValidate: false, shouldDirty: false });
           }
         }
       }
@@ -108,14 +114,15 @@ export function useAddCaseForm(onSuccess: () => void) {
   useEffect(() => {
     const subscription = form.watch((value, { name }) => {
       if (name === "work_type_price" || name === "teeth_count") {
-        const workTypePrice = value.work_type_price || 0;
-        const numberOfTeeth = value.teeth_count || 1;
+        const workTypePrice = form.getValues("work_type_price") || 0;
+        const numberOfTeeth = form.getValues("teeth_count") || 1;
         
         const totalPrice = workTypePrice * numberOfTeeth;
         const currentPrice = form.getValues("price");
         
+        // Only update if the value is actually different
         if (totalPrice !== currentPrice) {
-          form.setValue("price", totalPrice, { shouldValidate: false });
+          form.setValue("price", totalPrice, { shouldValidate: false, shouldDirty: false });
         }
       }
     });
@@ -145,8 +152,8 @@ export function useAddCaseForm(onSuccess: () => void) {
       await addCase.mutateAsync(sanitizedData);
       
       form.reset();
-      form.setValue("submission_date", todayStr);
-      form.setValue("teeth_count", 1);
+      form.setValue("submission_date", todayStr, { shouldValidate: false });
+      form.setValue("teeth_count", 1, { shouldValidate: false });
       onSuccess();
     } catch (error) {
       console.error("Error adding case:", error);
@@ -155,8 +162,8 @@ export function useAddCaseForm(onSuccess: () => void) {
 
   const handleReset = () => {
     form.reset();
-    form.setValue("submission_date", todayStr);
-    form.setValue("teeth_count", 1);
+    form.setValue("submission_date", todayStr, { shouldValidate: false });
+    form.setValue("teeth_count", 1, { shouldValidate: false });
   };
 
   return {
