@@ -84,25 +84,27 @@ export function useAddCaseForm(onSuccess: () => void) {
 
   // Update work type price when doctor or work type changes
   useEffect(() => {
-    const subscription = form.watch((value, { name }) => {
-      if (name === "doctor_id" || name === "work_type") {
+    const subscription = form.watch((value, { name, type }) => {
+      if (type === 'change' && (name === "doctor_id" || name === "work_type")) {
         const doctorId = value.doctor_id;
         const workType = value.work_type;
         
         if (doctorId && workType) {
           const workTypePrice = getDoctorWorkTypePrice(doctorId, workType);
-          form.setValue("work_type_price", workTypePrice);
+          if (workTypePrice !== value.work_type_price) {
+            form.setValue("work_type_price", workTypePrice, { shouldValidate: false });
+          }
         }
       }
     });
     
     return () => subscription.unsubscribe();
-  }, [form, doctorWorkTypePrices, workTypes]);
+  }, [doctorWorkTypePrices, workTypes, form]);
 
   // Update total price when work type price or number of teeth changes
   useEffect(() => {
-    const subscription = form.watch((value, { name }) => {
-      if (name === "work_type_price" || name === "teeth_count") {
+    const subscription = form.watch((value, { name, type }) => {
+      if (type === 'change' && (name === "work_type_price" || name === "teeth_count")) {
         const workTypePrice = value.work_type_price;
         const numberOfTeeth = value.teeth_count;
         
@@ -115,7 +117,9 @@ export function useAddCaseForm(onSuccess: () => void) {
             }
           }
           const totalPrice = workTypePrice * teethCount;
-          form.setValue("price", totalPrice);
+          if (totalPrice !== value.price) {
+            form.setValue("price", totalPrice, { shouldValidate: false });
+          }
         }
       }
     });
