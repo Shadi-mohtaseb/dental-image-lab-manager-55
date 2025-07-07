@@ -23,17 +23,17 @@ const formSchema = z.object({
   doctor_id: z.string().min(1, "اختيار الطبيب مطلوب"),
   work_type: z.string().min(1, "نوع العمل مطلوب"),
   teeth_count: z
-    .preprocess(val => (val === "" || val === undefined ? undefined : Number(val)), z.number({ invalid_type_error: "يرجى إدخال عدد الأسنان" }).min(1, "يرجى إدخال عدد الأسنان").optional()),
+    .preprocess(val => (val === "" || val === undefined ? 1 : Number(val)), z.number().min(1, "عدد الأسنان يجب أن يكون أكبر من صفر").optional().default(1)),
   tooth_number: z.string().optional(),
   status: z.enum(caseStatuses).default("قيد التنفيذ"),
   notes: z.string().optional(),
   price: z.preprocess(
-    (val) => (val === "" ? undefined : Number(val)),
-    z.number({ invalid_type_error: "يرجى إدخال سعر صالح" }).min(0, "يرجى إدخال السعر")
+    (val) => (val === "" || val === undefined ? 0 : Number(val)),
+    z.number().min(0, "يرجى إدخال السعر")
   ),
   work_type_price: z.preprocess(
-    (val) => (val === "" ? undefined : Number(val)),
-    z.number({ invalid_type_error: "يرجى إدخال سعر صالح" }).min(0, "سعر نوع العمل مطلوب")
+    (val) => (val === "" || val === undefined ? 0 : Number(val)),
+    z.number().min(0, "سعر نوع العمل مطلوب")
   ),
   shade: z.string().optional(),
   zircon_block_type: z.string().optional(),
@@ -57,7 +57,7 @@ export function useAddCaseForm(onSuccess: () => void) {
       doctor_id: "",
       work_type: "",
       tooth_number: "",
-      teeth_count: undefined,
+      teeth_count: 1,
       status: "قيد التنفيذ",
       notes: "",
       price: 0,
@@ -84,14 +84,16 @@ export function useAddCaseForm(onSuccess: () => void) {
 
   // Update work type price when doctor or work type changes
   useEffect(() => {
-    const subscription = form.watch((value, { name, type }) => {
-      if (type === 'change' && (name === "doctor_id" || name === "work_type")) {
+    const subscription = form.watch((value, { name }) => {
+      if (name === "doctor_id" || name === "work_type") {
         const doctorId = value.doctor_id;
         const workType = value.work_type;
         
         if (doctorId && workType) {
           const workTypePrice = getDoctorWorkTypePrice(doctorId, workType);
-          if (workTypePrice !== value.work_type_price) {
+          const currentWorkTypePrice = form.getValues("work_type_price");
+          
+          if (workTypePrice !== currentWorkTypePrice) {
             form.setValue("work_type_price", workTypePrice, { shouldValidate: false });
           }
         }
@@ -103,23 +105,16 @@ export function useAddCaseForm(onSuccess: () => void) {
 
   // Update total price when work type price or number of teeth changes
   useEffect(() => {
-    const subscription = form.watch((value, { name, type }) => {
-      if (type === 'change' && (name === "work_type_price" || name === "teeth_count")) {
-        const workTypePrice = value.work_type_price;
-        const numberOfTeeth = value.teeth_count;
+    const subscription = form.watch((value, { name }) => {
+      if (name === "work_type_price" || name === "teeth_count") {
+        const workTypePrice = value.work_type_price || 0;
+        const numberOfTeeth = value.teeth_count || 1;
         
-        if (workTypePrice !== undefined && workTypePrice > 0) {
-          let teethCount = 1;
-          if (numberOfTeeth !== undefined && numberOfTeeth !== null) {
-            const parsedTeeth = Number(numberOfTeeth);
-            if (!isNaN(parsedTeeth) && parsedTeeth > 0) {
-              teethCount = parsedTeeth;
-            }
-          }
-          const totalPrice = workTypePrice * teethCount;
-          if (totalPrice !== value.price) {
-            form.setValue("price", totalPrice, { shouldValidate: false });
-          }
+        const totalPrice = workTypePrice * numberOfTeeth;
+        const currentPrice = form.getValues("price");
+        
+        if (totalPrice !== currentPrice) {
+          form.setValue("price", totalPrice, { shouldValidate: false });
         }
       }
     });
@@ -136,7 +131,7 @@ export function useAddCaseForm(onSuccess: () => void) {
         doctor_id: data.doctor_id,
         work_type: data.work_type,
         tooth_number: data.tooth_number || null,
-        teeth_count: data.teeth_count || null,
+        teeth_count: data.teeth_count || 1,
         status: data.status,
         notes: data.notes || null,
         price: data.price,
@@ -150,6 +145,7 @@ export function useAddCaseForm(onSuccess: () => void) {
       
       form.reset();
       form.setValue("submission_date", todayStr);
+      form.setValue("teeth_count", 1);
       onSuccess();
     } catch (error) {
       console.error("Error adding case:", error);
@@ -159,6 +155,7 @@ export function useAddCaseForm(onSuccess: () => void) {
   const handleReset = () => {
     form.reset();
     form.setValue("submission_date", todayStr);
+    form.setValue("teeth_count", 1);
   };
 
   return {
