@@ -24,7 +24,7 @@ const formSchema = z.object({
   work_type: z.string().min(1, "نوع العمل مطلوب"),
   teeth_count: z
     .preprocess(val => (val === "" || val === undefined ? 1 : Number(val)), z.number().min(1, "عدد الأسنان يجب أن يكون أكبر من صفر").optional().default(1)),
-  tooth_number: z.string().optional(),
+  tooth_number: z.string().optional(), // رقم السن - مجرد رمز تعريفي
   status: z.enum(caseStatuses).default("قيد التنفيذ"),
   notes: z.string().optional(),
   price: z.preprocess(
@@ -56,7 +56,7 @@ export function useAddCaseForm(onSuccess: () => void) {
       patient_name: "",
       doctor_id: "",
       work_type: "",
-      tooth_number: "",
+      tooth_number: "", // رقم السن - مجرد نص تعريفي
       teeth_count: 1,
       status: "قيد التنفيذ",
       notes: "",
@@ -103,7 +103,8 @@ export function useAddCaseForm(onSuccess: () => void) {
     return () => subscription.unsubscribe();
   }, [doctorWorkTypePrices, workTypes, form]);
 
-  // Update total price when work type price or number of teeth changes
+  // Update total price ONLY when work type price or teeth count changes
+  // رقم السن (tooth_number) لا يؤثر على الحساب
   useEffect(() => {
     const subscription = form.watch((value, { name }) => {
       if (name === "work_type_price" || name === "teeth_count") {
@@ -130,7 +131,7 @@ export function useAddCaseForm(onSuccess: () => void) {
         patient_name: data.patient_name,
         doctor_id: data.doctor_id,
         work_type: data.work_type,
-        tooth_number: data.tooth_number || null,
+        tooth_number: data.tooth_number || null, // رقم السن كرمز تعريفي فقط
         teeth_count: data.teeth_count || 1,
         status: data.status,
         notes: data.notes || null,
