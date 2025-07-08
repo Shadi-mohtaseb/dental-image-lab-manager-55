@@ -29,22 +29,20 @@ export function useEditCaseForm(
   const updateCase = useUpdateCase();
 
   const form = useForm<CaseForm>({
-    defaultValues: caseData
-      ? {
-          patient_name: caseData.patient_name,
-          doctor_id: caseData.doctor_id || "",
-          work_type: caseData.work_type,
-          tooth_number: caseData.tooth_number || "",
-          teeth_count: caseData.teeth_count ?? "",
-          price: caseData.price ?? "",
-          shade: caseData.shade || "",
-          zircon_block_type: caseData.zircon_block_type || "",
-          notes: caseData.notes || "",
-          status: caseData.status,
-          submission_date: caseData.submission_date || "",
-          delivery_date: caseData.delivery_date || "",
-        }
-      : {},
+    defaultValues: {
+      patient_name: "",
+      doctor_id: "",
+      work_type: "",
+      tooth_number: "",
+      teeth_count: "",
+      price: "",
+      shade: "",
+      zircon_block_type: "",
+      notes: "",
+      status: "في الانتظار",
+      submission_date: "",
+      delivery_date: "",
+    },
   });
 
   // Reset form when case data or dialog state changes
@@ -70,12 +68,22 @@ export function useEditCaseForm(
   const onSubmit = async (values: CaseForm) => {
     if (!caseData) return;
     try {
-      // Convert price and teeth_count to numbers if they exist
+      // إزالة الحقول غير الموجودة في جدول cases وتحويل الأرقام
+      const { ...caseValues } = values;
       const payload = {
-        ...values,
         id: caseData.id,
-        price: values.price !== "" && values.price !== undefined ? Number(values.price) : null,
-        teeth_count: values.teeth_count !== "" && values.teeth_count !== undefined ? Number(values.teeth_count) : null,
+        patient_name: caseValues.patient_name,
+        doctor_id: caseValues.doctor_id,
+        work_type: caseValues.work_type,
+        tooth_number: caseValues.tooth_number || null,
+        teeth_count: caseValues.teeth_count !== "" && caseValues.teeth_count !== undefined ? Number(caseValues.teeth_count) : null,
+        price: caseValues.price !== "" && caseValues.price !== undefined ? Number(caseValues.price) : null,
+        shade: caseValues.shade || null,
+        zircon_block_type: caseValues.zircon_block_type || null,
+        notes: caseValues.notes || null,
+        status: caseValues.status,
+        submission_date: caseValues.submission_date,
+        delivery_date: caseValues.delivery_date || null,
       };
       
       const updated = await updateCase.mutateAsync(payload);
