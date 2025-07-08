@@ -84,51 +84,36 @@ export function useAddCaseForm(onSuccess: () => void) {
 
   // Update work type price when doctor or work type changes
   useEffect(() => {
-    const subscription = form.watch((value, { name }) => {
-      if (name === "doctor_id" || name === "work_type") {
-        const doctorId = form.getValues("doctor_id");
-        const workType = form.getValues("work_type");
-        
-        if (doctorId && workType) {
-          const workTypePrice = getDoctorWorkTypePrice(doctorId, workType);
-          const currentWorkTypePrice = form.getValues("work_type_price");
-          
-          // Only update if the value is actually different
-          if (workTypePrice !== currentWorkTypePrice) {
-            form.setValue("work_type_price", workTypePrice, { shouldValidate: false, shouldDirty: false });
-            
-            // Also update total price
-            const teethCount = form.getValues("teeth_count") || 1;
-            const totalPrice = workTypePrice * teethCount;
-            form.setValue("price", totalPrice, { shouldValidate: false, shouldDirty: false });
-          }
-        }
-      }
-    });
+    const doctorId = form.watch("doctor_id");
+    const workType = form.watch("work_type");
     
-    return () => subscription.unsubscribe();
-  }, [doctorWorkTypePrices, workTypes, form]);
+    if (doctorId && workType) {
+      const workTypePrice = getDoctorWorkTypePrice(doctorId, workType);
+      const currentWorkTypePrice = form.getValues("work_type_price");
+      
+      if (workTypePrice !== currentWorkTypePrice) {
+        form.setValue("work_type_price", workTypePrice);
+        
+        // Update total price
+        const teethCount = form.getValues("teeth_count") || 1;
+        const totalPrice = workTypePrice * teethCount;
+        form.setValue("price", totalPrice);
+      }
+    }
+  }, [form.watch("doctor_id"), form.watch("work_type"), doctorWorkTypePrices, workTypes]);
 
-  // Update total price ONLY when work type price or teeth count changes
-  // رقم السن (tooth_number) لا يؤثر على الحساب
+  // Update total price when work type price or teeth count changes
   useEffect(() => {
-    const subscription = form.watch((value, { name }) => {
-      if (name === "work_type_price" || name === "teeth_count") {
-        const workTypePrice = form.getValues("work_type_price") || 0;
-        const numberOfTeeth = form.getValues("teeth_count") || 1;
-        
-        const totalPrice = workTypePrice * numberOfTeeth;
-        const currentPrice = form.getValues("price");
-        
-        // Only update if the value is actually different
-        if (totalPrice !== currentPrice) {
-          form.setValue("price", totalPrice, { shouldValidate: false, shouldDirty: false });
-        }
-      }
-    });
+    const workTypePrice = form.watch("work_type_price") || 0;
+    const teethCount = form.watch("teeth_count") || 1;
     
-    return () => subscription.unsubscribe();
-  }, [form]);
+    const totalPrice = workTypePrice * teethCount;
+    const currentPrice = form.getValues("price");
+    
+    if (totalPrice !== currentPrice && workTypePrice > 0) {
+      form.setValue("price", totalPrice);
+    }
+  }, [form.watch("work_type_price"), form.watch("teeth_count")]);
 
   const onSubmit = async (data: FormData) => {
     try {
