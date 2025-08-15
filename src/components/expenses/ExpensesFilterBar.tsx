@@ -64,12 +64,12 @@ export function ExpensesFilterBar({
           {/* فلاتر */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
             {/* تصفية حسب النوع */}
-            <Select value={selectedType || ""} onValueChange={(value) => onFilterByType(value || null)}>
+            <Select value={selectedType || "all"} onValueChange={(value) => onFilterByType(value === "all" ? null : value)}>
               <SelectTrigger>
                 <SelectValue placeholder="نوع المصروف" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">جميع الأنواع</SelectItem>
+                <SelectItem value="all">جميع الأنواع</SelectItem>
                 {expenseTypes.map((type) => (
                   <SelectItem key={type.id} value={type.id}>
                     {type.name}
