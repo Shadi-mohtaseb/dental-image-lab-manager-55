@@ -21,7 +21,7 @@ export const useFinancialSummary = () => {
       // Get expenses
       const { data: expenses, error: expensesError } = await supabase
         .from("expenses")
-        .select("total_amount");
+        .select("total_amount, expense_types(name)");
       if (expensesError) throw expensesError;
 
       const totalRevenue =
