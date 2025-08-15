@@ -1,58 +1,53 @@
 
-import { format } from "date-fns";
-import { ar } from "date-fns/locale";
-import { Receipt, Trash2, Edit } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
+import { useState, useMemo } from "react";
+import { Receipt } from "lucide-react";
 import { useExpenses } from "@/hooks/useExpenses";
 import { AddExpenseDialog } from "@/components/AddExpenseDialog";
-import { EditExpenseDialog } from "@/components/EditExpenseDialog";
-import { toast } from "@/hooks/use-toast";
-import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { ExpensesSummaryCards } from "@/components/expenses/ExpensesSummaryCards";
+import { ExpensesFilterBar } from "@/components/expenses/ExpensesFilterBar";
+import { ExpensesTable } from "@/components/expenses/ExpensesTable";
 
-// صفحة المصاريف
 const Expenses = () => {
-  const { data: expenses, isLoading, error } = useExpenses();
-  const [editingExpense, setEditingExpense] = useState<any>(null);
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const { data: expenses = [], isLoading, error } = useExpenses();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedType, setSelectedType] = useState<string | null>(null);
+  const [startDate, setStartDate] = useState<string | null>(null);
+  const [endDate, setEndDate] = useState<string | null>(null);
 
-  const handleDelete = async (expenseId: string) => {
-    if (window.confirm("هل أنت متأكد من حذف هذا المصروف؟")) {
-      try {
-        const { error } = await supabase
-          .from("expenses")
-          .delete()
-          .eq("id", expenseId);
-
-        if (error) {
-          throw error;
-        }
-
-        toast({
-          title: "تم حذف المصروف بنجاح",
-          description: "تم حذف المصروف من النظام",
-        });
-      } catch (error: any) {
-        console.error("Error deleting expense:", error);
-        toast({
-          title: "خطأ في حذف المصروف",
-          description: "حدث خطأ أثناء حذف المصروف، يرجى المحاولة مرة أخرى",
-          variant: "destructive",
-        });
+  // تصفية المصاريف بناءً على البحث والفلاتر
+  const filteredExpenses = useMemo(() => {
+    return expenses.filter(expense => {
+      // البحث في جميع الحقول
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        const matchesSearch = 
+          expense.expense_types?.name?.toLowerCase().includes(query) ||
+          expense.notes?.toLowerCase().includes(query) ||
+          expense.total_amount.toString().includes(query) ||
+          expense.purchase_date.includes(query);
+        
+        if (!matchesSearch) return false;
       }
-    }
-  };
 
-  const handleEdit = (expense: any) => {
-    setEditingExpense(expense);
-    setEditDialogOpen(true);
-  };
+      // تصفية حسب نوع المصروف
+      if (selectedType && expense.expense_type_id !== selectedType) {
+        return false;
+      }
+
+      // تصفية حسب نطاق التاريخ
+      if (startDate || endDate) {
+        const expenseDate = new Date(expense.purchase_date);
+        if (startDate && expenseDate < new Date(startDate)) return false;
+        if (endDate && expenseDate > new Date(endDate)) return false;
+      }
+
+      return true;
+    });
+  }, [expenses, searchQuery, selectedType, startDate, endDate]);
 
   if (isLoading) {
     return (
-      <div className="space-y-6 animate-fade-in">
+      <div className="container mx-auto p-4 space-y-6 animate-fade-in">
         <div className="flex items-center justify-center p-8">
           <div className="text-lg">جاري تحميل بيانات المصاريف...</div>
         </div>
@@ -62,7 +57,7 @@ const Expenses = () => {
 
   if (error) {
     return (
-      <div className="space-y-6 animate-fade-in">
+      <div className="container mx-auto p-4 space-y-6 animate-fade-in">
         <div className="flex items-center justify-center p-8">
           <div className="text-lg text-red-600">
             حدث خطأ أثناء تحميل بيانات المصاريف: {error.message}
@@ -73,86 +68,38 @@ const Expenses = () => {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="flex items-center justify-between">
+    <div className="container mx-auto p-4 space-y-6 animate-fade-in">
+      {/* رأس الصفحة */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <Receipt className="w-8 h-8 text-primary" />
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">المصاريف</h1>
-            <p className="text-gray-600">إدارة وتسجيل المصاريف المختلفة</p>
+            <h1 className="text-2xl font-bold">المصاريف</h1>
+            <p className="text-muted-foreground">إدارة وتسجيل المصاريف</p>
           </div>
         </div>
         <AddExpenseDialog />
       </div>
-      
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Receipt className="w-5 h-5" />
-            قائمة المصاريف
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>الوصف</TableHead>
-                  <TableHead>الكمية</TableHead>
-                  <TableHead>المبلغ</TableHead>
-                  <TableHead>تاريخ الشراء</TableHead>
-                  <TableHead>الإجراءات</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {expenses?.map((expense) => (
-                  <TableRow key={expense.id}>
-                    <TableCell className="font-medium">
-                      {expense.description || expense.item_name}
-                    </TableCell>
-                    <TableCell>
-                      {expense.quantity || 1}
-                    </TableCell>
-                    <TableCell className="text-red-600 font-bold">
-                      {expense.total_amount.toLocaleString()} ₪
-                    </TableCell>
-                    <TableCell>
-                      {format(new Date(expense.purchase_date), "dd/MM/yyyy", {
-                        locale: ar,
-                      })}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleEdit(expense)}
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="text-red-600 hover:text-red-700"
-                          onClick={() => handleDelete(expense.id)}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
 
-      <EditExpenseDialog 
-        open={editDialogOpen}
-        onOpenChange={setEditDialogOpen}
-        expenseData={editingExpense}
+      {/* الملخص المالي */}
+      <ExpensesSummaryCards expenses={expenses} />
+
+      {/* شريط البحث والفلاتر */}
+      <ExpensesFilterBar
+        onSearch={setSearchQuery}
+        onFilterByType={setSelectedType}
+        onFilterByDateRange={(start, end) => {
+          setStartDate(start);
+          setEndDate(end);
+        }}
+        searchQuery={searchQuery}
+        selectedType={selectedType}
+        startDate={startDate}
+        endDate={endDate}
       />
+
+      {/* جدول المصاريف */}
+      <ExpensesTable expenses={filteredExpenses} />
     </div>
   );
 };

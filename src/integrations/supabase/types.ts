@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -275,44 +275,64 @@ export type Database = {
         }
         Relationships: []
       }
-      expenses: {
+      expense_types: {
         Row: {
           created_at: string
-          description: string
           id: string
-          item_name: string
-          notes: string | null
-          purchase_date: string
-          quantity: number
-          total_amount: number
-          unit_price: number
+          name: string
           updated_at: string
         }
         Insert: {
           created_at?: string
-          description: string
           id?: string
-          item_name: string
-          notes?: string | null
-          purchase_date: string
-          quantity?: number
-          total_amount: number
-          unit_price: number
+          name: string
           updated_at?: string
         }
         Update: {
           created_at?: string
-          description?: string
           id?: string
-          item_name?: string
-          notes?: string | null
-          purchase_date?: string
-          quantity?: number
-          total_amount?: number
-          unit_price?: number
+          name?: string
           updated_at?: string
         }
         Relationships: []
+      }
+      expenses: {
+        Row: {
+          created_at: string
+          expense_type_id: string
+          id: string
+          notes: string | null
+          purchase_date: string
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          expense_type_id: string
+          id?: string
+          notes?: string | null
+          purchase_date: string
+          total_amount: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          expense_type_id?: string
+          id?: string
+          notes?: string | null
+          purchase_date?: string
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expenses_expense_type_id_fkey"
+            columns: ["expense_type_id"]
+            isOneToOne: false
+            referencedRelation: "expense_types"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       partner_transactions: {
         Row: {

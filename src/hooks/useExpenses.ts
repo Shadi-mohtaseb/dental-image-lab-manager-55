@@ -14,7 +14,11 @@ export const useExpenses = () => {
       const { data, error } = await supabase
         .from("expenses")
         .select(`
-          *
+          *,
+          expense_types (
+            id,
+            name
+          )
         `)
         .order("purchase_date", { ascending: false });
       
@@ -32,7 +36,13 @@ export const useAddExpense = () => {
       const { data, error } = await supabase
         .from("expenses")
         .insert(expense)
-        .select()
+        .select(`
+          *,
+          expense_types (
+            id,
+            name
+          )
+        `)
         .single();
       if (error) throw error;
       return data;

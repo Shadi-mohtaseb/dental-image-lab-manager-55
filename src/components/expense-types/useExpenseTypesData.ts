@@ -8,7 +8,7 @@ export const useExpenseTypesData = () => {
     queryKey: ["expense_types"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("expense_types" as any)
+        .from("expense_types")
         .select("*")
         .order("name");
       if (error) throw error;
@@ -29,7 +29,7 @@ export const useAddExpenseType = () => {
   return useMutation({
     mutationFn: async (name: string) => {
       const { data, error } = await supabase
-        .from("expense_types" as any)
+        .from("expense_types")
         .insert({ name })
         .select()
         .single();
@@ -52,7 +52,7 @@ export const useUpdateExpenseType = () => {
   return useMutation({
     mutationFn: async ({ id, name }: { id: string; name: string }) => {
       const { data, error } = await supabase
-        .from("expense_types" as any)
+        .from("expense_types")
         .update({ name })
         .eq("id", id)
         .select()
@@ -76,7 +76,7 @@ export const useDeleteExpenseType = () => {
   return useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
-        .from("expense_types" as any)
+        .from("expense_types")
         .delete()
         .eq("id", id);
       if (error) throw error;
