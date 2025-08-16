@@ -99,6 +99,9 @@ const PartnershipAccounts = () => {
   const netProfit = summary?.netProfit ?? 0;
   const partnersCount = partners.length;
 
+  // حساب صافي الربح من الأطباء (المقبوض فعلياً)
+  const netDoctorProfit = totalDoctorsPayments;
+
   const handleDeletePartner = async (partnerId: string) => {
     if (window.confirm("هل أنت متأكد من حذف هذا الشريك؟")) {
       const { error } = await import("@/integrations/supabase/client").then(({ supabase }) =>
@@ -190,6 +193,7 @@ const PartnershipAccounts = () => {
         netProfit={netProfit}
         totalDoctorsDebt={totalDoctorsDebt}
         totalDoctorsPayments={totalDoctorsPayments}
+        netDoctorProfit={netDoctorProfit}
         partnersCount={partnersCount}
         casesCount={cases.length}
         expensesCount={expenses?.length ?? 0}

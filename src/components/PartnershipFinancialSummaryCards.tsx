@@ -8,6 +8,7 @@ interface PartnershipFinancialSummaryCardsProps {
   netProfit: number;
   totalDoctorsDebt: number;
   totalDoctorsPayments: number;
+  netDoctorProfit: number;
   partnersCount: number;
   casesCount: number;
   expensesCount: number;
@@ -19,12 +20,13 @@ export default function PartnershipFinancialSummaryCards({
   netProfit,
   totalDoctorsDebt,
   totalDoctorsPayments,
+  netDoctorProfit,
   partnersCount,
   casesCount,
   expensesCount
 }: PartnershipFinancialSummaryCardsProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 p-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7 gap-6 p-6">
       <Card className="text-center">
         <CardContent className="flex flex-col items-center justify-center p-6">
           <span className="flex items-center justify-center bg-blue-50 text-blue-500 rounded-full w-10 h-10 mb-2">
@@ -73,6 +75,16 @@ export default function PartnershipFinancialSummaryCards({
           <span className="text-gray-500 text-sm">مجموع دفعات الأطباء</span>
           <span className="text-2xl font-bold text-gray-900 mt-1">{(totalDoctorsPayments || 0).toFixed(0)} ₪</span>
           <span className="text-xs text-teal-600 mt-1">المقبوض من الأطباء</span>
+        </CardContent>
+      </Card>
+      <Card className="text-center">
+        <CardContent className="flex flex-col items-center justify-center p-6">
+          <span className="flex items-center justify-center bg-indigo-50 text-indigo-600 rounded-full w-10 h-10 mb-2">
+            <DollarSign className="w-6 h-6" />
+          </span>
+          <span className="text-gray-500 text-sm">صافي الربح من الأطباء</span>
+          <span className="text-2xl font-bold text-gray-900 mt-1">{(netDoctorProfit || 0).toFixed(0)} ₪</span>
+          <span className="text-xs text-indigo-600 mt-1">{(netDoctorProfit || 0) > 0 ? "ربح محقق" : "لا يوجد ربح"}</span>
         </CardContent>
       </Card>
       <Card className="text-center">
