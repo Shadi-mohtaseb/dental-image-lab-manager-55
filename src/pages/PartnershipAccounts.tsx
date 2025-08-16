@@ -99,8 +99,8 @@ const PartnershipAccounts = () => {
   const netProfit = summary?.netProfit ?? 0;
   const partnersCount = partners.length;
 
-  // حساب صافي الربح من الأطباء (المقبوض فعلياً)
-  const netDoctorProfit = totalDoctorsPayments;
+  // حساب صافي الربح من الأطباء (المقبوض فعلياً بعد خصم المصروفات)
+  const netDoctorProfit = totalDoctorsPayments - totalExpenses;
 
   const handleDeletePartner = async (partnerId: string) => {
     if (window.confirm("هل أنت متأكد من حذف هذا الشريك؟")) {
