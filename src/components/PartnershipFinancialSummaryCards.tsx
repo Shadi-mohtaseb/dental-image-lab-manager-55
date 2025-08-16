@@ -1,12 +1,13 @@
 
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowUp, ArrowDown, Wallet, DollarSign, Users } from "lucide-react";
+import { ArrowUp, ArrowDown, Wallet, DollarSign, Users, CreditCard } from "lucide-react";
 
 interface PartnershipFinancialSummaryCardsProps {
   totalRevenue: number;
   totalExpenses: number;
   netProfit: number;
   totalDoctorsDebt: number;
+  totalDoctorsPayments: number;
   partnersCount: number;
   casesCount: number;
   expensesCount: number;
@@ -17,12 +18,13 @@ export default function PartnershipFinancialSummaryCards({
   totalExpenses,
   netProfit,
   totalDoctorsDebt,
+  totalDoctorsPayments,
   partnersCount,
   casesCount,
   expensesCount
 }: PartnershipFinancialSummaryCardsProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6 p-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 p-6">
       <Card className="text-center">
         <CardContent className="flex flex-col items-center justify-center p-6">
           <span className="flex items-center justify-center bg-blue-50 text-blue-500 rounded-full w-10 h-10 mb-2">
@@ -61,6 +63,16 @@ export default function PartnershipFinancialSummaryCards({
           <span className="text-gray-500 text-sm">صافي الربح (رأس المال)</span>
           <span className="text-2xl font-bold text-gray-900 mt-1">{netProfit.toFixed(0)} ₪</span>
           <span className="text-xs text-green-600 mt-1">{netProfit > 0 ? "ربح صافي" : "لا يوجد ربح"}</span>
+        </CardContent>
+      </Card>
+      <Card className="text-center">
+        <CardContent className="flex flex-col items-center justify-center p-6">
+          <span className="flex items-center justify-center bg-teal-50 text-teal-600 rounded-full w-10 h-10 mb-2">
+            <CreditCard className="w-6 h-6" />
+          </span>
+          <span className="text-gray-500 text-sm">مجموع دفعات الأطباء</span>
+          <span className="text-2xl font-bold text-gray-900 mt-1">{totalDoctorsPayments.toFixed(0)} ₪</span>
+          <span className="text-xs text-teal-600 mt-1">المقبوض من الأطباء</span>
         </CardContent>
       </Card>
       <Card className="text-center">

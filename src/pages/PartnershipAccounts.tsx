@@ -86,6 +86,11 @@ const PartnershipAccounts = () => {
     return totalDoctorsDebt;
   }
 
+  // احسب مجموع دفعات الأطباء المقبوضة
+  const totalDoctorsPayments = doctorTransactions
+    .filter((tx) => tx.transaction_type === "دفعة")
+    .reduce((sum, tx) => sum + Number(tx.amount), 0);
+
   const totalDoctorsDebt = computeDoctorsDebt();
 
   const { data: summary, isLoading: loadingSummary } = useFinancialSummary();
@@ -184,6 +189,7 @@ const PartnershipAccounts = () => {
         totalExpenses={totalExpenses}
         netProfit={netProfit}
         totalDoctorsDebt={totalDoctorsDebt}
+        totalDoctorsPayments={totalDoctorsPayments}
         partnersCount={partnersCount}
         casesCount={cases.length}
         expensesCount={expenses?.length ?? 0}
