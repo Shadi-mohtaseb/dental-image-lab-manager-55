@@ -31,7 +31,7 @@ export default function PartnershipFinancialSummaryCards({
             <ArrowUp className="w-6 h-6" />
           </span>
           <span className="text-gray-500 text-sm">إجمالي الإيرادات</span>
-          <span className="text-2xl font-bold text-gray-900 mt-1">{totalRevenue.toFixed(0)} ₪</span>
+          <span className="text-2xl font-bold text-gray-900 mt-1">{(totalRevenue || 0).toFixed(0)} ₪</span>
           <span className="text-xs text-blue-600 mt-1">من {casesCount} حالة</span>
         </CardContent>
       </Card>
@@ -41,7 +41,7 @@ export default function PartnershipFinancialSummaryCards({
             <ArrowDown className="w-6 h-6" />
           </span>
           <span className="text-gray-500 text-sm">إجمالي المصاريف</span>
-          <span className="text-2xl font-bold text-gray-900 mt-1">{totalExpenses.toFixed(0)} ₪</span>
+          <span className="text-2xl font-bold text-gray-900 mt-1">{(totalExpenses || 0).toFixed(0)} ₪</span>
           <span className="text-xs text-red-600 mt-1">{expensesCount} مصروف</span>
         </CardContent>
       </Card>
@@ -51,8 +51,8 @@ export default function PartnershipFinancialSummaryCards({
             <Wallet className="w-6 h-6" />
           </span>
           <span className="text-gray-500 text-sm">إجمالي ديون الأطباء</span>
-          <span className="text-2xl font-bold text-gray-900 mt-1">{totalDoctorsDebt.toFixed(0)} ₪</span>
-          <span className="text-xs text-orange-600 mt-1">{totalDoctorsDebt > 0 ? "يجب تحصيلها" : "لا توجد ديون"}</span>
+          <span className="text-2xl font-bold text-gray-900 mt-1">{(totalDoctorsDebt || 0).toFixed(0)} ₪</span>
+          <span className="text-xs text-orange-600 mt-1">{(totalDoctorsDebt || 0) > 0 ? "يجب تحصيلها" : "لا توجد ديون"}</span>
         </CardContent>
       </Card>
       <Card className="text-center">
@@ -61,8 +61,8 @@ export default function PartnershipFinancialSummaryCards({
             <DollarSign className="w-6 h-6" />
           </span>
           <span className="text-gray-500 text-sm">صافي الربح (رأس المال)</span>
-          <span className="text-2xl font-bold text-gray-900 mt-1">{netProfit.toFixed(0)} ₪</span>
-          <span className="text-xs text-green-600 mt-1">{netProfit > 0 ? "ربح صافي" : "لا يوجد ربح"}</span>
+          <span className="text-2xl font-bold text-gray-900 mt-1">{(netProfit || 0).toFixed(0)} ₪</span>
+          <span className="text-xs text-green-600 mt-1">{(netProfit || 0) > 0 ? "ربح صافي" : "لا يوجد ربح"}</span>
         </CardContent>
       </Card>
       <Card className="text-center">
@@ -71,7 +71,7 @@ export default function PartnershipFinancialSummaryCards({
             <CreditCard className="w-6 h-6" />
           </span>
           <span className="text-gray-500 text-sm">مجموع دفعات الأطباء</span>
-          <span className="text-2xl font-bold text-gray-900 mt-1">{totalDoctorsPayments.toFixed(0)} ₪</span>
+          <span className="text-2xl font-bold text-gray-900 mt-1">{(totalDoctorsPayments || 0).toFixed(0)} ₪</span>
           <span className="text-xs text-teal-600 mt-1">المقبوض من الأطباء</span>
         </CardContent>
       </Card>
