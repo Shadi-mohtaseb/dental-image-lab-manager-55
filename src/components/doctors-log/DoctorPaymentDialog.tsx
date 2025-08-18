@@ -61,8 +61,8 @@ export default function DoctorPaymentDialog({ open, onOpenChange, doctor }: Doct
       queryClient.invalidateQueries({ queryKey: ["doctor_transactions"] });
       
       // إعادة حساب وتوزيع الأرباح تلقائياً
-      const { error: calcError } = await supabase.rpc("calculate_company_capital");
-      if (!calcError) {
+      const { error: updateError } = await supabase.rpc("update_company_capital");
+      if (!updateError) {
         await supabase.rpc("distribute_profits_to_partners");
         queryClient.invalidateQueries({ queryKey: ["company_capital"] });
         queryClient.invalidateQueries({ queryKey: ["partners"] });

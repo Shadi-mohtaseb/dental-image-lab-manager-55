@@ -22,21 +22,19 @@ export const useCalculateCompanyCapital = () => {
   
   return useMutation({
     mutationFn: async () => {
-      const { data, error } = await supabase.rpc("calculate_company_capital");
-      if (error) throw error;
-      return data;
+      // أولاً نحدث رأس المال
+      const { error: updateError } = await supabase.rpc("update_company_capital");
+      if (updateError) throw updateError;
+      
+      // ثم نوزع الأرباح
+      const { error: distributeError } = await supabase.rpc("distribute_profits_to_partners");
+      if (distributeError) throw distributeError;
+      
+      return true;
     },
     onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ["company_capital"] });
       queryClient.invalidateQueries({ queryKey: ["partners"] });
-      
-      // توزيع الأرباح تلقائياً بعد حساب رأس المال
-      const { error } = await supabase.rpc("distribute_profits_to_partners");
-      if (error) {
-        console.error("Error distributing profits:", error);
-      } else {
-        queryClient.invalidateQueries({ queryKey: ["partners"] });
-      }
       
       toast({
         title: "تم تحديث رأس المال وتوزيع الأرباح",

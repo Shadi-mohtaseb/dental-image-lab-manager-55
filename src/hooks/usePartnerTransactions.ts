@@ -38,8 +38,8 @@ export const useAddPartnerTransaction = () => {
       queryClient.invalidateQueries({ queryKey: ["partner_transactions"] });
       
       // إعادة حساب وتوزيع الأرباح تلقائياً
-      const { error } = await supabase.rpc("calculate_company_capital");
-      if (!error) {
+      const { error: updateError } = await supabase.rpc("update_company_capital");
+      if (!updateError) {
         await supabase.rpc("distribute_profits_to_partners");
         queryClient.invalidateQueries({ queryKey: ["company_capital"] });
         queryClient.invalidateQueries({ queryKey: ["partners"] });
@@ -76,8 +76,8 @@ export const useDeletePartnerTransaction = () => {
       queryClient.invalidateQueries({ queryKey: ["partner_transactions"] });
       
       // إعادة حساب وتوزيع الأرباح تلقائياً
-      const { error } = await supabase.rpc("calculate_company_capital");
-      if (!error) {
+      const { error: updateError } = await supabase.rpc("update_company_capital");
+      if (!updateError) {
         await supabase.rpc("distribute_profits_to_partners");
         queryClient.invalidateQueries({ queryKey: ["company_capital"] });
         queryClient.invalidateQueries({ queryKey: ["partners"] });
