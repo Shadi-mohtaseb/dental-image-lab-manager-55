@@ -47,11 +47,20 @@ export const useAddExpense = () => {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ["expenses"] });
+      
+      // إعادة حساب وتوزيع الأرباح تلقائياً
+      const { error } = await supabase.rpc("calculate_company_capital");
+      if (!error) {
+        await supabase.rpc("distribute_profits_to_partners");
+        queryClient.invalidateQueries({ queryKey: ["company_capital"] });
+        queryClient.invalidateQueries({ queryKey: ["partners"] });
+      }
+      
       toast({
         title: "تم إضافة المصروف بنجاح",
-        description: "تم حفظ بيانات المصروف في النظام",
+        description: "تم حفظ بيانات المصروف وإعادة توزيع الأرباح تلقائياً",
       });
     },
     onError: (error) => {
@@ -75,11 +84,20 @@ export const useDeleteExpense = () => {
         .eq("id", expenseId);
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ["expenses"] });
+      
+      // إعادة حساب وتوزيع الأرباح تلقائياً
+      const { error } = await supabase.rpc("calculate_company_capital");
+      if (!error) {
+        await supabase.rpc("distribute_profits_to_partners");
+        queryClient.invalidateQueries({ queryKey: ["company_capital"] });
+        queryClient.invalidateQueries({ queryKey: ["partners"] });
+      }
+      
       toast({
         title: "تم حذف المصروف بنجاح",
-        description: "تم حذف المصروف من النظام",
+        description: "تم حذف المصروف وإعادة توزيع الأرباح تلقائياً",
       });
     },
     onError: (error) => {

@@ -59,6 +59,15 @@ export default function DoctorPaymentDialog({ open, onOpenChange, doctor }: Doct
     if (!error) {
       toast({ title: "تم تسجيل الدفعة بنجاح" });
       queryClient.invalidateQueries({ queryKey: ["doctor_transactions"] });
+      
+      // إعادة حساب وتوزيع الأرباح تلقائياً
+      const { error: calcError } = await supabase.rpc("calculate_company_capital");
+      if (!calcError) {
+        await supabase.rpc("distribute_profits_to_partners");
+        queryClient.invalidateQueries({ queryKey: ["company_capital"] });
+        queryClient.invalidateQueries({ queryKey: ["partners"] });
+      }
+      
       onOpenChange(false);
       reset();
     } else {

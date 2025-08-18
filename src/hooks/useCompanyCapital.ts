@@ -26,12 +26,21 @@ export const useCalculateCompanyCapital = () => {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ["company_capital"] });
       queryClient.invalidateQueries({ queryKey: ["partners"] });
+      
+      // توزيع الأرباح تلقائياً بعد حساب رأس المال
+      const { error } = await supabase.rpc("distribute_profits_to_partners");
+      if (error) {
+        console.error("Error distributing profits:", error);
+      } else {
+        queryClient.invalidateQueries({ queryKey: ["partners"] });
+      }
+      
       toast({
-        title: "تم تحديث رأس المال",
-        description: "تم حساب صافي الربح وتحديث رأس المال بنجاح",
+        title: "تم تحديث رأس المال وتوزيع الأرباح",
+        description: "تم حساب صافي الربح وتوزيع الأرباح على الشركاء تلقائياً",
       });
     },
   });

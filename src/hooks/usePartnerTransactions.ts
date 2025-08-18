@@ -34,11 +34,20 @@ export const useAddPartnerTransaction = () => {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ["partner_transactions"] });
+      
+      // إعادة حساب وتوزيع الأرباح تلقائياً
+      const { error } = await supabase.rpc("calculate_company_capital");
+      if (!error) {
+        await supabase.rpc("distribute_profits_to_partners");
+        queryClient.invalidateQueries({ queryKey: ["company_capital"] });
+        queryClient.invalidateQueries({ queryKey: ["partners"] });
+      }
+      
       toast({
         title: "تم إضافة المعاملة بنجاح",
-        description: "تم حفظ بيانات المعاملة في النظام",
+        description: "تم حفظ بيانات المعاملة وإعادة توزيع الأرباح تلقائياً",
       });
     },
     onError: (error) => {
@@ -63,11 +72,20 @@ export const useDeletePartnerTransaction = () => {
         .eq("id", transactionId);
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ["partner_transactions"] });
+      
+      // إعادة حساب وتوزيع الأرباح تلقائياً
+      const { error } = await supabase.rpc("calculate_company_capital");
+      if (!error) {
+        await supabase.rpc("distribute_profits_to_partners");
+        queryClient.invalidateQueries({ queryKey: ["company_capital"] });
+        queryClient.invalidateQueries({ queryKey: ["partners"] });
+      }
+      
       toast({
         title: "تم حذف المعاملة",
-        description: "تم حذف المعاملة بنجاح",
+        description: "تم حذف المعاملة وإعادة توزيع الأرباح تلقائياً",
       });
     },
     onError: (error) => {
