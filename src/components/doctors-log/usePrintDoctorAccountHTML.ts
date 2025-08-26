@@ -71,12 +71,9 @@ export function usePrintDoctorAccountHTML() {
 
     // حساب عدد الأسنان المعالجة في الفترة
     const periodTeethCount = filteredCases.reduce((total: number, c: any) => {
-      if (c?.number_of_teeth && Number(c.number_of_teeth) > 0) {
-        return total + Number(c.number_of_teeth);
-      } else if (c?.tooth_number) {
-        return total + c.tooth_number.split(" ").filter(Boolean).length;
-      }
-      return total;
+      // أولوية للحقول: number_of_teeth، ثم teeth_count، ثم tooth_number كرقم
+      const teethCount = c.number_of_teeth || c.teeth_count || (c.tooth_number ? 1 : 0);
+      return total + (Number(teethCount) || 0);
     }, 0);
 
     // حساب الدين السابق (ما قبل الفترة المحددة)
