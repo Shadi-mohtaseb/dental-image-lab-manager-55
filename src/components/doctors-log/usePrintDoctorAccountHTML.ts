@@ -122,13 +122,16 @@ export function usePrintDoctorAccountHTML() {
             submissionDateField = String(c.submission_date).slice(0, 10);
           }
         }
-        return `
+    // حساب عدد الأسنان لهذه الحالة
+    const individualTeethCount = c.number_of_teeth || c.teeth_count || (c.tooth_number ? 1 : 0);
+    
+    return `
       <tr>
         <td>${c?.patient_name ?? ""}</td>
         <td>${c?.work_type ?? ""}</td>
         <td>${c?.shade ?? ""}</td>
         <td>${(c?.price != null && c?.price !== undefined && !isNaN(Number(c.price))) ? Number(c.price).toLocaleString() : ""}</td>
-        <td>${c?.number_of_teeth ?? ""}</td>
+        <td>${individualTeethCount || ""}</td>
         <td>${c?.tooth_number ?? ""}</td>
         <td>${c?.status ?? ""}</td>
         <td>${submissionDateField}</td>
