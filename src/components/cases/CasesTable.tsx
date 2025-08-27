@@ -3,6 +3,8 @@ import React, { useState } from "react";
 import { Eye, Edit, Trash2, Check, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { buildWhatsappLink } from "@/utils/whatsapp";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 interface CasesTableProps {
   cases: any[];
   onView?: (caseId: string) => void;
@@ -19,6 +21,29 @@ export function CasesTable({
   getStatusColor,
   onStatusChange
 }: CasesTableProps) {
+  // جلب جميع دفعات الأطباء لحساب الرصيد المتبقي
+  const { data: doctorPayments = [] } = useQuery({
+    queryKey: ["doctor_transactions"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("doctor_transactions")
+        .select("*");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  // جلب جميع الحالات لحساب المستحق
+  const { data: allCases = [] } = useQuery({
+    queryKey: ["cases"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("cases")
+        .select("*");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
   // دالة لإظهار السعر الإجمالي بناء على المشكلة المذكورة
   const getTotalPrice = (caseItem: any) => {
     if (caseItem.price && caseItem.teeth_count && Number(caseItem.teeth_count) > 1 && (Number(caseItem.price) === Number(caseItem.price) / Number(caseItem.teeth_count) || Number(caseItem.price) < 200)) {
@@ -46,9 +71,16 @@ export function CasesTable({
 
   // حساب المتبقي للطبيب (للرسالة)
   const getDoctorRemaining = (doctorId: string) => {
-    // هذا مؤقت - في الواقع نحتاج لجلب بيانات الدفعات
-    // لكن سنضع قيمة افتراضية للان
-    return 0;
+    // المستحق = مجموع أسعار الحالات لهذا الطبيب
+    const doctorCases = allCases.filter((c: any) => c.doctor_id === doctorId);
+    const totalCases = doctorCases.reduce((sum: number, c: any) => sum + (Number(c.price) || 0), 0);
+
+    // المدفوع = مجموع الدفعات من جدول doctor_transactions
+    const doctorTxs = doctorPayments.filter((tx: any) => tx.doctor_id === doctorId && tx.transaction_type === "دفعة");
+    const totalPayments = doctorTxs.reduce((sum: number, tx: any) => sum + (Number(tx.amount) || 0), 0);
+
+    // الباقي
+    return totalCases - totalPayments;
   };
 
   return <div className="overflow-x-auto bg-white rounded-lg shadow">
