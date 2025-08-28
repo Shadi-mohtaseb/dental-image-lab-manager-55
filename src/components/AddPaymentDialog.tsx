@@ -63,8 +63,14 @@ export default function AddPaymentDialog({ open: controlledOpen, onOpenChange: c
     setLoading(false);
 
     if (!error) {
+      // تحديث رأس المال وتوزيع الأرباح
+      await supabase.rpc("update_company_capital");
+      await supabase.rpc("distribute_profits_to_partners");
+      
       toast({ title: "تم تسجيل الدفعة بنجاح" });
       queryClient.invalidateQueries({ queryKey: ["doctor_transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["company_capital"] });
+      queryClient.invalidateQueries({ queryKey: ["partners"] });
       if (onOpenChange) onOpenChange(false);
       reset();
     } else {
