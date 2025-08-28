@@ -9,7 +9,9 @@ import {
   Calendar,
   DollarSign,
   Activity,
-  Wallet
+  Wallet,
+  Plus,
+  CreditCard
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useCases } from "@/hooks/useCases";
@@ -20,6 +22,9 @@ import { useFinancialSummary } from "@/hooks/useFinancialSummary";
 import { usePartnerTransactions } from "@/hooks/usePartnerTransactions";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { AddCaseDialog } from "@/components/AddCaseDialog";
+import { AddExpenseDialog } from "@/components/AddExpenseDialog";
+import AddPaymentDialog from "@/components/AddPaymentDialog";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -173,6 +178,23 @@ const Index = () => {
           {todayGregorian} - لوحة التحكم الرئيسية
         </p>
       </div>
+
+      {/* Quick Shortcuts */}
+      <Card className="animate-slide-up">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Plus className="w-5 h-5" />
+            اختصارات سريعة
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <AddCaseDialog />
+            <AddExpenseDialog />
+            <AddPaymentDialog />
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Quick Actions */}
       <Card className="animate-slide-up">
