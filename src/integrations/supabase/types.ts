@@ -253,6 +253,7 @@ export type Database = {
       }
       doctors: {
         Row: {
+          access_token: string | null
           created_at: string
           id: string
           name: string
@@ -260,6 +261,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          access_token?: string | null
           created_at?: string
           id?: string
           name: string
@@ -267,6 +269,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          access_token?: string | null
           created_at?: string
           id?: string
           name?: string
@@ -450,6 +453,10 @@ export type Database = {
       distribute_profits_to_partners: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      generate_doctor_access_token: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
       update_company_capital: {
         Args: Record<PropertyKey, never>

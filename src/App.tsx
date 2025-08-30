@@ -17,6 +17,8 @@ import NotFound from "./pages/NotFound";
 import Settings from "./pages/Settings";
 import Checks from "./pages/Checks";
 
+import DoctorDashboard from "./pages/DoctorDashboard";
+
 // Lazy load DoctorDetails
 const DoctorDetails = lazy(() => import("./pages/DoctorDetails"));
 
@@ -49,41 +51,43 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <SidebarProvider>
-          {/* بنية منطقية: الشريط والمحتوى داخل نفس Flex — السايدبار يمين، المحتوى يسار */}
-          <div className="flex w-full min-h-screen">
-            {/* السايدبار (على اليمين في الـrtl) */}
-            <AppSidebar />
-            {/* المحتوى الرئيسي */}
-            <MainContent>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/partnership-accounts" element={<PartnershipAccounts />} />
-                {/* حذف صفحة سجل/إحصائيات الأطباء وتحويلها لقائمة الأطباء */}
-                <Route path="/doctors-dashboard" element={<Navigate to="/doctors-accounts" replace />} />
-                <Route path="/doctors-accounts" element={<DoctorsAccounts />} />
-                <Route path="/doctors-log" element={<Navigate to="/doctors-accounts" replace />} />
-                <Route path="/expenses" element={<Expenses />} />
-                <Route path="/cases" element={<Cases />} />
-                <Route path="/case/:id" element={<CaseDetails />} />
-                <Route path="/checks" element={<Checks />} />
-                <Route path="/settings" element={<Settings />} />
-                {/* إعادة توجيه صفحة دفعات الأطباء إلى حسابات الأطباء */}
-                <Route path="/doctors-payments" element={<Navigate to="/doctors-accounts" replace />} />
-                {/* إصلاح اللودينج هنا باستخدام React.lazy و Suspense */}
-                <Route
-                  path="/doctor/:id"
-                  element={
-                    <Suspense fallback={<div className="p-8 text-center text-lg">جاري التحميل...</div>}>
-                      <DoctorDetails />
-                    </Suspense>
-                  }
-                />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </MainContent>
-          </div>
-        </SidebarProvider>
+        <Routes>
+          {/* صفحة الطبيب بدون سايدبار */}
+          <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
+          
+          {/* باقي الصفحات مع السايدبار */}
+          <Route path="/*" element={
+            <SidebarProvider>
+              <div className="flex w-full min-h-screen">
+                <AppSidebar />
+                <MainContent>
+                  <Routes>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/partnership-accounts" element={<PartnershipAccounts />} />
+                    <Route path="/doctors-dashboard" element={<Navigate to="/doctors-accounts" replace />} />
+                    <Route path="/doctors-accounts" element={<DoctorsAccounts />} />
+                    <Route path="/doctors-log" element={<Navigate to="/doctors-accounts" replace />} />
+                    <Route path="/expenses" element={<Expenses />} />
+                    <Route path="/cases" element={<Cases />} />
+                    <Route path="/case/:id" element={<CaseDetails />} />
+                    <Route path="/checks" element={<Checks />} />
+                    <Route path="/settings" element={<Settings />} />
+                    <Route path="/doctors-payments" element={<Navigate to="/doctors-accounts" replace />} />
+                    <Route
+                      path="/doctor/:id"
+                      element={
+                        <Suspense fallback={<div className="p-8 text-center text-lg">جاري التحميل...</div>}>
+                          <DoctorDetails />
+                        </Suspense>
+                      }
+                    />
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </MainContent>
+              </div>
+            </SidebarProvider>
+          } />
+        </Routes>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
