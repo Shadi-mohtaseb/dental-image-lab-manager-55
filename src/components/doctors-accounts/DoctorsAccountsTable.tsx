@@ -5,6 +5,9 @@ import { DoctorAccountPDFButton } from "@/components/doctors-log/DoctorAccountPD
 import { EditDoctorDialog } from "@/components/EditDoctorDialog";
 import type { Doctor } from "@/hooks/useDoctors";
 import { useDeleteDoctor } from "@/hooks/useDoctors";
+import { useUpdateDoctorAccessToken } from "@/hooks/useUpdateDoctorAccessToken";
+import { Copy, RefreshCw } from "lucide-react";
+import { toast } from "sonner";
 
 // doctorPayments is new!
 interface Props {
@@ -34,6 +37,7 @@ function getDoctorFinancialSummaryForTable(doctorId: string, cases: any[], docto
 
 export default function DoctorsAccountsTable({ doctors, cases, doctorPayments }: Props) {
   const deleteDoctor = useDeleteDoctor();
+  const updateAccessToken = useUpdateDoctorAccessToken();
 
   // دالة لحساب إجمالي الأسنان لطبيب معيّن بناءً على كل حالاته - الحساب من teeth_count فقط
   const calcTotalTeeth = (doctor_id: string) => {
@@ -51,6 +55,18 @@ export default function DoctorsAccountsTable({ doctors, cases, doctorPayments }:
   const handleDelete = (id: string) => {
     if (window.confirm("هل أنت متأكد من حذف الطبيب؟")) {
       deleteDoctor.mutate(id);
+    }
+  };
+
+  const handleCopyLink = (accessToken: string) => {
+    const link = `${window.location.origin}/doctor-dashboard/${accessToken}`;
+    navigator.clipboard.writeText(link);
+    toast.success("تم نسخ الرابط بنجاح");
+  };
+
+  const handleRegenerateToken = (doctorId: string) => {
+    if (window.confirm("هل أنت متأكد من تغيير رابط الطبيب؟ الرابط القديم سيتوقف عن العمل.")) {
+      updateAccessToken.mutate(doctorId);
     }
   };
 
@@ -78,9 +94,10 @@ export default function DoctorsAccountsTable({ doctors, cases, doctorPayments }:
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="text-right w-[200px]">اسم الطبيب</TableHead>
-              <TableHead className="text-center w-[140px]">إجمالي الأسنان</TableHead>
-              <TableHead className="text-center w-[120px]">PDF</TableHead>
+              <TableHead className="text-right w-[180px]">اسم الطبيب</TableHead>
+              <TableHead className="text-center w-[120px]">إجمالي الأسنان</TableHead>
+              <TableHead className="text-center w-[300px]">رابط الطبيب</TableHead>
+              <TableHead className="text-center w-[100px]">PDF</TableHead>
               <TableHead className="text-center w-[195px]">إجراءات</TableHead>
             </TableRow>
           </TableHeader>
@@ -92,13 +109,49 @@ export default function DoctorsAccountsTable({ doctors, cases, doctorPayments }:
 
               return (
                 <TableRow key={doctor.id} className="hover:bg-gray-50">
-                  <TableCell className="font-semibold text-primary text-right w-[200px]">
+                  <TableCell className="font-semibold text-primary text-right w-[180px]">
                     {doctor.name}
                   </TableCell>
-                  <TableCell className="text-center w-[140px]">
+                  <TableCell className="text-center w-[120px]">
                     <span className="text-sm font-bold">{calcTotalTeeth(doctor.id)}</span>
                   </TableCell>
-                  <TableCell className="text-center w-[120px]">
+                  <TableCell className="w-[300px]">
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs text-gray-500 mb-1">رابط لوحة التحكم:</div>
+                        <div className="text-xs bg-gray-50 p-2 rounded border truncate" dir="ltr">
+                          {doctor.access_token ? 
+                            `${window.location.origin}/doctor-dashboard/${doctor.access_token}` : 
+                            "لا يوجد رابط"
+                          }
+                        </div>
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        {doctor.access_token && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleCopyLink(doctor.access_token!)}
+                            className="p-1 h-8 w-8"
+                            title="نسخ الرابط"
+                          >
+                            <Copy className="h-3 w-3" />
+                          </Button>
+                        )}
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleRegenerateToken(doctor.id)}
+                          className="p-1 h-8 w-8 text-orange-600 hover:bg-orange-50"
+                          title="تجديد الرابط"
+                          disabled={updateAccessToken.isPending}
+                        >
+                          <RefreshCw className={`h-3 w-3 ${updateAccessToken.isPending ? 'animate-spin' : ''}`} />
+                        </Button>
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-center w-[100px]">
                     <DoctorAccountPDFButton
                       doctorName={doctor.name}
                       summary={{ totalDue, totalPaid, remaining }}

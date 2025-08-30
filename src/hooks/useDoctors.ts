@@ -8,6 +8,7 @@ export type Doctor = {
   id: string;
   name: string;
   phone?: string | null;
+  access_token?: string | null;
   created_at?: string;
   updated_at?: string;
 };
@@ -18,20 +19,20 @@ export type DoctorInsert = {
   workTypePrices?: Record<string, number>;
 };
 
-// جلب الأطباء
 export const useDoctors = () => {
   return useQuery({
     queryKey: ["doctors"],
     queryFn: async (): Promise<Doctor[]> => {
       const { data, error } = await supabase
         .from("doctors")
-        .select("id, name, phone, created_at, updated_at")
+        .select("id, name, phone, access_token, created_at, updated_at")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return (data ?? []).map((row) => ({
         id: row.id,
         name: row.name,
         phone: row.phone ?? "",
+        access_token: row.access_token,
         created_at: row.created_at,
         updated_at: row.updated_at,
       }));
