@@ -14,7 +14,9 @@ export function useDoctorByToken(accessToken: string) {
   return useQuery({
     queryKey: ["doctor-by-token", accessToken],
     queryFn: async (): Promise<DoctorWithData | null> => {
+      console.log("useDoctorByToken called with token:", accessToken);
       if (!accessToken) {
+        console.log("No access token provided");
         throw new Error("Access token is required");
       }
 

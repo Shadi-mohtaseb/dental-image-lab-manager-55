@@ -14,6 +14,8 @@ const DoctorDashboard = () => {
   const [searchParams] = useSearchParams();
   const accessToken = searchParams.get("token") || "";
   
+  console.log("DoctorDashboard loaded, token:", accessToken);
+  
   const [searchFilters, setSearchFilters] = useState<SearchFilters>({
     patientName: "",
     invoiceNumber: "",
