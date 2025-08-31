@@ -53,6 +53,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           {/* صفحة الطبيب بدون سايدبار */}
+          <Route path="/doctor" element={<DoctorDashboard />} />
           <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
           
           {/* باقي الصفحات مع السايدبار */}
