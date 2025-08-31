@@ -59,7 +59,7 @@ export default function DoctorsAccountsTable({ doctors, cases, doctorPayments }:
   };
 
   const handleCopyLink = (accessToken: string) => {
-    const link = `${window.location.origin}/doctor-dashboard/${accessToken}`;
+    const link = `${window.location.origin}/doctor-dashboard?token=${accessToken}`;
     navigator.clipboard.writeText(link);
     toast.success("تم نسخ الرابط بنجاح");
   };
@@ -121,7 +121,7 @@ export default function DoctorsAccountsTable({ doctors, cases, doctorPayments }:
                         <div className="text-xs text-gray-500 mb-1">رابط لوحة التحكم:</div>
                         <div className="text-xs bg-gray-50 p-2 rounded border truncate" dir="ltr">
                           {doctor.access_token ? 
-                            `${window.location.origin}/doctor-dashboard/${doctor.access_token}` : 
+                            `${window.location.origin}/doctor-dashboard?token=${doctor.access_token}` : 
                             "لا يوجد رابط"
                           }
                         </div>
