@@ -123,11 +123,20 @@ export const useUpdateExpense = () => {
       if (error) throw error;
       return expense;
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ["expenses"] });
+      
+      // إعادة حساب وتوزيع الأرباح تلقائياً
+      const { error: updateError } = await supabase.rpc("update_company_capital");
+      if (!updateError) {
+        await supabase.rpc("distribute_profits_to_partners");
+        queryClient.invalidateQueries({ queryKey: ["company_capital"] });
+        queryClient.invalidateQueries({ queryKey: ["partners"] });
+      }
+      
       toast({
         title: "تم تعديل المصروف بنجاح",
-        description: "تم حفظ التعديلات",
+        description: "تم حفظ التعديلات وإعادة توزيع الأرباح تلقائياً",
       });
     },
     onError: (error) => {
