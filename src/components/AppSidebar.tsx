@@ -156,7 +156,15 @@ export function AppSidebar() {
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton asChild>
-                <button className="flex items-center gap-3 w-full text-sidebar-foreground/70 hover:text-sidebar-foreground">
+                <button onClick={handleChangePassword} className="flex items-center gap-3 w-full text-sidebar-foreground/70 hover:text-sidebar-foreground">
+                  <KeyRound className="w-5 h-5" />
+                  <span>تغيير كلمة المرور</span>
+                </button>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild>
+                <button onClick={handleLogout} className="flex items-center gap-3 w-full text-red-400 hover:text-red-300">
                   <LogOut className="w-5 h-5" />
                   <span>تسجيل الخروج</span>
                 </button>
