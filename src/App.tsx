@@ -51,6 +51,7 @@ const App = () => (
         <Routes>
           {/* صفحة تسجيل الدخول */}
           <Route path="/login" element={<Login />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
 
           {/* صفحة الطبيب - متاحة بدون تسجيل دخول عبر access_token */}
           <Route path="/doctor" element={<DoctorDashboard />} />
