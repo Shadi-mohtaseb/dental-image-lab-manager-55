@@ -43,8 +43,31 @@ export function AppSidebar() {
     open,
     isMobile
   } = useSidebar();
+  const { toast } = useToast();
   const [labName, setLabName] = useState("مختبر الأسنان");
   const [labLogo, setLabLogo] = useState("");
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate("/login");
+    toast({ title: "تم تسجيل الخروج بنجاح" });
+  };
+
+  const handleChangePassword = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user?.email) {
+      toast({ title: "خطأ", description: "لم يتم العثور على البريد الإلكتروني", variant: "destructive" });
+      return;
+    }
+    const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    if (error) {
+      toast({ title: "خطأ", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "تم الإرسال", description: "تم إرسال رابط تغيير كلمة المرور إلى بريدك الإلكتروني" });
+    }
+  };
 
   // تحميل اسم المختبر والشعار من localStorage عند بدء التشغيل
   useEffect(() => {
