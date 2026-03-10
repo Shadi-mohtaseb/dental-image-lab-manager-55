@@ -17,6 +17,7 @@ import CaseDetails from "./pages/CaseDetails";
 import Settings from "./pages/Settings";
 import Checks from "./pages/Checks";
 import Login from "./pages/Login";
+import ResetPassword from "./pages/ResetPassword";
 import DoctorDashboard from "./pages/DoctorDashboard";
 
 const DoctorDetails = lazy(() => import("./pages/DoctorDetails"));
@@ -50,6 +51,7 @@ const App = () => (
         <Routes>
           {/* صفحة تسجيل الدخول */}
           <Route path="/login" element={<Login />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
 
           {/* صفحة الطبيب - متاحة بدون تسجيل دخول عبر access_token */}
           <Route path="/doctor" element={<DoctorDashboard />} />

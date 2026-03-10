@@ -1,7 +1,9 @@
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
-import { Users, Receipt, FileText, Search, PlusCircle, BarChart3, Settings, LogOut } from "lucide-react";
+import { Users, Receipt, FileText, Search, PlusCircle, BarChart3, Settings, LogOut, KeyRound } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 // صورة الخلفية المرفوعة:
 const sidebarBg = "/lovable-uploads/d177bd6f-d2eb-4db8-996a-e2a94b42a9da.png";
@@ -41,8 +43,31 @@ export function AppSidebar() {
     open,
     isMobile
   } = useSidebar();
+  const { toast } = useToast();
   const [labName, setLabName] = useState("مختبر الأسنان");
   const [labLogo, setLabLogo] = useState("");
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate("/login");
+    toast({ title: "تم تسجيل الخروج بنجاح" });
+  };
+
+  const handleChangePassword = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user?.email) {
+      toast({ title: "خطأ", description: "لم يتم العثور على البريد الإلكتروني", variant: "destructive" });
+      return;
+    }
+    const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    if (error) {
+      toast({ title: "خطأ", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "تم الإرسال", description: "تم إرسال رابط تغيير كلمة المرور إلى بريدك الإلكتروني" });
+    }
+  };
 
   // تحميل اسم المختبر والشعار من localStorage عند بدء التشغيل
   useEffect(() => {
@@ -131,7 +156,15 @@ export function AppSidebar() {
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton asChild>
-                <button className="flex items-center gap-3 w-full text-sidebar-foreground/70 hover:text-sidebar-foreground">
+                <button onClick={handleChangePassword} className="flex items-center gap-3 w-full text-sidebar-foreground/70 hover:text-sidebar-foreground">
+                  <KeyRound className="w-5 h-5" />
+                  <span>تغيير كلمة المرور</span>
+                </button>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild>
+                <button onClick={handleLogout} className="flex items-center gap-3 w-full text-red-400 hover:text-red-300">
                   <LogOut className="w-5 h-5" />
                   <span>تسجيل الخروج</span>
                 </button>
