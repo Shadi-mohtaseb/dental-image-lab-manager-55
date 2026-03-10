@@ -7,36 +7,32 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import PartnershipAccounts from "./pages/PartnershipAccounts";
 import DoctorsAccounts from "./pages/DoctorsAccounts";
 import Expenses from "./pages/Expenses";
 import Cases from "./pages/Cases";
 import CaseDetails from "./pages/CaseDetails";
-import NotFound from "./pages/NotFound";
 import Settings from "./pages/Settings";
 import Checks from "./pages/Checks";
-
+import Login from "./pages/Login";
 import DoctorDashboard from "./pages/DoctorDashboard";
 
-// Lazy load DoctorDetails
 const DoctorDetails = lazy(() => import("./pages/DoctorDetails"));
 
-// Create QueryClient instance outside of component to prevent recreation on every render
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 5, // 5 minutes
+      staleTime: 1000 * 60 * 5,
       retry: 1,
     },
   },
 });
 
-// مكون للمحتوى الرئيسي بدون الهامش — لأن الهيكل الجديد سيتعامل مع ترتيب السايدبار والمين تلقائياً
 function MainContent({ children }: { children: React.ReactNode }) {
   return (
     <main className="flex-1 min-h-screen bg-gray-50 relative transition-all duration-300">
-      {/* زر اظهار السايدبار في أعلى content */}
       <div className="flex justify-start items-center mb-4 mt-6 mr-4">
         <SidebarTrigger />
       </div>
@@ -52,41 +48,46 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          {/* صفحة الطبيب بدون سايدبار */}
+          {/* صفحة تسجيل الدخول */}
+          <Route path="/login" element={<Login />} />
+
+          {/* صفحة الطبيب - متاحة بدون تسجيل دخول عبر access_token */}
           <Route path="/doctor" element={<DoctorDashboard />} />
           <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
-          
-          {/* باقي الصفحات مع السايدبار */}
+
+          {/* صفحات الإدارة - محمية بتسجيل الدخول */}
           <Route path="/*" element={
-            <SidebarProvider>
-              <div className="flex w-full min-h-screen">
-                <AppSidebar />
-                <MainContent>
-                  <Routes>
-                    <Route path="/" element={<Index />} />
-                    <Route path="/partnership-accounts" element={<PartnershipAccounts />} />
-                    <Route path="/doctors-dashboard" element={<Navigate to="/doctors-accounts" replace />} />
-                    <Route path="/doctors-accounts" element={<DoctorsAccounts />} />
-                    <Route path="/doctors-log" element={<Navigate to="/doctors-accounts" replace />} />
-                    <Route path="/expenses" element={<Expenses />} />
-                    <Route path="/cases" element={<Cases />} />
-                    <Route path="/case/:id" element={<CaseDetails />} />
-                    <Route path="/checks" element={<Checks />} />
-                    <Route path="/settings" element={<Settings />} />
-                    <Route path="/doctors-payments" element={<Navigate to="/doctors-accounts" replace />} />
-                    <Route
-                      path="/doctor/:id"
-                      element={
-                        <Suspense fallback={<div className="p-8 text-center text-lg">جاري التحميل...</div>}>
-                          <DoctorDetails />
-                        </Suspense>
-                      }
-                    />
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </MainContent>
-              </div>
-            </SidebarProvider>
+            <ProtectedRoute>
+              <SidebarProvider>
+                <div className="flex w-full min-h-screen">
+                  <AppSidebar />
+                  <MainContent>
+                    <Routes>
+                      <Route path="/" element={<Index />} />
+                      <Route path="/partnership-accounts" element={<PartnershipAccounts />} />
+                      <Route path="/doctors-dashboard" element={<Navigate to="/doctors-accounts" replace />} />
+                      <Route path="/doctors-accounts" element={<DoctorsAccounts />} />
+                      <Route path="/doctors-log" element={<Navigate to="/doctors-accounts" replace />} />
+                      <Route path="/expenses" element={<Expenses />} />
+                      <Route path="/cases" element={<Cases />} />
+                      <Route path="/case/:id" element={<CaseDetails />} />
+                      <Route path="/checks" element={<Checks />} />
+                      <Route path="/settings" element={<Settings />} />
+                      <Route path="/doctors-payments" element={<Navigate to="/doctors-accounts" replace />} />
+                      <Route
+                        path="/doctor/:id"
+                        element={
+                          <Suspense fallback={<div className="p-8 text-center text-lg">جاري التحميل...</div>}>
+                            <DoctorDetails />
+                          </Suspense>
+                        }
+                      />
+                      <Route path="*" element={<Navigate to="/login" replace />} />
+                    </Routes>
+                  </MainContent>
+                </div>
+              </SidebarProvider>
+            </ProtectedRoute>
           } />
         </Routes>
       </BrowserRouter>

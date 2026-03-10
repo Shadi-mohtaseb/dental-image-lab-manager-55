@@ -446,22 +446,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      calculate_company_capital: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
-      distribute_profits_to_partners: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      generate_doctor_access_token: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
-      update_company_capital: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      calculate_company_capital: { Args: never; Returns: number }
+      distribute_profits_to_partners: { Args: never; Returns: undefined }
+      generate_doctor_access_token: { Args: never; Returns: string }
+      update_company_capital: { Args: never; Returns: undefined }
     }
     Enums: {
       [_ in never]: never
