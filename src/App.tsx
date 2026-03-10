@@ -17,6 +17,7 @@ import CaseDetails from "./pages/CaseDetails";
 import Settings from "./pages/Settings";
 import Checks from "./pages/Checks";
 import Login from "./pages/Login";
+import ResetPassword from "./pages/ResetPassword";
 import DoctorDashboard from "./pages/DoctorDashboard";
 
 const DoctorDetails = lazy(() => import("./pages/DoctorDetails"));
