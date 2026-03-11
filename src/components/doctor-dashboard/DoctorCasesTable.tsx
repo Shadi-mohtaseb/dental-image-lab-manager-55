@@ -101,7 +101,7 @@ export function DoctorCasesTable({ cases }: DoctorCasesTableProps) {
                     <TableCell>{caseRow.tooth_number || "-"}</TableCell>
                     <TableCell>{getTeethCount(caseRow)}</TableCell>
                     <TableCell className="font-semibold">
-                      {Number(caseRow.price).toFixed(2)} ر.س
+                      {Number(caseRow.price).toFixed(2)}
                     </TableCell>
                     <TableCell>
                       <Badge variant={getStatusVariant(caseRow.status)}>
