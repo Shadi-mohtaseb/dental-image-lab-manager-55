@@ -79,7 +79,7 @@ export function DoctorTransactionsTable({ transactions }: DoctorTransactionsTabl
                       </Badge>
                     </TableCell>
                     <TableCell className="font-semibold">
-                      {Number(transaction.amount).toFixed(2)} ر.س
+                      {Number(transaction.amount).toFixed(2)}
                     </TableCell>
                     <TableCell>{transaction.payment_method || "-"}</TableCell>
                     <TableCell>

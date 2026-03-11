@@ -166,7 +166,7 @@ const DoctorDashboard = () => {
 
         {/* Transactions Table */}
         <div className="mb-6">
-          <DoctorTransactionsTable transactions={doctorData.transactions} />
+          <DoctorTransactionsTable transactions={[...doctorData.transactions].sort((a, b) => new Date(b.transaction_date).getTime() - new Date(a.transaction_date).getTime())} />
         </div>
 
         {/* Footer */}
