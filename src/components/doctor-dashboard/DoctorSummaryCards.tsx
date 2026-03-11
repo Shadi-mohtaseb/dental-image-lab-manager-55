@@ -42,7 +42,7 @@ export function DoctorSummaryCards({
           <div className="text-2xl font-bold text-green-600">
             {totalPayments.toFixed(2)}
           </div>
-          <p className="text-xs text-muted-foreground">ريال سعودي</p>
+          <p className="text-xs text-muted-foreground"></p>
         </CardContent>
       </Card>
 
