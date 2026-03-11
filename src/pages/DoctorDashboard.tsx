@@ -54,22 +54,24 @@ const DoctorDashboard = () => {
   const filteredCases = useMemo(() => {
     if (!doctorData) return [];
     
-    return doctorData.cases.filter(caseItem => {
-      const matchesPatientName = !searchFilters.patientName || 
-        caseItem.patient_name?.toLowerCase().includes(searchFilters.patientName.toLowerCase());
-      
-      const matchesInvoiceNumber = !searchFilters.invoiceNumber || 
-        caseItem.id?.includes(searchFilters.invoiceNumber) ||
-        caseItem.tooth_number?.includes(searchFilters.invoiceNumber);
-      
-      const matchesFromDate = !searchFilters.fromDate || 
-        new Date(caseItem.submission_date) >= new Date(searchFilters.fromDate);
-      
-      const matchesToDate = !searchFilters.toDate || 
-        new Date(caseItem.submission_date) <= new Date(searchFilters.toDate);
+    return doctorData.cases
+      .filter(caseItem => {
+        const matchesPatientName = !searchFilters.patientName || 
+          caseItem.patient_name?.toLowerCase().includes(searchFilters.patientName.toLowerCase());
+        
+        const matchesInvoiceNumber = !searchFilters.invoiceNumber || 
+          caseItem.id?.includes(searchFilters.invoiceNumber) ||
+          caseItem.tooth_number?.includes(searchFilters.invoiceNumber);
+        
+        const matchesFromDate = !searchFilters.fromDate || 
+          new Date(caseItem.submission_date) >= new Date(searchFilters.fromDate);
+        
+        const matchesToDate = !searchFilters.toDate || 
+          new Date(caseItem.submission_date) <= new Date(searchFilters.toDate);
 
-      return matchesPatientName && matchesInvoiceNumber && matchesFromDate && matchesToDate;
-    });
+        return matchesPatientName && matchesInvoiceNumber && matchesFromDate && matchesToDate;
+      })
+      .sort((a, b) => new Date(b.submission_date).getTime() - new Date(a.submission_date).getTime());
   }, [doctorData, searchFilters]);
 
   const activeFiltersCount = Object.values(searchFilters).filter(value => value.trim() !== "").length;
