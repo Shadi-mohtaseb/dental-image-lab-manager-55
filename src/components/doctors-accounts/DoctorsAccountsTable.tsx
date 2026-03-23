@@ -6,11 +6,14 @@ import { EditDoctorDialog } from "@/components/EditDoctorDialog";
 import type { Doctor } from "@/hooks/useDoctors";
 import { useDeleteDoctor } from "@/hooks/useDoctors";
 import { useUpdateDoctorAccessToken } from "@/hooks/useUpdateDoctorAccessToken";
-import { Copy, RefreshCw, MessageCircle } from "lucide-react";
+import { Copy, RefreshCw, MessageCircle, Search } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { buildWhatsappLink } from "@/utils/whatsapp";
 import AddPaymentDialog from "@/components/AddPaymentDialog";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useState, useMemo } from "react";
 
 interface Props {
   doctors: Doctor[];
@@ -31,6 +34,20 @@ function getDoctorFinancialSummary(doctorId: string, cases: any[], doctorPayment
 export default function DoctorsAccountsTable({ doctors, cases, doctorPayments }: Props) {
   const deleteDoctor = useDeleteDoctor();
   const updateAccessToken = useUpdateDoctorAccessToken();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debtFilter, setDebtFilter] = useState<string>("all");
+
+  const filteredDoctors = useMemo(() => {
+    return doctors.filter((doctor) => {
+      const matchesSearch = doctor.name.toLowerCase().includes(searchQuery.toLowerCase());
+      if (!matchesSearch) return false;
+      if (debtFilter === "all") return true;
+      const { remaining } = getDoctorFinancialSummary(doctor.id, cases, doctorPayments);
+      if (debtFilter === "has_debt") return remaining > 0;
+      if (debtFilter === "no_debt") return remaining <= 0;
+      return true;
+    });
+  }, [doctors, searchQuery, debtFilter, cases, doctorPayments]);
 
   const calcTotalTeeth = (doctor_id: string) => {
     const doctorCases = cases.filter((c) => c.doctor_id === doctor_id);
@@ -82,11 +99,32 @@ export default function DoctorsAccountsTable({ doctors, cases, doctorPayments }:
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>قائمة الأطباء ({doctors.length})</CardTitle>
+      <CardHeader className="flex flex-row items-center justify-between flex-wrap gap-2">
+        <CardTitle>قائمة الأطباء ({filteredDoctors.length})</CardTitle>
         <AddPaymentDialog />
       </CardHeader>
       <CardContent>
+        <div className="flex flex-col sm:flex-row gap-3 mb-4">
+          <div className="relative flex-1">
+            <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="بحث باسم الطبيب..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pr-9"
+            />
+          </div>
+          <Select value={debtFilter} onValueChange={setDebtFilter}>
+            <SelectTrigger className="w-full sm:w-[180px]">
+              <SelectValue placeholder="فلترة حسب الدين" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">الكل</SelectItem>
+              <SelectItem value="has_debt">عليه دين</SelectItem>
+              <SelectItem value="no_debt">بدون دين</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
@@ -103,7 +141,14 @@ export default function DoctorsAccountsTable({ doctors, cases, doctorPayments }:
               </TableRow>
             </TableHeader>
             <TableBody>
-              {doctors.map((doctor) => {
+              {filteredDoctors.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={9} className="text-center text-muted-foreground py-8">
+                    لا توجد نتائج مطابقة
+                  </TableCell>
+                </TableRow>
+              ) : null}
+              {filteredDoctors.map((doctor) => {
                 const { totalDue, totalPaid, remaining, doctorCases } =
                   getDoctorFinancialSummary(doctor.id, cases, doctorPayments);
 
