@@ -77,11 +77,8 @@ const DoctorsAccounts = () => {
         <AddDoctorDialog />
       </div>
 
-      {/* جدول الأطباء */}
+      {/* جدول الأطباء الموحد */}
       <DoctorsAccountsTable doctors={validDoctors} cases={cases} doctorPayments={doctorPayments} />
-
-      {/* تبويب دفعات الأطباء */}
-      <DoctorsPaymentsTableSection />
 
       {/* سجل دفعات الأطباء */}
       <DoctorsPaymentsLogSection />
