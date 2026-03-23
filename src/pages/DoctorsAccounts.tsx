@@ -5,7 +5,6 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { AddDoctorDialog } from "@/components/AddDoctorDialog";
 import DoctorsAccountsTable from "@/components/doctors-accounts/DoctorsAccountsTable";
-import DoctorsPaymentsTableSection from "@/components/doctors-accounts/DoctorsPaymentsTableSection";
 import DoctorsPaymentsLogSection from "@/components/doctors-accounts/DoctorsPaymentsLogSection";
 
 // صفحة حسابات الأطباء (مقسمة لأجزاء مركبة)
