@@ -34,6 +34,20 @@ function getDoctorFinancialSummary(doctorId: string, cases: any[], doctorPayment
 export default function DoctorsAccountsTable({ doctors, cases, doctorPayments }: Props) {
   const deleteDoctor = useDeleteDoctor();
   const updateAccessToken = useUpdateDoctorAccessToken();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debtFilter, setDebtFilter] = useState<string>("all");
+
+  const filteredDoctors = useMemo(() => {
+    return doctors.filter((doctor) => {
+      const matchesSearch = doctor.name.toLowerCase().includes(searchQuery.toLowerCase());
+      if (!matchesSearch) return false;
+      if (debtFilter === "all") return true;
+      const { remaining } = getDoctorFinancialSummary(doctor.id, cases, doctorPayments);
+      if (debtFilter === "has_debt") return remaining > 0;
+      if (debtFilter === "no_debt") return remaining <= 0;
+      return true;
+    });
+  }, [doctors, searchQuery, debtFilter, cases, doctorPayments]);
 
   const calcTotalTeeth = (doctor_id: string) => {
     const doctorCases = cases.filter((c) => c.doctor_id === doctor_id);
