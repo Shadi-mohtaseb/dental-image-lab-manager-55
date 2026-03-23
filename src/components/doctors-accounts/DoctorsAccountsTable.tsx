@@ -6,11 +6,14 @@ import { EditDoctorDialog } from "@/components/EditDoctorDialog";
 import type { Doctor } from "@/hooks/useDoctors";
 import { useDeleteDoctor } from "@/hooks/useDoctors";
 import { useUpdateDoctorAccessToken } from "@/hooks/useUpdateDoctorAccessToken";
-import { Copy, RefreshCw, MessageCircle } from "lucide-react";
+import { Copy, RefreshCw, MessageCircle, Search } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { buildWhatsappLink } from "@/utils/whatsapp";
 import AddPaymentDialog from "@/components/AddPaymentDialog";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useState, useMemo } from "react";
 
 interface Props {
   doctors: Doctor[];
