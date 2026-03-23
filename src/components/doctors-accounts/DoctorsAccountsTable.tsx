@@ -99,11 +99,32 @@ export default function DoctorsAccountsTable({ doctors, cases, doctorPayments }:
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>قائمة الأطباء ({doctors.length})</CardTitle>
+      <CardHeader className="flex flex-row items-center justify-between flex-wrap gap-2">
+        <CardTitle>قائمة الأطباء ({filteredDoctors.length})</CardTitle>
         <AddPaymentDialog />
       </CardHeader>
       <CardContent>
+        <div className="flex flex-col sm:flex-row gap-3 mb-4">
+          <div className="relative flex-1">
+            <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="بحث باسم الطبيب..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pr-9"
+            />
+          </div>
+          <Select value={debtFilter} onValueChange={setDebtFilter}>
+            <SelectTrigger className="w-full sm:w-[180px]">
+              <SelectValue placeholder="فلترة حسب الدين" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">الكل</SelectItem>
+              <SelectItem value="has_debt">عليه دين</SelectItem>
+              <SelectItem value="no_debt">بدون دين</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
@@ -120,7 +141,14 @@ export default function DoctorsAccountsTable({ doctors, cases, doctorPayments }:
               </TableRow>
             </TableHeader>
             <TableBody>
-              {doctors.map((doctor) => {
+              {filteredDoctors.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={9} className="text-center text-muted-foreground py-8">
+                    لا توجد نتائج مطابقة
+                  </TableCell>
+                </TableRow>
+              ) : null}
+              {filteredDoctors.map((doctor) => {
                 const { totalDue, totalPaid, remaining, doctorCases } =
                   getDoctorFinancialSummary(doctor.id, cases, doctorPayments);
 
