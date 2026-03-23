@@ -6,45 +6,36 @@ import { EditDoctorDialog } from "@/components/EditDoctorDialog";
 import type { Doctor } from "@/hooks/useDoctors";
 import { useDeleteDoctor } from "@/hooks/useDoctors";
 import { useUpdateDoctorAccessToken } from "@/hooks/useUpdateDoctorAccessToken";
-import { Copy, RefreshCw } from "lucide-react";
+import { Copy, RefreshCw, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
+import { buildWhatsappLink } from "@/utils/whatsapp";
+import AddPaymentDialog from "@/components/AddPaymentDialog";
 
-// doctorPayments is new!
 interface Props {
   doctors: Doctor[];
   cases: any[];
   doctorPayments: any[];
 }
 
-// حساب ملخص الطبيب المالي بناءً على جميع الحالات والمدفوعات
-function getDoctorFinancialSummaryForTable(doctorId: string, cases: any[], doctorPayments: any[]) {
+function getDoctorFinancialSummary(doctorId: string, cases: any[], doctorPayments: any[]) {
   const doctorCases = cases.filter((c: any) => c.doctor_id === doctorId);
   const totalDue = doctorCases.reduce((sum: number, c: any) => sum + (Number(c.price) || 0), 0);
   const totalPaid = doctorPayments
     .filter((t: any) => t.doctor_id === doctorId && t.transaction_type === "دفعة")
     .reduce((sum: number, t: any) => sum + (Number(t.amount) || 0), 0);
-
   const remaining = totalDue - totalPaid;
-
-  return {
-    totalDue,
-    totalPaid,
-    remaining,
-    doctorCases,
-    isLoading: false, // no longer any per-row loading
-  };
+  return { totalDue, totalPaid, remaining, doctorCases };
 }
 
 export default function DoctorsAccountsTable({ doctors, cases, doctorPayments }: Props) {
   const deleteDoctor = useDeleteDoctor();
   const updateAccessToken = useUpdateDoctorAccessToken();
 
-  // دالة لحساب إجمالي الأسنان لطبيب معيّن بناءً على كل حالاته - الحساب من teeth_count فقط
   const calcTotalTeeth = (doctor_id: string) => {
     const doctorCases = cases.filter((c) => c.doctor_id === doctor_id);
     let total = 0;
     doctorCases.forEach(c => {
-      // حساب عدد الأسنان من teeth_count فقط
       if (c?.teeth_count && Number(c.teeth_count) > 0) {
         total += Number(c.teeth_count);
       }
@@ -70,6 +61,10 @@ export default function DoctorsAccountsTable({ doctors, cases, doctorPayments }:
     }
   };
 
+  const getPaymentMsg = (doc: any, remaining: number) => {
+    return `مرحبًا ${doc?.name}\nنود تذكيركم بأن مبلغ المستحق المتبقي عليك هو: ${remaining.toFixed(2)}. إذا كان لديكم أي استفسار يرجى التواصل معنا. شكرًا لتعاملكم معنا`;
+  };
+
   if (doctors.length === 0) {
     return (
       <Card>
@@ -77,7 +72,7 @@ export default function DoctorsAccountsTable({ doctors, cases, doctorPayments }:
           <CardTitle>قائمة الأطباء (0)</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-8 text-gray-500">
+          <div className="text-center py-8 text-muted-foreground">
             لا يوجد أطباء مسجلين حتى الآن
           </div>
         </CardContent>
@@ -87,98 +82,114 @@ export default function DoctorsAccountsTable({ doctors, cases, doctorPayments }:
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>قائمة الأطباء ({doctors.length})</CardTitle>
+        <AddPaymentDialog />
       </CardHeader>
       <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="text-right w-[180px]">اسم الطبيب</TableHead>
-              <TableHead className="text-center w-[120px]">إجمالي الأسنان</TableHead>
-              <TableHead className="text-center w-[300px]">رابط الطبيب</TableHead>
-              <TableHead className="text-center w-[100px]">PDF</TableHead>
-              <TableHead className="text-center w-[195px]">إجراءات</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {doctors.map((doctor) => {
-              // حساب الملخص المالي لكل طبيب الآن في فانكشن عادية
-              const { totalDue, totalPaid, remaining, doctorCases, isLoading } =
-                getDoctorFinancialSummaryForTable(doctor.id, cases, doctorPayments);
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="text-right">اسم الطبيب</TableHead>
+                <TableHead className="text-center">الأسنان</TableHead>
+                <TableHead className="text-center">المستحق</TableHead>
+                <TableHead className="text-center">المدفوع</TableHead>
+                <TableHead className="text-center">الدين/المتبقي</TableHead>
+                <TableHead className="text-center">الرابط</TableHead>
+                <TableHead className="text-center">PDF</TableHead>
+                <TableHead className="text-center">واتساب</TableHead>
+                <TableHead className="text-center">إجراءات</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {doctors.map((doctor) => {
+                const { totalDue, totalPaid, remaining, doctorCases } =
+                  getDoctorFinancialSummary(doctor.id, cases, doctorPayments);
 
-              return (
-                <TableRow key={doctor.id} className="hover:bg-gray-50">
-                  <TableCell className="font-semibold text-primary text-right w-[180px]">
-                    {doctor.name}
-                  </TableCell>
-                  <TableCell className="text-center w-[120px]">
-                    <span className="text-sm font-bold">{calcTotalTeeth(doctor.id)}</span>
-                  </TableCell>
-                  <TableCell className="w-[300px]">
-                    <div className="flex items-center gap-2">
-                      <div className="flex-1 min-w-0">
-                        <div className="text-xs text-gray-500 mb-1">رابط لوحة التحكم:</div>
-                        <div className="text-xs bg-gray-50 p-2 rounded border truncate" dir="ltr">
-                          {doctor.access_token ? 
-                            `${window.location.origin}/doctor-dashboard?token=${doctor.access_token}` : 
-                            "لا يوجد رابط"
-                          }
-                        </div>
-                      </div>
-                      <div className="flex flex-col gap-1">
+                return (
+                  <TableRow key={doctor.id}>
+                    <TableCell className="font-semibold text-primary text-right">
+                      {doctor.name}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <span className="text-sm font-bold">{calcTotalTeeth(doctor.id)}</span>
+                    </TableCell>
+                    <TableCell className="text-center">{totalDue.toFixed(2)}</TableCell>
+                    <TableCell className="text-center">{totalPaid.toFixed(2)}</TableCell>
+                    <TableCell className="text-center">
+                      <Badge variant={remaining > 0 ? "destructive" : "default"} className={remaining > 0 ? "bg-destructive text-destructive-foreground" : "bg-green-100 text-green-700"}>
+                        {remaining > 0 ? `${remaining.toFixed(2)} دين` : "لا يوجد دين"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <div className="flex items-center justify-center gap-1">
                         {doctor.access_token && (
                           <Button
-                            size="sm"
+                            size="icon"
                             variant="outline"
                             onClick={() => handleCopyLink(doctor.access_token!)}
-                            className="p-1 h-8 w-8"
+                            className="h-8 w-8"
                             title="نسخ الرابط"
                           >
-                            <Copy className="h-3 w-3" />
+                            <Copy className="h-3.5 w-3.5" />
                           </Button>
                         )}
                         <Button
-                          size="sm"
+                          size="icon"
                           variant="outline"
                           onClick={() => handleRegenerateToken(doctor.id)}
-                          className="p-1 h-8 w-8 text-orange-600 hover:bg-orange-50"
+                          className="h-8 w-8 text-orange-600 hover:bg-orange-50"
                           title="تجديد الرابط"
                           disabled={updateAccessToken.isPending}
                         >
-                          <RefreshCw className={`h-3 w-3 ${updateAccessToken.isPending ? 'animate-spin' : ''}`} />
+                          <RefreshCw className={`h-3.5 w-3.5 ${updateAccessToken.isPending ? 'animate-spin' : ''}`} />
                         </Button>
                       </div>
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-center w-[100px]">
-                    <DoctorAccountPDFButton
-                      doctorName={doctor.name}
-                      summary={{ totalDue, totalPaid, remaining }}
-                      doctorCases={doctorCases}
-                      doctorId={doctor.id}
-                      doctorPhone={doctor.phone}
-                    />
-                  </TableCell>
-                  <TableCell className="text-center w-[195px]">
-                    <div className="flex gap-2 justify-center">
-                      <EditDoctorDialog doctor={doctor} />
-                      <Button size="sm" variant="outline" className="text-blue-600 hover:bg-blue-50 border-blue-200"
-                        title="تفاصيل"
-                        onClick={() => window.location.href = `/doctor/${doctor.id}`}>
-                        تفاصيل
-                      </Button>
-                      <Button size="sm" variant="outline" className="text-red-600 hover:bg-red-50" title="حذف"
-                        onClick={() => handleDelete(doctor.id)}>
-                        حذف
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              )
-            })}
-          </TableBody>
-        </Table>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <DoctorAccountPDFButton
+                        doctorName={doctor.name}
+                        summary={{ totalDue, totalPaid, remaining }}
+                        doctorCases={doctorCases}
+                        doctorId={doctor.id}
+                        doctorPhone={doctor.phone}
+                      />
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {doctor.phone ? (
+                        <a
+                          href={buildWhatsappLink(doctor.phone, getPaymentMsg(doctor, remaining))}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <Button size="icon" variant="outline" className="text-green-600 border-green-300 hover:bg-green-50 h-8 w-8">
+                            <MessageCircle className="h-3.5 w-3.5" />
+                          </Button>
+                        </a>
+                      ) : (
+                        <span className="text-muted-foreground">—</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <div className="flex gap-1 justify-center">
+                        <EditDoctorDialog doctor={doctor} />
+                        <Button size="sm" variant="outline" className="text-blue-600 hover:bg-blue-50 border-blue-200"
+                          onClick={() => window.location.href = `/doctor/${doctor.id}`}>
+                          تفاصيل
+                        </Button>
+                        <Button size="sm" variant="outline" className="text-destructive hover:bg-destructive/10"
+                          onClick={() => handleDelete(doctor.id)}>
+                          حذف
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </div>
       </CardContent>
     </Card>
   );
