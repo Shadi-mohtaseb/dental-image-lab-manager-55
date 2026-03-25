@@ -1,7 +1,6 @@
 
 import React from "react";
 import { Calendar } from "@/components/ui/calendar";
-import { ar } from "date-fns/locale";
 
 interface DoctorPDFDateRangePickerProps {
   fromDate: Date | undefined;
@@ -27,7 +26,6 @@ export const DoctorPDFDateRangePicker: React.FC<DoctorPDFDateRangePickerProps> =
           selected={fromDate}
           onSelect={onFromDateChange}
           className="p-2 pointer-events-auto"
-          locale={ar}
           disabled={disabled}
         />
       </div>
@@ -40,7 +38,6 @@ export const DoctorPDFDateRangePicker: React.FC<DoctorPDFDateRangePickerProps> =
           selected={toDate}
           onSelect={onToDateChange}
           className="p-2 pointer-events-auto"
-          locale={ar}
           disabled={disabled}
         />
       </div>
