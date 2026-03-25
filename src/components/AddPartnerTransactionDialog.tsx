@@ -18,6 +18,7 @@ export default function AddPartnerTransactionDialog({ open, onOpenChange }: Prop
   const { data: partners = [] } = usePartners();
   const addTx = useAddPartnerTransaction();
   const [isLoading, setIsLoading] = useState(false);
+  const [dateValue, setDateValue] = useState(new Date().toISOString().slice(0, 10));
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
@@ -89,10 +90,10 @@ export default function AddPartnerTransactionDialog({ open, onOpenChange }: Prop
           <div>
             <Label htmlFor="date">التاريخ</Label>
             <DatePickerField
-              value={new Date().toISOString().slice(0, 10)}
-              onChange={() => {}}
+              value={dateValue}
+              onChange={setDateValue}
             />
-            <input type="hidden" name="date" value={new Date().toISOString().slice(0, 10)} />
+            <input type="hidden" name="date" value={dateValue} />
           </div>
           <div>
             <Label htmlFor="description">الوصف</Label>
