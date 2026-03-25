@@ -26,8 +26,6 @@ export const DoctorPDFDateRangePicker: React.FC<DoctorPDFDateRangePickerProps> =
           selected={fromDate}
           onSelect={onFromDateChange}
           className="p-2 pointer-events-auto"
-          locale={ar}
-          disabled={disabled}
         />
       </div>
     </div>
@@ -39,8 +37,6 @@ export const DoctorPDFDateRangePicker: React.FC<DoctorPDFDateRangePickerProps> =
           selected={toDate}
           onSelect={onToDateChange}
           className="p-2 pointer-events-auto"
-          locale={ar}
-          disabled={disabled}
         />
       </div>
     </div>
