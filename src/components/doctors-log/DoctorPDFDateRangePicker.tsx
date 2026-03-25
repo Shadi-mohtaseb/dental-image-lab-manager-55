@@ -1,7 +1,6 @@
 
 import React from "react";
 import { Calendar } from "@/components/ui/calendar";
-import { ar } from "date-fns/locale";
 
 interface DoctorPDFDateRangePickerProps {
   fromDate: Date | undefined;
