@@ -1,6 +1,7 @@
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { DatePickerField } from "@/components/ui/date-picker-field";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
@@ -96,12 +97,18 @@ export default function EditDoctorPaymentDialog({ open, onOpenChange, payment }:
           </div>
           <div>
             <Label>تاريخ الدفع</Label>
-            <Input type="date" {...register("transaction_date")} />
+            <DatePickerField
+              value={watch("transaction_date")}
+              onChange={(value) => form.setValue("transaction_date", value)}
+            />
           </div>
           {paymentMethod === "شيك" && (
             <div>
               <Label>تاريخ صرف الشيك</Label>
-              <Input type="date" {...register("check_cash_date")} />
+              <DatePickerField
+                value={watch("check_cash_date")}
+                onChange={(value) => form.setValue("check_cash_date", value)}
+              />
             </div>
           )}
           <div>

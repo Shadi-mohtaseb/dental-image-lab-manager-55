@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { DatePickerField } from "@/components/ui/date-picker-field";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -97,21 +98,17 @@ export function DoctorAdvancedSearch({
 
           <div className="space-y-2">
             <Label htmlFor="fromDate">من تاريخ</Label>
-            <Input
-              id="fromDate"
-              type="date"
+            <DatePickerField
               value={filters.fromDate}
-              onChange={(e) => handleInputChange("fromDate", e.target.value)}
+              onChange={(value) => handleInputChange("fromDate", value)}
             />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="toDate">إلى تاريخ</Label>
-            <Input
-              id="toDate"
-              type="date"
+            <DatePickerField
               value={filters.toDate}
-              onChange={(e) => handleInputChange("toDate", e.target.value)}
+              onChange={(value) => handleInputChange("toDate", value)}
             />
           </div>
         </div>
