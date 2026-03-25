@@ -2,6 +2,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DatePickerField } from "@/components/ui/date-picker-field";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
@@ -114,10 +115,9 @@ export default function EditPartnerTransactionDialog({ open, onOpenChange, partn
           
           <div>
             <Label>التاريخ</Label>
-            <Input
-              type="date"
+            <DatePickerField
               value={form.watch("transaction_date")}
-              onChange={e => form.setValue("transaction_date", e.target.value)}
+              onChange={(value) => form.setValue("transaction_date", value)}
             />
           </div>
           

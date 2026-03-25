@@ -2,6 +2,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DatePickerField } from "@/components/ui/date-picker-field";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState } from "react";
@@ -17,6 +18,7 @@ export default function AddPartnerTransactionDialog({ open, onOpenChange }: Prop
   const { data: partners = [] } = usePartners();
   const addTx = useAddPartnerTransaction();
   const [isLoading, setIsLoading] = useState(false);
+  const [dateValue, setDateValue] = useState(new Date().toISOString().slice(0, 10));
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
@@ -87,7 +89,11 @@ export default function AddPartnerTransactionDialog({ open, onOpenChange }: Prop
           </div>
           <div>
             <Label htmlFor="date">التاريخ</Label>
-            <Input name="date" type="date" required defaultValue={new Date().toISOString().slice(0, 10)} />
+            <DatePickerField
+              value={dateValue}
+              onChange={setDateValue}
+            />
+            <input type="hidden" name="date" value={dateValue} />
           </div>
           <div>
             <Label htmlFor="description">الوصف</Label>

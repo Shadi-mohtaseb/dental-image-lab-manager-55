@@ -6,11 +6,11 @@ import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { DatePickerField } from "@/components/ui/date-picker-field";
 
 export function SubmissionAndDeliveryDatesFields({ form }: { form: any }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-      {/* تاريخ التسليم (اختياري) */}
       <FormField
         control={form.control}
         name="delivery_date"
@@ -18,11 +18,7 @@ export function SubmissionAndDeliveryDatesFields({ form }: { form: any }) {
           <FormItem>
             <FormLabel>تاريخ التسليم</FormLabel>
             <FormControl>
-              <input
-                type="date"
-                className="input input-bordered w-full p-2 border rounded"
-                {...field}
-              />
+              <DatePickerField value={field.value || ""} onChange={field.onChange} />
             </FormControl>
             <FormMessage />
           </FormItem>

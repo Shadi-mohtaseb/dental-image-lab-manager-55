@@ -2,6 +2,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DatePickerField } from "@/components/ui/date-picker-field";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
@@ -92,22 +93,17 @@ export default function EditPaymentCheckDialog({ open, onOpenChange, payment, do
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="transaction_date">تاريخ المعاملة *</Label>
-              <Input
-                id="transaction_date"
-                type="date"
+              <DatePickerField
                 value={formData.transaction_date}
-                onChange={(e) => setFormData({...formData, transaction_date: e.target.value})}
-                required
+                onChange={(value) => setFormData({...formData, transaction_date: value})}
               />
             </div>
             
             <div>
               <Label htmlFor="check_cash_date">تاريخ صرف الشيك</Label>
-              <Input
-                id="check_cash_date"
-                type="date"
+              <DatePickerField
                 value={formData.check_cash_date}
-                onChange={(e) => setFormData({...formData, check_cash_date: e.target.value})}
+                onChange={(value) => setFormData({...formData, check_cash_date: value})}
               />
             </div>
           </div>

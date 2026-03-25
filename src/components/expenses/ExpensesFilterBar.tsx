@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { DatePickerField } from "@/components/ui/date-picker-field";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
@@ -79,21 +80,23 @@ export function ExpensesFilterBar({
             </Select>
 
             {/* تاريخ البداية */}
-            <Input
-              type="date"
+            <DatePickerField
               placeholder="من تاريخ"
               value={localStartDate}
-              onChange={(e) => setLocalStartDate(e.target.value)}
-              onBlur={handleDateRangeChange}
+              onChange={(value) => {
+                setLocalStartDate(value);
+                onFilterByDateRange(value || null, localEndDate || null);
+              }}
             />
 
             {/* تاريخ النهاية */}
-            <Input
-              type="date"
+            <DatePickerField
               placeholder="إلى تاريخ"
               value={localEndDate}
-              onChange={(e) => setLocalEndDate(e.target.value)}
-              onBlur={handleDateRangeChange}
+              onChange={(value) => {
+                setLocalEndDate(value);
+                onFilterByDateRange(localStartDate || null, value || null);
+              }}
             />
 
             {/* زر مسح الفلاتر */}
