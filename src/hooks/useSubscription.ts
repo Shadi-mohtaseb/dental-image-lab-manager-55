@@ -14,45 +14,31 @@ export function useSubscription() {
         return;
       }
 
-      // Check admin
-      const { data: roleData } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", user.id)
-        .eq("role", "admin")
-        .maybeSingle();
+      // Check admin - use rpc to avoid type issues with new tables
+      const { data: isAdminResult } = await supabase.rpc("has_role", {
+        _user_id: user.id,
+        _role: "admin",
+      });
 
-      if (roleData) {
+      if (isAdminResult) {
         setIsAdmin(true);
         setIsActive(true);
         setLoading(false);
         return;
       }
 
-      // Check subscription
-      const { data: sub } = await supabase
-        .from("subscriptions")
-        .select("*")
-        .eq("user_id", user.id)
-        .maybeSingle();
+      // Check subscription via rpc
+      const { data: subActive } = await supabase.rpc("is_subscription_active", {
+        _user_id: user.id,
+      });
 
-      if (!sub) {
-        setIsActive(false);
-      } else if (sub.is_permanent && sub.status === "active") {
-        setIsActive(true);
-      } else if (sub.status === "active" && sub.end_date) {
-        setIsActive(new Date(sub.end_date) >= new Date(new Date().toISOString().split("T")[0]));
-      } else {
-        setIsActive(false);
-      }
-
+      setIsActive(!!subActive);
       setLoading(false);
     };
 
     check();
   }, []);
 
-  // Read-only = not admin AND subscription inactive
   const isReadOnly = !isAdmin && isActive === false;
 
   return { isActive, isAdmin, isReadOnly, loading };
