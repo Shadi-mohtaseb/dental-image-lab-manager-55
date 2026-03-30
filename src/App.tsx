@@ -8,6 +8,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 import Index from "./pages/Index";
 import PartnershipAccounts from "./pages/PartnershipAccounts";
 import DoctorsAccounts from "./pages/DoctorsAccounts";
@@ -19,6 +20,7 @@ import Checks from "./pages/Checks";
 import Login from "./pages/Login";
 import ResetPassword from "./pages/ResetPassword";
 import DoctorDashboard from "./pages/DoctorDashboard";
+import UserManagement from "./pages/UserManagement";
 
 const DoctorDetails = lazy(() => import("./pages/DoctorDetails"));
 
@@ -60,35 +62,38 @@ const App = () => (
           {/* صفحات الإدارة - محمية بتسجيل الدخول */}
           <Route path="/*" element={
             <ProtectedRoute>
-              <SidebarProvider>
-                <div className="flex w-full min-h-screen">
-                  <AppSidebar />
-                  <MainContent>
-                    <Routes>
-                      <Route path="/" element={<Index />} />
-                      <Route path="/partnership-accounts" element={<PartnershipAccounts />} />
-                      <Route path="/doctors-dashboard" element={<Navigate to="/doctors-accounts" replace />} />
-                      <Route path="/doctors-accounts" element={<DoctorsAccounts />} />
-                      <Route path="/doctors-log" element={<Navigate to="/doctors-accounts" replace />} />
-                      <Route path="/expenses" element={<Expenses />} />
-                      <Route path="/cases" element={<Cases />} />
-                      <Route path="/case/:id" element={<CaseDetails />} />
-                      <Route path="/checks" element={<Checks />} />
-                      <Route path="/settings" element={<Settings />} />
-                      <Route path="/doctors-payments" element={<Navigate to="/doctors-accounts" replace />} />
-                      <Route
-                        path="/doctor/:id"
-                        element={
-                          <Suspense fallback={<div className="p-8 text-center text-lg">جاري التحميل...</div>}>
-                            <DoctorDetails />
-                          </Suspense>
-                        }
-                      />
-                      <Route path="*" element={<Navigate to="/login" replace />} />
-                    </Routes>
-                  </MainContent>
-                </div>
-              </SidebarProvider>
+              <SubscriptionProvider>
+                <SidebarProvider>
+                  <div className="flex w-full min-h-screen">
+                    <AppSidebar />
+                    <MainContent>
+                      <Routes>
+                        <Route path="/" element={<Index />} />
+                        <Route path="/partnership-accounts" element={<PartnershipAccounts />} />
+                        <Route path="/doctors-dashboard" element={<Navigate to="/doctors-accounts" replace />} />
+                        <Route path="/doctors-accounts" element={<DoctorsAccounts />} />
+                        <Route path="/doctors-log" element={<Navigate to="/doctors-accounts" replace />} />
+                        <Route path="/expenses" element={<Expenses />} />
+                        <Route path="/cases" element={<Cases />} />
+                        <Route path="/case/:id" element={<CaseDetails />} />
+                        <Route path="/checks" element={<Checks />} />
+                        <Route path="/settings" element={<Settings />} />
+                        <Route path="/user-management" element={<UserManagement />} />
+                        <Route path="/doctors-payments" element={<Navigate to="/doctors-accounts" replace />} />
+                        <Route
+                          path="/doctor/:id"
+                          element={
+                            <Suspense fallback={<div className="p-8 text-center text-lg">جاري التحميل...</div>}>
+                              <DoctorDetails />
+                            </Suspense>
+                          }
+                        />
+                        <Route path="*" element={<Navigate to="/login" replace />} />
+                      </Routes>
+                    </MainContent>
+                  </div>
+                </SidebarProvider>
+              </SubscriptionProvider>
             </ProtectedRoute>
           } />
         </Routes>
