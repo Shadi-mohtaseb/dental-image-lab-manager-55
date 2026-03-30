@@ -150,7 +150,7 @@ export function AppSidebar() {
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {menuItems.map(item => <SidebarMenuItem key={item.title}>
+                {filteredMenuItems.map(item => <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild isActive={location.pathname === item.url} className="transition-all duration-200 hover:bg-sidebar-accent">
                       <button onClick={() => navigate(item.url)} className="flex items-center gap-3 w-full">
                         <item.icon className="w-5 h-5" />
