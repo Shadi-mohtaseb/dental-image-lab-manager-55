@@ -48,6 +48,12 @@ export function AppSidebar() {
     open,
     isMobile
   } = useSidebar();
+  const { isAdmin } = useSubscriptionContext();
+  
+  const filteredMenuItems = menuItems.filter(item => {
+    if (item.url === "/user-management") return isAdmin;
+    return true;
+  });
   const { toast } = useToast();
   const [labName, setLabName] = useState("مختبر الأسنان");
   const [labLogo, setLabLogo] = useState("");
