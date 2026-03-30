@@ -1,9 +1,10 @@
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
-import { Users, Receipt, FileText, Search, PlusCircle, BarChart3, Settings, LogOut, KeyRound } from "lucide-react";
+import { Users, Receipt, FileText, Search, PlusCircle, BarChart3, Settings, LogOut, KeyRound, UserCog } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useSubscriptionContext } from "@/contexts/SubscriptionContext";
 
 // صورة الخلفية المرفوعة:
 const sidebarBg = "/lovable-uploads/d177bd6f-d2eb-4db8-996a-e2a94b42a9da.png";
@@ -35,6 +36,10 @@ const menuItems = [{
   title: "الإعدادات",
   url: "/settings",
   icon: Settings
+}, {
+  title: "إدارة المستخدمين",
+  url: "/user-management",
+  icon: UserCog
 }];
 export function AppSidebar() {
   const location = useLocation();
@@ -43,6 +48,12 @@ export function AppSidebar() {
     open,
     isMobile
   } = useSidebar();
+  const { isAdmin } = useSubscriptionContext();
+  
+  const filteredMenuItems = menuItems.filter(item => {
+    if (item.url === "/user-management") return isAdmin;
+    return true;
+  });
   const { toast } = useToast();
   const [labName, setLabName] = useState("مختبر الأسنان");
   const [labLogo, setLabLogo] = useState("");
@@ -139,7 +150,7 @@ export function AppSidebar() {
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {menuItems.map(item => <SidebarMenuItem key={item.title}>
+                {filteredMenuItems.map(item => <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild isActive={location.pathname === item.url} className="transition-all duration-200 hover:bg-sidebar-accent">
                       <button onClick={() => navigate(item.url)} className="flex items-center gap-3 w-full">
                         <item.icon className="w-5 h-5" />
