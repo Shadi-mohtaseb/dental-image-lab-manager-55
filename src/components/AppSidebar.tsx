@@ -35,6 +35,10 @@ const menuItems = [{
   title: "الإعدادات",
   url: "/settings",
   icon: Settings
+}, {
+  title: "إدارة المستخدمين",
+  url: "/user-management",
+  icon: UserCog
 }];
 export function AppSidebar() {
   const location = useLocation();
