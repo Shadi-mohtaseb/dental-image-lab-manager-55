@@ -1,5 +1,6 @@
 
 import React, { Suspense, lazy } from "react";
+import { ReadOnlyBanner } from "@/components/ReadOnlyBanner";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -39,7 +40,10 @@ function MainContent({ children }: { children: React.ReactNode }) {
       <div className="flex justify-start items-center mb-4 mt-6 mr-4">
         <SidebarTrigger />
       </div>
-      <div className="p-6 pt-0">{children}</div>
+      <div className="p-6 pt-0">
+        <ReadOnlyBanner />
+        {children}
+      </div>
     </main>
   );
 }
