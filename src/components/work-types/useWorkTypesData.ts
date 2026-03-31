@@ -34,8 +34,8 @@ export const useAddWorkType = () => {
   const createPrices = useCreateDoctorWorkTypePricesForNewWorkType();
   
   return useMutation({
-    mutationFn: async (name: string) => {
-      console.log("Starting to add work type:", name);
+    mutationFn: async ({ name, defaultPrice = 0 }: { name: string; defaultPrice?: number }) => {
+      console.log("Starting to add work type:", name, "with default price:", defaultPrice);
       
       const { data, error } = await supabase
         .from("work_types")
