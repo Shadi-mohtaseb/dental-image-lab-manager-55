@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export const useCreateDoctorWorkTypePricesForNewWorkType = () => {
   return useMutation({
-    mutationFn: async (workTypeId: string) => {
+    mutationFn: async ({ workTypeId, defaultPrice = 0 }: { workTypeId: string; defaultPrice?: number }) => {
       console.log("Creating default prices for new work type:", workTypeId);
       
       // الحصول على جميع الأطباء
@@ -26,7 +26,7 @@ export const useCreateDoctorWorkTypePricesForNewWorkType = () => {
       const pricesData = doctors.map(doctor => ({
         doctor_id: doctor.id,
         work_type_id: workTypeId,
-        price: 0
+        price: defaultPrice
       }));
       
       const { error: pricesError } = await supabase

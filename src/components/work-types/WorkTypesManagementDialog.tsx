@@ -16,7 +16,7 @@ export function WorkTypesManagementDialog() {
   useEffect(() => {
     if (open && workTypes.length === 0 && !isLoading) {
       console.log("Adding test work type...");
-      addWorkType.mutate("نوع عمل تجريبي");
+      addWorkType.mutate({ name: "نوع عمل تجريبي" });
     }
   }, [open, workTypes.length, isLoading]);
 
