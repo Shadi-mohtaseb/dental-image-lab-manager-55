@@ -31,6 +31,7 @@ export type Database = {
           teeth_count: number | null
           tooth_number: string | null
           updated_at: string
+          user_id: string | null
           work_type: string
           zircon_block_type: string | null
         }
@@ -50,6 +51,7 @@ export type Database = {
           teeth_count?: number | null
           tooth_number?: string | null
           updated_at?: string
+          user_id?: string | null
           work_type: string
           zircon_block_type?: string | null
         }
@@ -69,6 +71,7 @@ export type Database = {
           teeth_count?: number | null
           tooth_number?: string | null
           updated_at?: string
+          user_id?: string | null
           work_type?: string
           zircon_block_type?: string | null
         }
@@ -98,6 +101,7 @@ export type Database = {
           recipient_name: string | null
           status: string | null
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           amount: number
@@ -114,6 +118,7 @@ export type Database = {
           recipient_name?: string | null
           status?: string | null
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           amount?: number
@@ -130,6 +135,7 @@ export type Database = {
           recipient_name?: string | null
           status?: string | null
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -146,16 +152,19 @@ export type Database = {
           id: string
           total_capital: number | null
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           id?: string
           total_capital?: number | null
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           id?: string
           total_capital?: number | null
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -172,6 +181,7 @@ export type Database = {
           transaction_date: string
           transaction_type: string
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           amount: number
@@ -185,6 +195,7 @@ export type Database = {
           transaction_date: string
           transaction_type: string
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           amount?: number
@@ -198,6 +209,7 @@ export type Database = {
           transaction_date?: string
           transaction_type?: string
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -216,6 +228,7 @@ export type Database = {
           id: string
           price: number
           updated_at: string
+          user_id: string | null
           work_type_id: string
         }
         Insert: {
@@ -224,6 +237,7 @@ export type Database = {
           id?: string
           price?: number
           updated_at?: string
+          user_id?: string | null
           work_type_id: string
         }
         Update: {
@@ -232,6 +246,7 @@ export type Database = {
           id?: string
           price?: number
           updated_at?: string
+          user_id?: string | null
           work_type_id?: string
         }
         Relationships: [
@@ -259,6 +274,7 @@ export type Database = {
           name: string
           phone: string | null
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           access_token?: string | null
@@ -267,6 +283,7 @@ export type Database = {
           name: string
           phone?: string | null
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           access_token?: string | null
@@ -275,6 +292,7 @@ export type Database = {
           name?: string
           phone?: string | null
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -284,18 +302,21 @@ export type Database = {
           id: string
           name: string
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string
           id?: string
           name: string
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string
           id?: string
           name?: string
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -308,6 +329,7 @@ export type Database = {
           purchase_date: string
           total_amount: number
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string
@@ -317,6 +339,7 @@ export type Database = {
           purchase_date: string
           total_amount: number
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string
@@ -326,6 +349,7 @@ export type Database = {
           purchase_date?: string
           total_amount?: number
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -348,6 +372,7 @@ export type Database = {
           transaction_source: string | null
           transaction_type: string
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           amount: number
@@ -359,6 +384,7 @@ export type Database = {
           transaction_source?: string | null
           transaction_type: string
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           amount?: number
@@ -370,6 +396,7 @@ export type Database = {
           transaction_source?: string | null
           transaction_type?: string
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -393,6 +420,7 @@ export type Database = {
           phone: string | null
           total_amount: number | null
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           address?: string | null
@@ -405,6 +433,7 @@ export type Database = {
           phone?: string | null
           total_amount?: number | null
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           address?: string | null
@@ -417,6 +446,7 @@ export type Database = {
           phone?: string | null
           total_amount?: number | null
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -483,18 +513,21 @@ export type Database = {
           id: string
           name: string
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string
           id?: string
           name: string
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string
           id?: string
           name?: string
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
