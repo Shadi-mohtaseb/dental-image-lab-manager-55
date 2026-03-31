@@ -26,7 +26,7 @@ export const useCreateDoctorWorkTypePricesForNewWorkType = () => {
       const pricesData = doctors.map(doctor => ({
         doctor_id: doctor.id,
         work_type_id: workTypeId,
-        price: 0
+        price: defaultPrice
       }));
       
       const { error: pricesError } = await supabase

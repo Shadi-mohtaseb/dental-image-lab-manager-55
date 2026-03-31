@@ -54,7 +54,7 @@ export const useAddWorkType = () => {
       if (data?.id) {
         try {
           console.log("Creating default prices for work type:", data.id);
-          await createPrices.mutateAsync(data.id);
+          await createPrices.mutateAsync({ workTypeId: data.id, defaultPrice: defaultPrice });
           console.log("Default prices created successfully");
         } catch (priceError) {
           console.error("Error creating default prices:", priceError);
