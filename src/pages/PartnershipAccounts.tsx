@@ -27,6 +27,7 @@ import PartnershipFinancialSummaryCards from "@/components/PartnershipFinancialS
 import { useExpenses } from "@/hooks/useExpenses";
 import PartnerActionHeaderSection from "@/components/PartnerActionHeaderSection";
 import PartnerListSection from "@/components/PartnerListSection";
+import PartnershipCharts from "@/components/PartnershipCharts";
 import PartnerTransactionsTableSection from "@/components/PartnerTransactionsTableSection";
 
 const PartnershipAccounts = () => {
