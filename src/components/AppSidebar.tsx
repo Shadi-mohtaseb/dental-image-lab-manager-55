@@ -40,6 +40,10 @@ const menuItems = [{
   title: "إدارة المستخدمين",
   url: "/user-management",
   icon: UserCog
+}, {
+  title: "المساعد الذكي",
+  url: "/ai-chat",
+  icon: Bot
 }];
 export function AppSidebar() {
   const location = useLocation();
