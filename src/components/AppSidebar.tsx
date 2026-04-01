@@ -1,5 +1,5 @@
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
-import { Users, Receipt, FileText, Search, PlusCircle, BarChart3, Settings, LogOut, KeyRound, UserCog } from "lucide-react";
+import { Users, Receipt, FileText, Search, PlusCircle, BarChart3, Settings, LogOut, KeyRound, UserCog, Bot } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -40,6 +40,10 @@ const menuItems = [{
   title: "إدارة المستخدمين",
   url: "/user-management",
   icon: UserCog
+}, {
+  title: "المساعد الذكي",
+  url: "/ai-chat",
+  icon: Bot
 }];
 export function AppSidebar() {
   const location = useLocation();

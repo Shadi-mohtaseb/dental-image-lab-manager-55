@@ -22,6 +22,8 @@ import Login from "./pages/Login";
 import ResetPassword from "./pages/ResetPassword";
 import DoctorDashboard from "./pages/DoctorDashboard";
 import UserManagement from "./pages/UserManagement";
+import AIChat from "./pages/AIChat";
+import { AIChatWidget } from "./components/AIChatWidget";
 
 const DoctorDetails = lazy(() => import("./pages/DoctorDetails"));
 
@@ -83,6 +85,7 @@ const App = () => (
                         <Route path="/checks" element={<Checks />} />
                         <Route path="/settings" element={<Settings />} />
                         <Route path="/user-management" element={<UserManagement />} />
+                        <Route path="/ai-chat" element={<AIChat />} />
                         <Route path="/doctors-payments" element={<Navigate to="/doctors-accounts" replace />} />
                         <Route
                           path="/doctor/:id"
@@ -95,6 +98,7 @@ const App = () => (
                         <Route path="*" element={<Navigate to="/login" replace />} />
                       </Routes>
                     </MainContent>
+                    <AIChatWidget />
                   </div>
                 </SidebarProvider>
               </SubscriptionProvider>
