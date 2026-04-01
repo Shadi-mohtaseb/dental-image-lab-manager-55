@@ -22,6 +22,8 @@ import Login from "./pages/Login";
 import ResetPassword from "./pages/ResetPassword";
 import DoctorDashboard from "./pages/DoctorDashboard";
 import UserManagement from "./pages/UserManagement";
+import AIChat from "./pages/AIChat";
+import { AIChatWidget } from "./components/AIChatWidget";
 
 const DoctorDetails = lazy(() => import("./pages/DoctorDetails"));
 
