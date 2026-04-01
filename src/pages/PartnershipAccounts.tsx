@@ -200,6 +200,13 @@ const PartnershipAccounts = () => {
         expensesCount={expenses?.length ?? 0}
       />
 
+      {/* رسم بياني تحليلي */}
+      <PartnershipCharts
+        cases={cases}
+        expenses={expenses}
+        doctorTransactions={doctorTransactions}
+      />
+
       {/* 2- إدارة الشركاء */}
       <section>
         <PartnerActionHeaderSection />
