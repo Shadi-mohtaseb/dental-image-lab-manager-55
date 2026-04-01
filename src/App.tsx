@@ -98,6 +98,7 @@ const App = () => (
                         <Route path="*" element={<Navigate to="/login" replace />} />
                       </Routes>
                     </MainContent>
+                    <AIChatWidget />
                   </div>
                 </SidebarProvider>
               </SubscriptionProvider>
