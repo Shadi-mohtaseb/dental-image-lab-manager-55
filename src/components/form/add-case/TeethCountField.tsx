@@ -16,11 +16,10 @@ export function TeethCountField({ form }: { form: any }) {
               min={1}
               placeholder="مثال: 3"
               {...field}
-              value={field.value || ""}
+              value={field.value === 0 ? "" : (field.value || "")}
               onChange={e => {
-                // فقط أرقام موجبة
                 const value = e.target.value.replace(/[^0-9]/g, "");
-                field.onChange(value ? Number(value) : undefined);
+                field.onChange(value === "" ? undefined : Number(value));
               }}
             />
           </FormControl>

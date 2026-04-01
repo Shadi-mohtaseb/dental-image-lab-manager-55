@@ -27,6 +27,7 @@ import PartnershipFinancialSummaryCards from "@/components/PartnershipFinancialS
 import { useExpenses } from "@/hooks/useExpenses";
 import PartnerActionHeaderSection from "@/components/PartnerActionHeaderSection";
 import PartnerListSection from "@/components/PartnerListSection";
+import PartnershipCharts from "@/components/PartnershipCharts";
 import PartnerTransactionsTableSection from "@/components/PartnerTransactionsTableSection";
 
 const PartnershipAccounts = () => {
@@ -197,6 +198,13 @@ const PartnershipAccounts = () => {
         partnersCount={partnersCount}
         casesCount={cases.length}
         expensesCount={expenses?.length ?? 0}
+      />
+
+      {/* رسم بياني تحليلي */}
+      <PartnershipCharts
+        cases={cases}
+        expenses={expenses}
+        doctorTransactions={doctorTransactions}
       />
 
       {/* 2- إدارة الشركاء */}

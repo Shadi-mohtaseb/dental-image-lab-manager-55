@@ -53,8 +53,11 @@ export function AddWorkTypeForm() {
           min={0}
           step={0.01}
           placeholder="0"
-          value={defaultPrice}
-          onChange={(e) => setDefaultPrice(Number(e.target.value) || 0)}
+          value={defaultPrice === 0 ? "" : defaultPrice}
+          onChange={(e) => {
+            const val = e.target.value;
+            setDefaultPrice(val === "" ? 0 : Number(val));
+          }}
           onKeyDown={handleKeyPress}
           disabled={addWorkType.isPending}
           className="w-32"
