@@ -76,7 +76,7 @@ export default function PartnerTransactionsTableSection({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {(transactions ?? []).map((transaction) => {
+              {sortedTransactions.map((transaction) => {
                 const partner = partners.find((p) => p.id === transaction.partner_id);
                 return (
                   <TableRow key={transaction.id}>
