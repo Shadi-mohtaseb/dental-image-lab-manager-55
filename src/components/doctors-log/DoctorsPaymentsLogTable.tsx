@@ -143,7 +143,9 @@ export default function DoctorsPaymentsLogTable() {
             <TableHead className="text-right w-[150px]">اسم الطبيب</TableHead>
             <TableHead className="text-center w-[100px]">المبلغ</TableHead>
             <TableHead className="text-center w-[110px]">طريقة الدفع</TableHead>
-            <TableHead className="text-center w-[110px]">التاريخ</TableHead>
+            <TableHead className="text-center w-[110px]">
+              <SortableHeader label="التاريخ" active={!!sortDir} direction={sortDir} onClick={toggleSort} />
+            </TableHead>
             <TableHead className="text-center w-[120px]">تاريخ صرف الشيك</TableHead>
             <TableHead className="text-center w-[130px]">ملاحظات</TableHead>
             <TableHead className="text-center w-[100px]">واتساب</TableHead>
