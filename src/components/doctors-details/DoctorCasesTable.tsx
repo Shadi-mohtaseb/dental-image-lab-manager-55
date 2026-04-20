@@ -1,5 +1,6 @@
-
+import { useState, useMemo } from "react";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
+import { SortableHeader, SortDirection } from "@/components/ui/sortable-header";
 
 interface CaseRow {
   id: string;
@@ -17,42 +18,50 @@ interface Props {
 }
 
 const getTeethCount = (c: CaseRow) => {
-  // أولاً نتحقق من وجود number_of_teeth (الحقل الجديد)
   if (c.number_of_teeth && Number(c.number_of_teeth) > 0) {
     return Number(c.number_of_teeth);
-  }
-  // إذا لم يكن موجود، نتحقق من teeth_count (الحقل القديم)
-  else if (c.teeth_count && Number(c.teeth_count) > 0) {
+  } else if (c.teeth_count && Number(c.teeth_count) > 0) {
     return Number(c.teeth_count);
-  }
-  // إذا لم يكن أي منهما موجود، نحسب من tooth_number
-  else if (c.tooth_number) {
+  } else if (c.tooth_number) {
     return c.tooth_number.split(" ").filter(Boolean).length;
   }
   return 0;
 };
 
 export function DoctorCasesTable({ cases }: Props) {
+  const [sortDir, setSortDir] = useState<SortDirection>("desc");
+  const sorted = useMemo(() => {
+    if (!sortDir) return cases;
+    return [...cases].sort((a, b) => {
+      const da = new Date(a.submission_date || 0).getTime();
+      const db = new Date(b.submission_date || 0).getTime();
+      return sortDir === "asc" ? da - db : db - da;
+    });
+  }, [cases, sortDir]);
+  const toggleSort = () => setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+
   return (
     <Table>
       <TableHeader>
         <TableRow>
           <TableHead className="text-right w-[180px]">اسم المريض</TableHead>
-          <TableHead className="text-center w-[130px]">تاريخ الإستلام</TableHead>
+          <TableHead className="text-center w-[130px]">
+            <SortableHeader label="تاريخ الإستلام" active={!!sortDir} direction={sortDir} onClick={toggleSort} />
+          </TableHead>
           <TableHead className="text-center w-[140px]">نوع العمل</TableHead>
           <TableHead className="text-center w-[120px]">عدد الأسنان</TableHead>
           <TableHead className="text-center w-[120px]">الحالة</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
-        {cases.length === 0 ? (
+        {sorted.length === 0 ? (
           <TableRow>
             <TableCell colSpan={5} className="text-center">
               لا توجد حالات لهذا الطبيب
             </TableCell>
           </TableRow>
         ) : (
-          cases.map((c) => (
+          sorted.map((c) => (
             <TableRow key={c.id}>
               <TableCell className="text-right w-[180px]">{c.patient_name}</TableCell>
               <TableCell className="text-center w-[130px]">{c.submission_date}</TableCell>

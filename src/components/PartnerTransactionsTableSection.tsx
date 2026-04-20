@@ -1,4 +1,5 @@
 
+import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import AddPartnerTransactionDialog from "./AddPartnerTransactionDialog";
+import { SortableHeader, SortDirection } from "@/components/ui/sortable-header";
 
 interface PartnerTransactionsTableSectionProps {
   transactions: any[];
@@ -24,6 +26,17 @@ export default function PartnerTransactionsTableSection({
   handleEditTx,
   handleDeleteTransaction,
 }: PartnerTransactionsTableSectionProps) {
+  const [sortDir, setSortDir] = useState<SortDirection>("desc");
+  const sortedTransactions = useMemo(() => {
+    const list = transactions ?? [];
+    if (!sortDir) return list;
+    return [...list].sort((a, b) => {
+      const da = new Date(a.transaction_date || 0).getTime();
+      const db = new Date(b.transaction_date || 0).getTime();
+      return sortDir === "asc" ? da - db : db - da;
+    });
+  }, [transactions, sortDir]);
+  const toggleSort = () => setSortDir((d) => (d === "asc" ? "desc" : "asc"));
   return (
     <section className="mt-10">
       <div className="flex items-center justify-between">
@@ -51,7 +64,9 @@ export default function PartnerTransactionsTableSection({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="text-center">التاريخ</TableHead>
+                <TableHead className="text-center">
+                  <SortableHeader label="التاريخ" active={!!sortDir} direction={sortDir} onClick={toggleSort} />
+                </TableHead>
                 <TableHead className="text-center">الشريك</TableHead>
                 <TableHead className="text-center">نوع المعاملة</TableHead>
                 <TableHead className="text-center">المبلغ</TableHead>
@@ -61,7 +76,7 @@ export default function PartnerTransactionsTableSection({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {(transactions ?? []).map((transaction) => {
+              {sortedTransactions.map((transaction) => {
                 const partner = partners.find((p) => p.id === transaction.partner_id);
                 return (
                   <TableRow key={transaction.id}>

@@ -11,6 +11,7 @@ import { Edit, Trash2, MessageCircle, Search } from "lucide-react";
 import { buildWhatsappLink } from "@/utils/whatsapp";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { SortableHeader, SortDirection } from "@/components/ui/sortable-header";
 
 export default function DoctorsPaymentsLogTable() {
   const queryClient = useQueryClient();
@@ -19,6 +20,7 @@ export default function DoctorsPaymentsLogTable() {
   const [searchQuery, setSearchQuery] = useState("");
   const [paymentMethodFilter, setPaymentMethodFilter] = useState("all");
   const [doctorFilter, setDoctorFilter] = useState("all");
+  const [sortDir, setSortDir] = useState<SortDirection>("desc");
 
   const { data: payments = [] } = useQuery({
     queryKey: ["doctor_transactions"],
@@ -65,7 +67,7 @@ export default function DoctorsPaymentsLogTable() {
   }
 
   const filteredPayments = useMemo(() => {
-    return payments.filter((payment: any) => {
+    const filtered = payments.filter((payment: any) => {
       const doctor = getDoctor(payment.doctor_id);
       const doctorName = doctor?.name ?? "";
       const matchesSearch = doctorName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -75,7 +77,15 @@ export default function DoctorsPaymentsLogTable() {
       if (doctorFilter !== "all" && payment.doctor_id !== doctorFilter) return false;
       return true;
     });
-  }, [payments, searchQuery, paymentMethodFilter, doctorFilter, doctors]);
+    if (!sortDir) return filtered;
+    return [...filtered].sort((a, b) => {
+      const da = new Date(a.transaction_date || 0).getTime();
+      const db = new Date(b.transaction_date || 0).getTime();
+      return sortDir === "asc" ? da - db : db - da;
+    });
+  }, [payments, searchQuery, paymentMethodFilter, doctorFilter, doctors, sortDir]);
+
+  const toggleSort = () => setSortDir((d) => (d === "asc" ? "desc" : "asc"));
 
   const handleDelete = async (id: string) => {
     if (window.confirm("هل أنت متأكد من حذف هذه الدفعة؟")) {
@@ -133,7 +143,9 @@ export default function DoctorsPaymentsLogTable() {
             <TableHead className="text-right w-[150px]">اسم الطبيب</TableHead>
             <TableHead className="text-center w-[100px]">المبلغ</TableHead>
             <TableHead className="text-center w-[110px]">طريقة الدفع</TableHead>
-            <TableHead className="text-center w-[110px]">التاريخ</TableHead>
+            <TableHead className="text-center w-[110px]">
+              <SortableHeader label="التاريخ" active={!!sortDir} direction={sortDir} onClick={toggleSort} />
+            </TableHead>
             <TableHead className="text-center w-[120px]">تاريخ صرف الشيك</TableHead>
             <TableHead className="text-center w-[130px]">ملاحظات</TableHead>
             <TableHead className="text-center w-[100px]">واتساب</TableHead>

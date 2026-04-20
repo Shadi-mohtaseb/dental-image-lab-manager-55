@@ -1,10 +1,11 @@
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Eye, Edit, Trash2, Check, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { buildWhatsappLink } from "@/utils/whatsapp";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { SortableHeader, SortDirection } from "@/components/ui/sortable-header";
 interface CasesTableProps {
   cases: any[];
   onView?: (caseId: string) => void;
@@ -58,6 +59,19 @@ export function CasesTable({
   }
 
   const [loadingId, setLoadingId] = useState<string | null>(null);
+  const [sortDir, setSortDir] = useState<SortDirection>("desc");
+
+  const sortedCases = useMemo(() => {
+    if (!sortDir) return cases;
+    return [...cases].sort((a, b) => {
+      const da = new Date(a.submission_date || 0).getTime();
+      const db = new Date(b.submission_date || 0).getTime();
+      return sortDir === "asc" ? da - db : db - da;
+    });
+  }, [cases, sortDir]);
+
+  const toggleSort = () => setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+
 
   // دالة معالجة تغيير الحالة: تنقلب بين قيد التنفيذ وتم التسليم
   const handleStatusClick = async (caseItem: any) => {
@@ -89,7 +103,9 @@ export function CasesTable({
           <tr>
             <th className="px-4 py-2">اسم الطبيب</th>
             <th className="px-4 py-2">اسم المريض</th>
-            <th className="px-4 py-2">تاريخ الاستلام</th>
+            <th className="px-4 py-2">
+              <SortableHeader label="تاريخ الاستلام" active={!!sortDir} direction={sortDir} onClick={toggleSort} />
+            </th>
             <th className="px-4 py-2">السعر الإجمالي</th>
             <th className="px-4 py-2">عدد الأسنان</th>
             <th className="px-4 py-2">نوع العمل</th>
@@ -101,7 +117,7 @@ export function CasesTable({
           </tr>
         </thead>
         <tbody>
-          {cases.map(caseItem => {
+          {sortedCases.map(caseItem => {
             const remaining = getDoctorRemaining(caseItem.doctor_id);
             return <tr key={caseItem.id}>
               <td className="px-4 py-2">{caseItem.doctor_name || caseItem.doctor?.name || "-"}</td>

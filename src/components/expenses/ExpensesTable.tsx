@@ -1,3 +1,4 @@
+import { useState, useMemo } from "react";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -6,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Receipt, Trash2 } from "lucide-react";
 import { EditExpenseDialog } from "@/components/EditExpenseDialog";
 import { useDeleteExpense } from "@/hooks/useExpenses";
+import { SortableHeader, SortDirection } from "@/components/ui/sortable-header";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,6 +26,18 @@ interface ExpensesTableProps {
 
 export function ExpensesTable({ expenses }: ExpensesTableProps) {
   const deleteExpense = useDeleteExpense();
+  const [sortDir, setSortDir] = useState<SortDirection>("desc");
+
+  const sortedExpenses = useMemo(() => {
+    if (!sortDir) return expenses;
+    return [...expenses].sort((a, b) => {
+      const da = new Date(a.purchase_date || 0).getTime();
+      const db = new Date(b.purchase_date || 0).getTime();
+      return sortDir === "asc" ? da - db : db - da;
+    });
+  }, [expenses, sortDir]);
+
+  const toggleSort = () => setSortDir((d) => (d === "asc" ? "desc" : "asc"));
 
   const handleDelete = async (expenseId: string) => {
     try {
@@ -57,7 +71,9 @@ export function ExpensesTable({ expenses }: ExpensesTableProps) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>التاريخ</TableHead>
+                <TableHead>
+                  <SortableHeader label="التاريخ" active={!!sortDir} direction={sortDir} onClick={toggleSort} />
+                </TableHead>
                 <TableHead>نوع المصروف</TableHead>
                 <TableHead>المبلغ</TableHead>
                 <TableHead>ملاحظات</TableHead>
@@ -65,7 +81,7 @@ export function ExpensesTable({ expenses }: ExpensesTableProps) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {expenses.map((expense) => (
+              {sortedExpenses.map((expense) => (
                 <TableRow key={expense.id}>
                   <TableCell>
                     {format(new Date(expense.purchase_date), "dd/MM/yyyy", {
