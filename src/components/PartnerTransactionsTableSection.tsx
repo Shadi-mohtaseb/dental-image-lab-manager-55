@@ -1,4 +1,5 @@
 
+import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import AddPartnerTransactionDialog from "./AddPartnerTransactionDialog";
+import { SortableHeader, SortDirection } from "@/components/ui/sortable-header";
 
 interface PartnerTransactionsTableSectionProps {
   transactions: any[];
