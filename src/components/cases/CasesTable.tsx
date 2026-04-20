@@ -59,6 +59,19 @@ export function CasesTable({
   }
 
   const [loadingId, setLoadingId] = useState<string | null>(null);
+  const [sortDir, setSortDir] = useState<SortDirection>("desc");
+
+  const sortedCases = useMemo(() => {
+    if (!sortDir) return cases;
+    return [...cases].sort((a, b) => {
+      const da = new Date(a.submission_date || 0).getTime();
+      const db = new Date(b.submission_date || 0).getTime();
+      return sortDir === "asc" ? da - db : db - da;
+    });
+  }, [cases, sortDir]);
+
+  const toggleSort = () => setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+
 
   // دالة معالجة تغيير الحالة: تنقلب بين قيد التنفيذ وتم التسليم
   const handleStatusClick = async (caseItem: any) => {
