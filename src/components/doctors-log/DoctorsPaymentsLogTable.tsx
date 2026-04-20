@@ -67,7 +67,7 @@ export default function DoctorsPaymentsLogTable() {
   }
 
   const filteredPayments = useMemo(() => {
-    return payments.filter((payment: any) => {
+    const filtered = payments.filter((payment: any) => {
       const doctor = getDoctor(payment.doctor_id);
       const doctorName = doctor?.name ?? "";
       const matchesSearch = doctorName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -77,7 +77,15 @@ export default function DoctorsPaymentsLogTable() {
       if (doctorFilter !== "all" && payment.doctor_id !== doctorFilter) return false;
       return true;
     });
-  }, [payments, searchQuery, paymentMethodFilter, doctorFilter, doctors]);
+    if (!sortDir) return filtered;
+    return [...filtered].sort((a, b) => {
+      const da = new Date(a.transaction_date || 0).getTime();
+      const db = new Date(b.transaction_date || 0).getTime();
+      return sortDir === "asc" ? da - db : db - da;
+    });
+  }, [payments, searchQuery, paymentMethodFilter, doctorFilter, doctors, sortDir]);
+
+  const toggleSort = () => setSortDir((d) => (d === "asc" ? "desc" : "asc"));
 
   const handleDelete = async (id: string) => {
     if (window.confirm("هل أنت متأكد من حذف هذه الدفعة؟")) {
