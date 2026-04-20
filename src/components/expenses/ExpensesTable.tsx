@@ -26,6 +26,18 @@ interface ExpensesTableProps {
 
 export function ExpensesTable({ expenses }: ExpensesTableProps) {
   const deleteExpense = useDeleteExpense();
+  const [sortDir, setSortDir] = useState<SortDirection>("desc");
+
+  const sortedExpenses = useMemo(() => {
+    if (!sortDir) return expenses;
+    return [...expenses].sort((a, b) => {
+      const da = new Date(a.purchase_date || 0).getTime();
+      const db = new Date(b.purchase_date || 0).getTime();
+      return sortDir === "asc" ? da - db : db - da;
+    });
+  }, [expenses, sortDir]);
+
+  const toggleSort = () => setSortDir((d) => (d === "asc" ? "desc" : "asc"));
 
   const handleDelete = async (expenseId: string) => {
     try {
