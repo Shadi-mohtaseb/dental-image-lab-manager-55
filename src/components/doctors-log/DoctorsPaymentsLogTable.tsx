@@ -20,6 +20,7 @@ export default function DoctorsPaymentsLogTable() {
   const [searchQuery, setSearchQuery] = useState("");
   const [paymentMethodFilter, setPaymentMethodFilter] = useState("all");
   const [doctorFilter, setDoctorFilter] = useState("all");
+  const [sortDir, setSortDir] = useState<SortDirection>("desc");
 
   const { data: payments = [] } = useQuery({
     queryKey: ["doctor_transactions"],
