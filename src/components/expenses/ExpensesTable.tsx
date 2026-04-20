@@ -81,7 +81,7 @@ export function ExpensesTable({ expenses }: ExpensesTableProps) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {expenses.map((expense) => (
+              {sortedExpenses.map((expense) => (
                 <TableRow key={expense.id}>
                   <TableCell>
                     {format(new Date(expense.purchase_date), "dd/MM/yyyy", {
