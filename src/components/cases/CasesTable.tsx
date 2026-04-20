@@ -103,7 +103,9 @@ export function CasesTable({
           <tr>
             <th className="px-4 py-2">اسم الطبيب</th>
             <th className="px-4 py-2">اسم المريض</th>
-            <th className="px-4 py-2">تاريخ الاستلام</th>
+            <th className="px-4 py-2">
+              <SortableHeader label="تاريخ الاستلام" active={!!sortDir} direction={sortDir} onClick={toggleSort} />
+            </th>
             <th className="px-4 py-2">السعر الإجمالي</th>
             <th className="px-4 py-2">عدد الأسنان</th>
             <th className="px-4 py-2">نوع العمل</th>
