@@ -71,7 +71,9 @@ export function ExpensesTable({ expenses }: ExpensesTableProps) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>التاريخ</TableHead>
+                <TableHead>
+                  <SortableHeader label="التاريخ" active={!!sortDir} direction={sortDir} onClick={toggleSort} />
+                </TableHead>
                 <TableHead>نوع المصروف</TableHead>
                 <TableHead>المبلغ</TableHead>
                 <TableHead>ملاحظات</TableHead>
