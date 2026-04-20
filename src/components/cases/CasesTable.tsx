@@ -117,7 +117,7 @@ export function CasesTable({
           </tr>
         </thead>
         <tbody>
-          {cases.map(caseItem => {
+          {sortedCases.map(caseItem => {
             const remaining = getDoctorRemaining(caseItem.doctor_id);
             return <tr key={caseItem.id}>
               <td className="px-4 py-2">{caseItem.doctor_name || caseItem.doctor?.name || "-"}</td>
