@@ -26,6 +26,17 @@ export default function PartnerTransactionsTableSection({
   handleEditTx,
   handleDeleteTransaction,
 }: PartnerTransactionsTableSectionProps) {
+  const [sortDir, setSortDir] = useState<SortDirection>("desc");
+  const sortedTransactions = useMemo(() => {
+    const list = transactions ?? [];
+    if (!sortDir) return list;
+    return [...list].sort((a, b) => {
+      const da = new Date(a.transaction_date || 0).getTime();
+      const db = new Date(b.transaction_date || 0).getTime();
+      return sortDir === "asc" ? da - db : db - da;
+    });
+  }, [transactions, sortDir]);
+  const toggleSort = () => setSortDir((d) => (d === "asc" ? "desc" : "asc"));
   return (
     <section className="mt-10">
       <div className="flex items-center justify-between">
