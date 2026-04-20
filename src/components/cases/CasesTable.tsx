@@ -1,10 +1,11 @@
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Eye, Edit, Trash2, Check, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { buildWhatsappLink } from "@/utils/whatsapp";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { SortableHeader, SortDirection } from "@/components/ui/sortable-header";
 interface CasesTableProps {
   cases: any[];
   onView?: (caseId: string) => void;
