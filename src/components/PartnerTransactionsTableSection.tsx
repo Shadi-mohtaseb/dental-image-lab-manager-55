@@ -64,7 +64,9 @@ export default function PartnerTransactionsTableSection({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="text-center">التاريخ</TableHead>
+                <TableHead className="text-center">
+                  <SortableHeader label="التاريخ" active={!!sortDir} direction={sortDir} onClick={toggleSort} />
+                </TableHead>
                 <TableHead className="text-center">الشريك</TableHead>
                 <TableHead className="text-center">نوع المعاملة</TableHead>
                 <TableHead className="text-center">المبلغ</TableHead>
