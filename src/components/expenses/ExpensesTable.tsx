@@ -1,3 +1,4 @@
+import { useState, useMemo } from "react";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -6,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Receipt, Trash2 } from "lucide-react";
 import { EditExpenseDialog } from "@/components/EditExpenseDialog";
 import { useDeleteExpense } from "@/hooks/useExpenses";
+import { SortableHeader, SortDirection } from "@/components/ui/sortable-header";
 import {
   AlertDialog,
   AlertDialogAction,
