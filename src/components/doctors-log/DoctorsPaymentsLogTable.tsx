@@ -11,6 +11,7 @@ import { Edit, Trash2, MessageCircle, Search } from "lucide-react";
 import { buildWhatsappLink } from "@/utils/whatsapp";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { SortableHeader, SortDirection } from "@/components/ui/sortable-header";
 
 export default function DoctorsPaymentsLogTable() {
   const queryClient = useQueryClient();
