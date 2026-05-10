@@ -10,6 +10,7 @@ import { TeethDetailsFields } from "@/components/form/add-case/TeethDetailsField
 import { ToothNumberField } from "@/components/form/add-case/ToothNumberField";
 import { NotesField } from "@/components/form/add-case/NotesField";
 import { PriceField } from "@/components/form/add-case/PriceField";
+import { WorkTypePriceField } from "@/components/form/add-case/WorkTypePriceField";
 import { SubmissionAndDeliveryDatesFields } from "@/components/form/add-case/SubmissionAndDeliveryDatesFields";
 import { StatusSelect } from "@/components/form/StatusSelect";
 import { PatientNameField } from "@/components/form/add-case/PatientNameField";
@@ -69,8 +70,11 @@ export function EditCaseForm({ caseData, open, onUpdate, onOpenChange }: EditCas
           <CardHeader>
             <CardTitle className="text-lg">التسعير</CardTitle>
           </CardHeader>
-          <CardContent>
-            <PriceField form={form} />
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <WorkTypePriceField form={form} />
+              <PriceField form={form} />
+            </div>
           </CardContent>
         </Card>
 
