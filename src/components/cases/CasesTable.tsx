@@ -45,12 +45,9 @@ export function CasesTable({
       return data ?? [];
     },
   });
-  // دالة لإظهار السعر الإجمالي بناء على المشكلة المذكورة
+  // السعر المخزّن هو السعر الإجمالي للحالة
   const getTotalPrice = (caseItem: any) => {
-    if (caseItem.price && caseItem.teeth_count && Number(caseItem.teeth_count) > 1 && (Number(caseItem.price) === Number(caseItem.price) / Number(caseItem.teeth_count) || Number(caseItem.price) < 200)) {
-      return `${Number(caseItem.price) * Number(caseItem.teeth_count)} ₪`;
-    }
-    return caseItem.price ? `${caseItem.price} ₪` : "-";
+    return caseItem.price ? `${Number(caseItem.price)} ₪` : "-";
   };
 
   // رسالة واتساب عند تغيير الحالة إلى "تم التسليم" - محدثة
