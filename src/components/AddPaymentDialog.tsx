@@ -72,7 +72,23 @@ export default function AddPaymentDialog({ open: controlledOpen, onOpenChange: c
       
       const selectedDoctor = doctors.find((d: any) => d.id === doctor_id);
       const doctorPhone = selectedDoctor?.phone;
-      const waMessage = `مرحباً د. ${selectedDoctor?.name || ""}،\nتم تسجيل دفعة بمبلغ ${Number(amount)} بتاريخ ${transaction_date}${payment_method ? ` (${payment_method})` : ""}.\nشكراً لتعاونكم.`;
+
+      // حساب المبلغ المتبقي على الطبيب
+      const [{ data: casesData }, { data: paymentsData }] = await Promise.all([
+        supabase.from("cases").select("price").eq("doctor_id", doctor_id),
+        supabase
+          .from("doctor_transactions")
+          .select("amount")
+          .eq("doctor_id", doctor_id)
+          .eq("transaction_type", "دفعة"),
+      ]);
+      const totalDue = (casesData ?? []).reduce((s: number, c: any) => s + (Number(c.price) || 0), 0);
+      const totalPaid = (paymentsData ?? []).reduce((s: number, t: any) => s + (Number(t.amount) || 0), 0);
+      const remaining = totalDue - totalPaid;
+
+      const paidAmount = Number(amount).toFixed(2);
+      const remainingStr = remaining.toFixed(2);
+      const waMessage = `مرحبا د ${selectedDoctor?.name || ""}\n\nتم استلام دفعة ${payment_method || ""} بمبلغ ${paidAmount}₪\n\nبتاريخ ${transaction_date}\n\nالمبلغ المتبقي عليك : ${remainingStr}₪`;
       toast({
         title: "تم تسجيل الدفعة بنجاح",
         action: doctorPhone ? (
