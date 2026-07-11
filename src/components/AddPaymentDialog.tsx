@@ -70,7 +70,22 @@ export default function AddPaymentDialog({ open: controlledOpen, onOpenChange: c
       await supabase.rpc("update_company_capital");
       await supabase.rpc("distribute_profits_to_partners");
       
-      toast({ title: "تم تسجيل الدفعة بنجاح" });
+      const selectedDoctor = doctors.find((d: any) => d.id === doctor_id);
+      const doctorPhone = selectedDoctor?.phone;
+      const waMessage = `مرحباً د. ${selectedDoctor?.name || ""}،\nتم تسجيل دفعة بمبلغ ${Number(amount)} بتاريخ ${transaction_date}${payment_method ? ` (${payment_method})` : ""}.\nشكراً لتعاونكم.`;
+      toast({
+        title: "تم تسجيل الدفعة بنجاح",
+        action: doctorPhone ? (
+          <ToastAction
+            altText="إرسال عبر واتساب"
+            onClick={() => window.open(buildWhatsappLink(doctorPhone, waMessage), "_blank")}
+            className="gap-1"
+          >
+            <MessageCircle className="h-4 w-4" />
+            واتساب
+          </ToastAction>
+        ) : undefined,
+      });
       queryClient.invalidateQueries({ queryKey: ["doctor_transactions"] });
       queryClient.invalidateQueries({ queryKey: ["company_capital"] });
       queryClient.invalidateQueries({ queryKey: ["partners"] });
