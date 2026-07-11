@@ -9,9 +9,11 @@ import { useForm } from "react-hook-form";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { ToastAction } from "@/components/ui/toast";
 import { useState } from "react";
 import { useDoctors } from "@/hooks/useDoctors";
-import { Plus } from "lucide-react";
+import { Plus, MessageCircle } from "lucide-react";
+import { buildWhatsappLink } from "@/utils/whatsapp";
 
 interface AddPaymentDialogProps {
   open?: boolean;
