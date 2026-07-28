@@ -35,6 +35,13 @@ export function usePrintDoctorAccountHTML() {
       });
     }
 
+    // ترتيب الحالات تصاعدياً حسب تاريخ الاستلام
+    filteredCases = [...filteredCases].sort((a: any, b: any) => {
+      const da = new Date(a.submission_date || 0).getTime();
+      const db = new Date(b.submission_date || 0).getTime();
+      return da - db;
+    });
+
     // جلب الدفعات للطبيب من قاعدة البيانات
     const { supabase } = await import("@/integrations/supabase/client");
     let doctorPayments: any[] = [];
@@ -63,6 +70,13 @@ export function usePrintDoctorAccountHTML() {
         return true;
       });
     }
+
+    // ترتيب الدفعات تصاعدياً حسب تاريخ الدفع
+    filteredPayments = [...filteredPayments].sort((a: any, b: any) => {
+      const da = new Date(a.transaction_date || 0).getTime();
+      const db = new Date(b.transaction_date || 0).getTime();
+      return da - db;
+    });
 
     // حساب البيانات المالية للفترة المحددة
     const periodTotalDue = filteredCases.reduce((sum: number, c: any) => sum + (Number(c.price) || 0), 0);
