@@ -79,7 +79,7 @@ export default function DoctorsAccountsTable({ doctors, cases, doctorPayments }:
   };
 
   const getPaymentMsg = (doc: any, remaining: number) => {
-    return `مرحبًا ${doc?.name}\nنود تذكيركم بأن مبلغ المستحق المتبقي عليك هو: ${remaining.toFixed(0)}. إذا كان لديكم أي استفسار يرجى التواصل معنا. شكرًا لتعاملكم معنا`;
+    return `مرحبًا ${doc?.name}\nنود تذكيركم بأن مبلغ المستحق المتبقي عليك هو: ${Math.round(remaining)}\n\nإذا كان لديكم أي استفسار يرجى التواصل معنا، شكرًا لتعاملكم معنا`;
   };
 
   if (doctors.length === 0) {
