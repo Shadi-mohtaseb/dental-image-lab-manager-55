@@ -79,7 +79,7 @@ export default function DoctorsAccountsTable({ doctors, cases, doctorPayments }:
   };
 
   const getPaymentMsg = (doc: any, remaining: number) => {
-    return `مرحبًا ${doc?.name}\nنود تذكيركم بأن مبلغ المستحق المتبقي عليك هو: ${remaining.toFixed(2)}. إذا كان لديكم أي استفسار يرجى التواصل معنا. شكرًا لتعاملكم معنا`;
+    return `مرحبًا ${doc?.name}\nنود تذكيركم بأن مبلغ المستحق المتبقي عليك هو: ${remaining.toFixed(0)}. إذا كان لديكم أي استفسار يرجى التواصل معنا. شكرًا لتعاملكم معنا`;
   };
 
   if (doctors.length === 0) {
@@ -160,11 +160,11 @@ export default function DoctorsAccountsTable({ doctors, cases, doctorPayments }:
                     <TableCell className="text-center">
                       <span className="text-sm font-bold">{calcTotalTeeth(doctor.id)}</span>
                     </TableCell>
-                    <TableCell className="text-center">{totalDue.toFixed(2)}</TableCell>
-                    <TableCell className="text-center">{totalPaid.toFixed(2)}</TableCell>
+                    <TableCell className="text-center">{totalDue.toFixed(0)}</TableCell>
+                    <TableCell className="text-center">{totalPaid.toFixed(0)}</TableCell>
                     <TableCell className="text-center">
                       <Badge variant={remaining > 0 ? "destructive" : "default"} className={remaining > 0 ? "bg-destructive text-destructive-foreground" : "bg-green-100 text-green-700"}>
-                        {remaining > 0 ? `${remaining.toFixed(2)} دين` : "لا يوجد دين"}
+                        {remaining > 0 ? `${remaining.toFixed(0)} دين` : "لا يوجد دين"}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-center">

@@ -41,15 +41,15 @@ export default function PartnerCard({ partner, /* onWithdraw,*/ onDelete, onWith
         <div className="space-y-2">
           <div className="flex justify-between border-b pb-2">
             <span className="text-gray-600">حصة من صافي الربح:</span>
-            <span className="font-bold text-green-600">{Number(partner.total_amount).toFixed(2)} ₪</span>
+            <span className="font-bold text-green-600">{Number(partner.total_amount).toFixed(0)} ₪</span>
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-gray-600">المبلغ المسحوب:</span>
-            <span className="text-orange-600">{Number(partner.withdrawals).toFixed(2)} ₪</span>
+            <span className="text-orange-600">{Number(partner.withdrawals).toFixed(0)} ₪</span>
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-gray-600">المتبقي من الحصة:</span>
-            <span className="font-semibold text-blue-800">{Number(partner.remaining_share).toFixed(2)} ₪</span>
+            <span className="font-semibold text-blue-800">{Number(partner.remaining_share).toFixed(0)} ₪</span>
           </div>
           <div className="flex gap-2 mt-2">
             <Button

@@ -40,7 +40,7 @@ export function DoctorSummaryCards({
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold text-green-600">
-            {totalPayments.toFixed(2)}
+            {totalPayments.toFixed(0)}
           </div>
           <p className="text-xs text-muted-foreground"></p>
         </CardContent>
@@ -64,7 +64,7 @@ export function DoctorSummaryCards({
         </CardHeader>
         <CardContent>
           <div className={`text-2xl font-bold ${remainingBalance > 0 ? 'text-red-600' : 'text-green-600'}`}>
-            {Math.abs(remainingBalance).toFixed(2)}
+            {Math.abs(remainingBalance).toFixed(0)}
           </div>
           <Badge variant={remainingBalance > 0 ? "destructive" : "default"}>
             {remainingBalance > 0 ? "مديون" : "مسدد"}

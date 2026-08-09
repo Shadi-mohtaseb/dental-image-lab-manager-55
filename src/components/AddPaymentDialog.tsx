@@ -86,8 +86,8 @@ export default function AddPaymentDialog({ open: controlledOpen, onOpenChange: c
       const totalPaid = (paymentsData ?? []).reduce((s: number, t: any) => s + (Number(t.amount) || 0), 0);
       const remaining = totalDue - totalPaid;
 
-      const paidAmount = Number(amount).toFixed(2);
-      const remainingStr = remaining.toFixed(2);
+      const paidAmount = Number(amount).toFixed(0);
+      const remainingStr = remaining.toFixed(0);
       const waMessage = `مرحبا د ${selectedDoctor?.name || ""}\n\nتم استلام دفعة ${payment_method || ""} بمبلغ ${paidAmount}₪\n\nبتاريخ ${transaction_date}\n\nالمبلغ المتبقي عليك : ${remainingStr}₪`;
       toast({
         title: "تم تسجيل الدفعة بنجاح",

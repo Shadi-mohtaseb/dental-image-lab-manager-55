@@ -88,7 +88,7 @@ export default function PartnerTransactionsTableSection({
                       </Badge>
                     </TableCell>
                     <TableCell className="text-center font-semibold">
-                      {Number(transaction.amount).toFixed(2)} ₪
+                      {Number(transaction.amount).toFixed(0)} ₪
                     </TableCell>
                     <TableCell className="text-center">
                       <Badge variant="outline">

@@ -130,15 +130,15 @@ const DoctorDetails = () => {
           {/* ملخص */}
           <div className="mt-4 flex flex-col sm:flex-row gap-3 sm:gap-6 text-base font-semibold">
             <div>
-              إجمالي المستحق: <span className="text-red-600">{totalDue.toFixed(2)} ₪</span>
+              إجمالي المستحق: <span className="text-red-600">{totalDue.toFixed(0)} ₪</span>
             </div>
             <div>
-              المدفوع: <span className="text-green-700">{totalPaid.toFixed(2)} ₪</span>
+              المدفوع: <span className="text-green-700">{totalPaid.toFixed(0)} ₪</span>
             </div>
             <div>
               الدين المتبقي:{" "}
               {remaining > 0 ? (
-                <span className="text-orange-600">{remaining.toFixed(2)} ₪</span>
+                <span className="text-orange-600">{remaining.toFixed(0)} ₪</span>
               ) : (
                 <span className="text-green-600">لا يوجد دين</span>
               )}
