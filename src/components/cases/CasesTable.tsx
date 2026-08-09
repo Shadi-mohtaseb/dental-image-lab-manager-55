@@ -52,7 +52,7 @@ export function CasesTable({
 
   // رسالة واتساب عند تغيير الحالة إلى "تم التسليم" - محدثة
   function getDeliveryMsg(caseItem: any, remaining: number) {
-    return `مرحبا ${caseItem.doctor_name || caseItem.doctor?.name || ""}\n\nتم تسليم حالة المريض: ${caseItem.patient_name}\n\nبتاريخ: ${new Date().toLocaleDateString("en-GB")}\n\nنود تذكيركم بأن المبلغ المتبقي عليك اصبح : ${remaining.toFixed(2)} ₪`;
+    return `مرحبا ${caseItem.doctor_name || caseItem.doctor?.name || ""}\n\nتم تسليم حالة المريض: ${caseItem.patient_name}\n\nبتاريخ: ${new Date().toLocaleDateString("en-GB")}\n\nنود تذكيركم بأن المبلغ المتبقي عليك اصبح : ${remaining.toFixed(0)} ₪`;
   }
 
   const [loadingId, setLoadingId] = useState<string | null>(null);

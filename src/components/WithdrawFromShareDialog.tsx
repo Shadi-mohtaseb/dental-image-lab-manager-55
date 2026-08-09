@@ -69,7 +69,7 @@ export default function WithdrawFromShareDialog({ open, onOpenChange, partner }:
           <p className="text-sm text-gray-600">
             المتبقي من الحصة:{" "}
             <span className="font-bold text-blue-800">
-              {Number(partner.remaining_share).toFixed(2)} ₪
+              {Number(partner.remaining_share).toFixed(0)} ₪
             </span>
           </p>
           <p className="text-xs text-orange-600">

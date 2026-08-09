@@ -219,7 +219,7 @@ const Checks = () => {
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold text-blue-600">
-              {allChecks.reduce((sum, c) => sum + Number(c.displayAmount || 0), 0).toFixed(2)} ₪
+              {allChecks.reduce((sum, c) => sum + Number(c.displayAmount || 0), 0).toFixed(0)} ₪
             </p>
           </CardContent>
         </Card>
@@ -269,7 +269,7 @@ const Checks = () => {
                       {check.doctors?.name || '-'}
                     </TableCell>
                     <TableCell className="font-medium">
-                      {Number(check.displayAmount).toFixed(2)} ₪
+                      {Number(check.displayAmount).toFixed(0)} ₪
                     </TableCell>
                     <TableCell>{check.check_number || '-'}</TableCell>
                     <TableCell>{check.bank_name || '-'}</TableCell>

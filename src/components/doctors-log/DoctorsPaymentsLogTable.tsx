@@ -165,14 +165,14 @@ export default function DoctorsPaymentsLogTable() {
             const hasPhone = doctor?.phone && typeof doctor.phone === "string" && doctor.phone.trim() !== "";
             const remaining = getDoctorRemaining(payment.doctor_id);
             const waMessage = doctor
-              ? `مرحبا ${doctor.name}\n\nتم استلام دفعة ${payment.payment_method ?? "نقدي"} بمبلغ ${Number(payment.amount).toFixed(2)}₪\n\nبتاريخ ${payment.transaction_date}\n\nالمبلغ المتبقي عليك : ${remaining.toFixed(2)}₪`
+              ? `مرحبا ${doctor.name}\n\nتم استلام دفعة ${payment.payment_method ?? "نقدي"} بمبلغ ${Number(payment.amount).toFixed(0)}₪\n\nبتاريخ ${payment.transaction_date}\n\nالمبلغ المتبقي عليك : ${remaining.toFixed(0)}₪`
               : "";
             const waLink = hasPhone && waMessage ? buildWhatsappLink(doctor.phone, waMessage) : "";
 
             return (
               <TableRow key={payment.id}>
                 <TableCell className="text-right w-[150px]">{doctor?.name ?? "-"}</TableCell>
-                <TableCell className="text-center w-[100px]">{Number(payment.amount).toFixed(2)} ₪</TableCell>
+                <TableCell className="text-center w-[100px]">{Number(payment.amount).toFixed(0)} ₪</TableCell>
                 <TableCell className="text-center w-[110px]">
                   <Badge>{payment.payment_method ?? "بدون"}</Badge>
                 </TableCell>

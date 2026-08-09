@@ -67,7 +67,7 @@ export default function DoctorsPaymentsTable({ }: DoctorsPaymentsTableProps) {
 
   // رسالة واتساب للدفعة
   function getPaymentMsg(doc: any, remaining: number) {
-    return `مرحبًا ${doc?.name}\nنود تذكيركم بأن مبلغ المستحق المتبقي عليك هو: ${remaining.toFixed(2)} ₪. إذا كان لديكم أي استفسار يرجى التواصل معنا. شكرًا لتعاملكم معنا`;
+    return `مرحبًا ${doc?.name}\nنود تذكيركم بأن مبلغ المستحق المتبقي عليك هو: ${remaining.toFixed(0)} ₪. إذا كان لديكم أي استفسار يرجى التواصل معنا. شكرًا لتعاملكم معنا`;
   }
 
   return (
@@ -92,11 +92,11 @@ export default function DoctorsPaymentsTable({ }: DoctorsPaymentsTableProps) {
             return (
               <TableRow key={doc.id} className="align-middle">
                 <TableCell className="text-blue-900 font-semibold text-right w-[180px]">{doc.name}</TableCell>
-                <TableCell className="text-right w-[140px]">{totalCases.toFixed(2)} ₪</TableCell>
-                <TableCell className="text-right w-[140px]">{totalPayments.toFixed(2)} ₪</TableCell>
+                <TableCell className="text-right w-[140px]">{totalCases.toFixed(0)} ₪</TableCell>
+                <TableCell className="text-right w-[140px]">{totalPayments.toFixed(0)} ₪</TableCell>
                 <TableCell className={`text-center w-[170px]`}>
                   <Badge variant={remaining > 0 ? "destructive" : "default"} className={remaining > 0 ? "bg-red-500 text-white" : "bg-green-100 text-green-700"}>
-                    {remaining > 0 ? `${remaining.toFixed(2)} ₪ دين` : "لا يوجد دين"}
+                    {remaining > 0 ? `${remaining.toFixed(0)} ₪ دين` : "لا يوجد دين"}
                   </Badge>
                 </TableCell>
                 <TableCell className="text-center w-[88px]">

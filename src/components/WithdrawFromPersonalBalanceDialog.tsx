@@ -101,7 +101,7 @@ export default function WithdrawFromPersonalBalanceDialog({ open, onOpenChange, 
         </DialogHeader>
         <div className="mb-4">
           <p className="text-sm text-gray-600">
-            الرصيد الشخصي المتاح: <span className="font-bold text-green-600">{(partner.personal_balance || 0).toFixed(2)} ₪</span>
+            الرصيد الشخصي المتاح: <span className="font-bold text-green-600">{(partner.personal_balance || 0).toFixed(0)} ₪</span>
           </p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">

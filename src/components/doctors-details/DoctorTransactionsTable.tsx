@@ -56,7 +56,7 @@ export function DoctorTransactionsTable({ transactions }: Props) {
                   {tx.transaction_type}
                 </Badge>
               </TableCell>
-              <TableCell className="text-center w-[100px]">{Number(tx.amount).toFixed(2)} ₪</TableCell>
+              <TableCell className="text-center w-[100px]">{Number(tx.amount).toFixed(0)} ₪</TableCell>
               <TableCell className="text-center w-[100px]">{tx.payment_method || "-"}</TableCell>
               <TableCell className="text-center w-[120px]">{tx.transaction_date}</TableCell>
               <TableCell className="text-center w-[150px]">{tx.notes || "-"}</TableCell>

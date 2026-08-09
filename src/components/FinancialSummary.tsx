@@ -31,7 +31,7 @@ export default function FinancialSummary({ totalRevenue, totalExpenses, netProfi
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{totalRevenue.toFixed(2)} ₪</div>
+          <div className="text-2xl font-bold">{totalRevenue.toFixed(0)} ₪</div>
         </CardContent>
       </Card>
       <Card className="bg-gradient-to-r from-red-400 to-red-600 text-white">
@@ -41,7 +41,7 @@ export default function FinancialSummary({ totalRevenue, totalExpenses, netProfi
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{totalExpenses.toFixed(2)} ₪</div>
+          <div className="text-2xl font-bold">{totalExpenses.toFixed(0)} ₪</div>
         </CardContent>
       </Card>
       <Card className="bg-gradient-to-r from-blue-400 to-blue-600 text-white">
@@ -52,7 +52,7 @@ export default function FinancialSummary({ totalRevenue, totalExpenses, netProfi
         </CardHeader>
         <CardContent>
           <div className="flex flex-col gap-3">
-            <div className="text-3xl font-semibold">{netProfit.toFixed(2)} ₪</div>
+            <div className="text-3xl font-semibold">{netProfit.toFixed(0)} ₪</div>
             {/* رسم بياني صغير يوضح الأرقام الثلاث */}
             <div className="h-24 w-full">
               <ResponsiveContainer width="100%" height="100%">

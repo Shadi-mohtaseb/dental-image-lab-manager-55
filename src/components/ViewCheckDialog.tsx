@@ -75,7 +75,7 @@ export default function ViewCheckDialog({ open, onOpenChange, check }: ViewCheck
               <DollarSign className="h-5 w-5 text-green-600" />
               <div>
                 <Label className="text-sm text-gray-600">المبلغ</Label>
-                <p className="font-medium text-lg">{Number(check.amount).toFixed(2)} ₪</p>
+                <p className="font-medium text-lg">{Number(check.amount).toFixed(0)} ₪</p>
               </div>
             </div>
           </div>
