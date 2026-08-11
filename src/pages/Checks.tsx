@@ -212,7 +212,7 @@ const Checks = () => {
       </div>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-gray-600">إجمالي الشيكات</CardTitle>
@@ -243,6 +243,19 @@ const Checks = () => {
         </Card>
         <Card>
           <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-gray-600">مبلغ الشيكات غير المصروفة</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold text-orange-600">
+              {allChecks
+                .filter(c => !c.receiveDate || new Date(c.receiveDate) > new Date())
+                .reduce((sum, c) => sum + Number(c.displayAmount || 0), 0)
+                .toFixed(0)} ₪
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-gray-600">إجمالي المبلغ</CardTitle>
           </CardHeader>
           <CardContent>
@@ -252,6 +265,7 @@ const Checks = () => {
           </CardContent>
         </Card>
       </div>
+
 
       {/* Checks Table */}
       <Card>
