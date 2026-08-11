@@ -134,28 +134,39 @@ const Checks = () => {
   };
 
   // دمج البيانات من الجدولين
-  const allChecks = [
-    ...checksData.map(check => ({
-      ...check,
-      source: 'checks',
-      displayDate: check.check_date,
-      displayAmount: check.amount
-    })),
-    ...checkPayments.map(payment => ({
-      ...payment,
-      source: 'payments',
-      displayDate: payment.transaction_date,
-      displayAmount: payment.amount,
-      check_date: payment.transaction_date,
-      receive_date: payment.check_cash_date,
-      status: payment.status || 'مؤكد',
-      check_number: null,
-      bank_name: null,
-      recipient_name: null,
-      front_image_url: null,
-      back_image_url: null
-    }))
-  ].sort((a, b) => new Date(b.displayDate).getTime() - new Date(a.displayDate).getTime());
+  const allChecks = useMemo(() => {
+    const combined = [
+      ...checksData.map(check => ({
+        ...check,
+        source: 'checks',
+        displayDate: check.check_date,
+        displayAmount: check.amount
+      })),
+      ...checkPayments.map(payment => ({
+        ...payment,
+        source: 'payments',
+        displayDate: payment.transaction_date,
+        displayAmount: payment.amount,
+        check_date: payment.transaction_date,
+        receive_date: payment.check_cash_date,
+        status: payment.status || 'مؤكد',
+        check_number: null,
+        bank_name: null,
+        recipient_name: null,
+        front_image_url: null,
+        back_image_url: null
+      }))
+    ];
+    if (!sortDir) return combined;
+    return combined.sort((a, b) => {
+      const da = new Date(a.displayDate || 0).getTime();
+      const db = new Date(b.displayDate || 0).getTime();
+      return sortDir === "asc" ? da - db : db - da;
+    });
+  }, [checksData, checkPayments, sortDir]);
+
+  const toggleSort = () => setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+
 
   if (loadingChecks || loadingPayments) {
     return (
