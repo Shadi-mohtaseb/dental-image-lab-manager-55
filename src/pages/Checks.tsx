@@ -19,6 +19,8 @@ const Checks = () => {
   const [editPaymentDialogOpen, setEditPaymentDialogOpen] = useState(false);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [selectedCheck, setSelectedCheck] = useState(null);
+  const [sortDir, setSortDir] = useState<SortDirection>("desc");
+
 
   // جلب الشيكات من جدول checks
   const { data: checksData = [], isLoading: loadingChecks, refetch: refetchChecks } = useQuery({
