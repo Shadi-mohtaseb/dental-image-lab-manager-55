@@ -1,10 +1,9 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { FileText, Plus, Edit, Trash2, Eye, Image } from "lucide-react";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -12,6 +11,7 @@ import AddCheckDialog from "@/components/AddCheckDialog";
 import EditCheckDialog from "@/components/EditCheckDialog";
 import ViewCheckDialog from "@/components/ViewCheckDialog";
 import EditPaymentCheckDialog from "@/components/EditPaymentCheckDialog";
+import { SortableHeader, SortDirection } from "@/components/ui/sortable-header";
 
 const Checks = () => {
   const [showAddDialog, setShowAddDialog] = useState(false);
