@@ -1,10 +1,9 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { FileText, Plus, Edit, Trash2, Eye, Image } from "lucide-react";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -12,6 +11,7 @@ import AddCheckDialog from "@/components/AddCheckDialog";
 import EditCheckDialog from "@/components/EditCheckDialog";
 import ViewCheckDialog from "@/components/ViewCheckDialog";
 import EditPaymentCheckDialog from "@/components/EditPaymentCheckDialog";
+import { SortableHeader, SortDirection } from "@/components/ui/sortable-header";
 
 const Checks = () => {
   const [showAddDialog, setShowAddDialog] = useState(false);
@@ -19,6 +19,8 @@ const Checks = () => {
   const [editPaymentDialogOpen, setEditPaymentDialogOpen] = useState(false);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [selectedCheck, setSelectedCheck] = useState(null);
+  const [sortDir, setSortDir] = useState<SortDirection>("desc");
+
 
   // جلب الشيكات من جدول checks
   const { data: checksData = [], isLoading: loadingChecks, refetch: refetchChecks } = useQuery({
@@ -132,28 +134,39 @@ const Checks = () => {
   };
 
   // دمج البيانات من الجدولين
-  const allChecks = [
-    ...checksData.map(check => ({
-      ...check,
-      source: 'checks',
-      displayDate: check.check_date,
-      displayAmount: check.amount
-    })),
-    ...checkPayments.map(payment => ({
-      ...payment,
-      source: 'payments',
-      displayDate: payment.transaction_date,
-      displayAmount: payment.amount,
-      check_date: payment.transaction_date,
-      receive_date: payment.check_cash_date,
-      status: payment.status || 'مؤكد',
-      check_number: null,
-      bank_name: null,
-      recipient_name: null,
-      front_image_url: null,
-      back_image_url: null
-    }))
-  ].sort((a, b) => new Date(b.displayDate).getTime() - new Date(a.displayDate).getTime());
+  const allChecks = useMemo(() => {
+    const combined = [
+      ...checksData.map(check => ({
+        ...check,
+        source: 'checks',
+        displayDate: check.check_date,
+        displayAmount: check.amount
+      })),
+      ...checkPayments.map(payment => ({
+        ...payment,
+        source: 'payments',
+        displayDate: payment.transaction_date,
+        displayAmount: payment.amount,
+        check_date: payment.transaction_date,
+        receive_date: payment.check_cash_date,
+        status: payment.status || 'مؤكد',
+        check_number: null,
+        bank_name: null,
+        recipient_name: null,
+        front_image_url: null,
+        back_image_url: null
+      }))
+    ];
+    if (!sortDir) return combined;
+    return combined.sort((a, b) => {
+      const da = new Date(a.displayDate || 0).getTime();
+      const db = new Date(b.displayDate || 0).getTime();
+      return sortDir === "asc" ? da - db : db - da;
+    });
+  }, [checksData, checkPayments, sortDir]);
+
+  const toggleSort = () => setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+
 
   if (loadingChecks || loadingPayments) {
     return (
@@ -236,7 +249,9 @@ const Checks = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>النوع</TableHead>
-                  <TableHead>تاريخ الشيك</TableHead>
+                  <TableHead>
+                    <SortableHeader label="تاريخ الشيك" active={!!sortDir} direction={sortDir} onClick={toggleSort} />
+                  </TableHead>
                   <TableHead>تاريخ الاستلام/الصرف</TableHead>
                   <TableHead>الطبيب</TableHead>
                   <TableHead>المبلغ</TableHead>
