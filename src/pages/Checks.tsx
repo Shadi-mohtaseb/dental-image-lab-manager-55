@@ -20,6 +20,8 @@ const Checks = () => {
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [selectedCheck, setSelectedCheck] = useState(null);
   const [sortDir, setSortDir] = useState<SortDirection>("desc");
+  const [sortKey, setSortKey] = useState<"check_date" | "receive_date">("check_date");
+
 
 
   // جلب الشيكات من جدول checks
