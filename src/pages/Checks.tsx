@@ -265,9 +265,11 @@ const Checks = () => {
                 <TableRow>
                   <TableHead>النوع</TableHead>
                   <TableHead>
-                    <SortableHeader label="تاريخ الشيك" active={!!sortDir} direction={sortDir} onClick={toggleSort} />
+                    <SortableHeader label="تاريخ الشيك" active={sortKey === "check_date"} direction={sortDir} onClick={() => toggleSort("check_date")} />
                   </TableHead>
-                  <TableHead>تاريخ الاستلام/الصرف</TableHead>
+                  <TableHead>
+                    <SortableHeader label="تاريخ الاستلام/الصرف" active={sortKey === "receive_date"} direction={sortDir} onClick={() => toggleSort("receive_date")} />
+                  </TableHead>
                   <TableHead>الطبيب</TableHead>
                   <TableHead>المبلغ</TableHead>
                   <TableHead>رقم الشيك</TableHead>
@@ -277,6 +279,7 @@ const Checks = () => {
                   <TableHead>الصور</TableHead>
                   <TableHead>الإجراءات</TableHead>
                 </TableRow>
+
               </TableHeader>
               <TableBody>
                 {allChecks.map((check) => (
