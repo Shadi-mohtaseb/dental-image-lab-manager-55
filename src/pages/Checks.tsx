@@ -249,7 +249,9 @@ const Checks = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>النوع</TableHead>
-                  <TableHead>تاريخ الشيك</TableHead>
+                  <TableHead>
+                    <SortableHeader label="تاريخ الشيك" active={!!sortDir} direction={sortDir} onClick={toggleSort} />
+                  </TableHead>
                   <TableHead>تاريخ الاستلام/الصرف</TableHead>
                   <TableHead>الطبيب</TableHead>
                   <TableHead>المبلغ</TableHead>
