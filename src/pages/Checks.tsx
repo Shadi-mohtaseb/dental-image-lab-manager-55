@@ -142,12 +142,14 @@ const Checks = () => {
         ...check,
         source: 'checks',
         displayDate: check.check_date,
+        receiveDate: check.receive_date,
         displayAmount: check.amount
       })),
       ...checkPayments.map(payment => ({
         ...payment,
         source: 'payments',
         displayDate: payment.transaction_date,
+        receiveDate: payment.check_cash_date,
         displayAmount: payment.amount,
         check_date: payment.transaction_date,
         receive_date: payment.check_cash_date,
@@ -161,13 +163,24 @@ const Checks = () => {
     ];
     if (!sortDir) return combined;
     return combined.sort((a, b) => {
-      const da = new Date(a.displayDate || 0).getTime();
-      const db = new Date(b.displayDate || 0).getTime();
+      const key = sortKey === "receive_date" ? "receiveDate" : "displayDate";
+      const da = new Date(a[key] || 0).getTime();
+      const db = new Date(b[key] || 0).getTime();
       return sortDir === "asc" ? da - db : db - da;
     });
-  }, [checksData, checkPayments, sortDir]);
+  }, [checksData, checkPayments, sortDir, sortKey]);
 
-  const toggleSort = () => setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+  const toggleSort = (key: "check_date" | "receive_date") => {
+    setSortKey((current) => {
+      if (current === key) {
+        setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+        return current;
+      }
+      setSortDir("desc");
+      return key;
+    });
+  };
+
 
 
   if (loadingChecks || loadingPayments) {
