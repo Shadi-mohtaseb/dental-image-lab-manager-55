@@ -1,4 +1,5 @@
-import { describe, expect, test } from "bun:test";
+import { describe, test } from "node:test";
+import { strict as assert } from "node:assert";
 import { getTeethCount } from "./DoctorCasesTable";
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -13,12 +14,12 @@ const caseData: Tables<"cases"> = {
 
 describe("Doctor case tooth count", () => {
   test("prefers number_of_teeth over teeth_count", () => {
-    expect(getTeethCount({ ...caseData, number_of_teeth: 3 })).toBe(3);
+    assert.equal(getTeethCount({ ...caseData, number_of_teeth: 3 }), 3);
   });
   test("uses teeth_count when the newer count is missing", () => {
-    expect(getTeethCount(caseData)).toBe(12);
+    assert.equal(getTeethCount(caseData), 12);
   });
   test("does not count symbolic tooth positions as quantities", () => {
-    expect(getTeethCount({ ...caseData, teeth_count: null })).toBe(1);
+    assert.equal(getTeethCount({ ...caseData, teeth_count: null }), 1);
   });
 });
