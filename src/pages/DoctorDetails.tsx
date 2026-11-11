@@ -1,4 +1,5 @@
 
+import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,10 +10,15 @@ import { DoctorInfoCard } from "@/components/doctors-details/DoctorInfoCard";
 import { DoctorCasesTable } from "@/components/doctors-details/DoctorCasesTable";
 import { DoctorTransactionsTable } from "@/components/doctors-details/DoctorTransactionsTable";
 import { DoctorWorkTypePricesSection } from "@/components/doctors/DoctorWorkTypePricesSection";
+import { EditCaseDialog } from "@/components/EditCaseDialog";
+import { Tables } from "@/integrations/supabase/types";
+import { useSubscriptionContext } from "@/contexts/SubscriptionContext";
 
 const DoctorDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [selectedCase, setSelectedCase] = useState<Tables<"cases"> | null>(null);
+  const { isReadOnly, loading: subscriptionLoading } = useSubscriptionContext();
 
   // جلب بيانات الطبيب
   const { data: doctor, isLoading: doctorLoading } = useQuery({
@@ -153,9 +159,22 @@ const DoctorDetails = () => {
           <CardTitle>حالات الطبيب ({cases.length})</CardTitle>
         </CardHeader>
         <CardContent className="overflow-x-auto">
-          <DoctorCasesTable cases={cases} />
+          <DoctorCasesTable
+            cases={cases}
+            onView={(caseId) => navigate(`/case/${caseId}`)}
+            onEdit={(caseItem) => {
+              if (!isReadOnly && !subscriptionLoading) setSelectedCase(caseItem);
+            }}
+            readOnly={isReadOnly || subscriptionLoading}
+          />
         </CardContent>
       </Card>
+      <EditCaseDialog
+        caseData={selectedCase}
+        open={selectedCase !== null}
+        onOpenChange={(open) => { if (!open) setSelectedCase(null); }}
+        onUpdate={() => setSelectedCase(null)}
+      />
     </div>
   );
 };
