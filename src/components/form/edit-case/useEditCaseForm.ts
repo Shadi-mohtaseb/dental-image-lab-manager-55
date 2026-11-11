@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { useUpdateCase } from "@/hooks/useCases";
 import { Tables } from "@/integrations/supabase/types";
 import { toast } from "@/hooks/use-toast";
+import { calculateEditedTotal, getInitialUnitPrice } from "./casePricing";
 
 type CaseForm = {
   patient_name: string;
@@ -12,6 +13,7 @@ type CaseForm = {
   tooth_number: string;
   teeth_count?: number | string;
   price?: number | string;
+  work_type_price?: number | string;
   shade?: string;
   zircon_block_type?: string;
   notes?: string;
@@ -36,6 +38,7 @@ export function useEditCaseForm(
       tooth_number: "",
       teeth_count: "",
       price: "",
+      work_type_price: "",
       shade: "",
       zircon_block_type: "",
       notes: "",
@@ -55,6 +58,7 @@ export function useEditCaseForm(
         tooth_number: caseData.tooth_number || "",
         teeth_count: caseData.teeth_count ?? "",
         price: caseData.price ?? "",
+        work_type_price: getInitialUnitPrice(caseData.price, caseData.teeth_count),
         shade: caseData.shade || "",
         zircon_block_type: caseData.zircon_block_type || "",
         notes: caseData.notes || "",
@@ -64,6 +68,17 @@ export function useEditCaseForm(
       });
     }
   }, [caseData, open, form]);
+
+  // Recalculate only after a user changes unit price or quantity, never on reset/open.
+  useEffect(() => {
+    const subscription = form.watch((values, { name, type }) => {
+      if (type !== "change" || (name !== "work_type_price" && name !== "teeth_count")) return;
+      form.setValue("price", calculateEditedTotal(values.work_type_price ?? "", values.teeth_count), {
+        shouldDirty: true,
+      });
+    });
+    return () => subscription.unsubscribe();
+  }, [form]);
 
   const onSubmit = async (values: CaseForm) => {
     if (!caseData) return;
@@ -112,6 +127,7 @@ export function useEditCaseForm(
         tooth_number: caseData.tooth_number || "",
         teeth_count: caseData.teeth_count ?? "",
         price: caseData.price ?? "",
+        work_type_price: getInitialUnitPrice(caseData.price, caseData.teeth_count),
         shade: caseData.shade || "",
         zircon_block_type: caseData.zircon_block_type || "",
         notes: caseData.notes || "",

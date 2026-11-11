@@ -88,8 +88,8 @@ export const useUpdateCase = () => {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["cases"] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["cases"] });
       toast({
         title: "تم تحديث الحالة بنجاح",
         description: "تم حفظ التغييرات في النظام",
