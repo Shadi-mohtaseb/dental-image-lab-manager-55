@@ -17,7 +17,7 @@ interface Props {
   readOnly?: boolean;
 }
 
-const getTeethCount = (c: CaseRow) => {
+export const getTeethCount = (c: CaseRow) => {
   if (c.number_of_teeth && Number(c.number_of_teeth) > 0) {
     return Number(c.number_of_teeth);
   } else if (c.teeth_count && Number(c.teeth_count) > 0) {
